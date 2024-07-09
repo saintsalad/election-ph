@@ -4,3 +4,9 @@ export type Candidate = {
   party: string;
   image: string;
 };
+
+export type NavigationProps = {
+  route: string;
+  label: string;
+  icon: string;
+};
