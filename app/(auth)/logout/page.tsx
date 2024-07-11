@@ -4,6 +4,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import FullscreenLoader from "@/components/custom/fullscreen-loader";
 
 function Logout() {
   const router = useRouter();
@@ -19,7 +20,7 @@ function Logout() {
 
   handleOnLogout();
 
-  return <div>Logging out ...</div>;
+  return <FullscreenLoader />;
 }
 
 export default Logout;

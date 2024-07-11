@@ -40,7 +40,7 @@ function MainHeader() {
             href='/logout'
             className='flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground'
             prefetch={false}>
-            {user?.displayName}
+            Logout
           </Link>
         </nav>
       </div>

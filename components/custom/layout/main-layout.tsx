@@ -7,7 +7,7 @@ import { navigation } from "@/lib/app-settings";
 import { useAuthStore } from "@/lib/store";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import ProtectedRoute from "@/components/hoc/protected-route";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -17,10 +17,9 @@ function MainLayout({
   children: React.ReactNode;
 }>) {
   const setUser = useAuthStore((state) => state.setUser);
-  const user = useAuthStore((state) => state.user);
   const setLoading = useAuthStore((state) => state.setLoading);
+  const loading = useAuthStore((state) => state.loading);
 
-  const router = useRouter();
   const pathname = usePathname();
   const pathParts = pathname?.split("/");
   const desiredPath = pathParts ? `/${pathParts[1]}` : "";
@@ -29,7 +28,6 @@ function MainLayout({
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      setLoading(false);
     });
 
     return () => unsubscribe();

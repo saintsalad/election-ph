@@ -33,11 +33,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [loading, user, router]);
 
-  if (loading) {
-    return <FullscreenLoader></FullscreenLoader>;
-  }
-
-  return <>{user ? children : null}</>;
+  return <>{user && children}</>;
 };
 
 export default ProtectedRoute;
