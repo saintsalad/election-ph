@@ -27,11 +27,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => unsubscribe();
   }, [setUser, setLoading]);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/signin");
-    }
-  }, [loading, user, router]);
+  if (!user) {
+    return <FullscreenLoader />;
+  }
 
   return <>{user && children}</>;
 };

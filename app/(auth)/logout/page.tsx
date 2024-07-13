@@ -5,6 +5,7 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import FullscreenLoader from "@/components/custom/fullscreen-loader";
+import { handleLogout } from "@/lib/firebase/functions";
 
 function Logout() {
   const router = useRouter();
@@ -12,7 +13,8 @@ function Logout() {
   const handleOnLogout = useCallback(() => {
     auth
       .signOut()
-      .then(() => {
+      .then(async () => {
+        await handleLogout();
         router.push("/signin");
       })
       .catch(() => router.push("/"));

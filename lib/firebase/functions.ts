@@ -1,12 +1,16 @@
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
-import { auth, db, signInWithGooglePopup } from "@/lib/firebase";
+  fetchSignInMethodsForEmail,
+  onAuthStateChanged,
+  User,
+} from "firebase/auth";
+import { APIResponse } from "@/lib/definitions";
+import axios from "axios";
+
+type customAuthEndpoint = {
+  success: boolean;
+};
 
 export const isUnique = async (
   path: string,
@@ -17,4 +21,38 @@ export const isUnique = async (
   const q = query(usersRef, where(field, "==", username));
   const querySnapshot = await getDocs(q);
   return querySnapshot.empty;
+};
+
+export const checkAccountExists = async (email: string): Promise<boolean> => {
+  try {
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    return signInMethods.length > 0;
+  } catch (error) {
+    console.error("Error checking account existence:", error);
+    return false;
+  }
+};
+
+export const handleLogin = async (user: User): Promise<customAuthEndpoint> => {
+  const idToken = await user.getIdToken();
+
+  const response = await axios.post<APIResponse<string>>(
+    "/api/signin",
+    {
+      idToken,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return {
+    success: response.status == 200,
+  };
+};
+
+export const handleLogout = async () => {
+  await axios.get<APIResponse<string>>("/api/signout");
 };

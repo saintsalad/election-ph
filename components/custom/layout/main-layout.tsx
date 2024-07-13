@@ -8,7 +8,6 @@ import { useAuthStore } from "@/lib/store";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { usePathname } from "next/navigation";
-import ProtectedRoute from "@/components/hoc/protected-route";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 function MainLayout({
@@ -38,19 +37,17 @@ function MainLayout({
   }
 
   return (
-    <ProtectedRoute>
-      <ScrollArea>
-        <div className='flex-1 flex flex-col-reverse content-between'>
-          <MainHeader />
+    <ScrollArea>
+      <div className='flex-1 flex flex-col-reverse content-between'>
+        <MainHeader />
 
-          <div className='flex flex-1 pt-11 w-full max-w-5xl self-center'>
-            {children}
-          </div>
-
-          <MainNavigation navigations={navigation} />
+        <div className='flex flex-1 pt-11 w-full max-w-5xl self-center'>
+          {children}
         </div>
-      </ScrollArea>
-    </ProtectedRoute>
+
+        <MainNavigation navigations={navigation} />
+      </div>
+    </ScrollArea>
   );
 }
 

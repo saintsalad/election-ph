@@ -33,8 +33,9 @@ import { doc, setDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import withGuestRedirect from "@/components/hoc/with-guess-redirect";
-import { isUnique } from "@/lib/firebase/functions";
+import { handleLogin, isUnique } from "@/lib/firebase/functions";
+import { APIResponse } from "@/lib/definitions";
+import axios from "axios";
 
 // Validation functions
 const isValidUsername = (str: string) => /^(?!.*[_.]{3})[\w.]*$/.test(str);
@@ -70,6 +71,11 @@ const SignUp = () => {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      username: "",
+    },
   });
 
   const router = useRouter();
@@ -98,17 +104,22 @@ const SignUp = () => {
     }
   };
 
-  const handleGoogleSignin = async () => {
+  const handleGoogleSignup = async () => {
     try {
       setIsSubmitting(true);
-      const response = await signInWithGooglePopup();
-      const { uid, email } = response.user;
+      const userCredential = await signInWithGooglePopup();
+      const { uid, email } = userCredential.user;
       const random4DigitNumber = Math.floor(1000 + Math.random() * 9000);
       const username = `${email?.split("@")[0]}${random4DigitNumber}`;
       await setDoc(doc(db, "users", uid), { username, email });
-      setUser(response.user);
-    } catch {
-      //console.log("Error occured", error);
+
+      // set session cookies
+      await handleLogin(userCredential.user).then((res) => {
+        if (!res.success) console.log("SIGN UP, SETTING SESSION ❌❌❌");
+        router.push("/");
+      });
+    } catch (error) {
+      console.log("SIGN UP ❌❌❌", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -132,10 +143,6 @@ const SignUp = () => {
       }
 
       await setDoc(doc(db, "users", user.uid), { username, email });
-      setUser(user);
-      await sendEmailVerification(user);
-
-      router.push("/signup/success");
     } catch (error) {
       if (error instanceof FirebaseError) {
         if (error.code === "auth/email-already-in-use") {
@@ -192,7 +199,7 @@ const SignUp = () => {
                 <>
                   <Button
                     disabled={isSubmitting}
-                    onClick={handleGoogleSignin}
+                    onClick={handleGoogleSignup}
                     type='button'
                     className='rounded-full h-14 text-sm w-full flex flex-1 gap-x-4 mb-8'
                     variant='default'>
@@ -346,4 +353,4 @@ const SignUp = () => {
   );
 };
 
-export default withGuestRedirect(SignUp);
+export default SignUp;

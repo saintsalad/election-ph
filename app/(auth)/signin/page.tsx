@@ -3,31 +3,27 @@
 import Google from "@/components/custom/icon/google";
 import { Button } from "@/components/ui/button";
 import { signInWithGooglePopup } from "@/lib/firebase";
-import { useAuthStore } from "@/lib/store";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-
 import banner from "@/public/images/banner2.jpg";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { handleLogin } from "@/lib/firebase/functions";
 
 function SignIn() {
-  const setUser = useAuthStore((state) => state.setUser);
-  const user = useAuthStore((state) => state.user);
-
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      router.push("/");
-    }
-  }, [user, router]);
-
   const handleGoogleSignin = async () => {
-    const response = await signInWithGooglePopup();
-    setUser(response.user);
+    // TODO: change to google sign in redirect
+    const userCredential = await signInWithGooglePopup();
+    const response = await handleLogin(userCredential.user);
+
+    if (response.success) {
+      router.push("/");
+    } else {
+      console.log("❌❌❌");
+    }
   };
 
   return (
