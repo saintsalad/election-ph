@@ -12,6 +12,11 @@ type customAuthEndpoint = {
   success: boolean;
 };
 
+type FetchOptions = {
+  cacheKey: string;
+  cacheExpiry?: number; // Optional cache expiry time in milliseconds
+};
+
 export const isUnique = async (
   path: string,
   field: string,
@@ -56,3 +61,60 @@ export const handleLogin = async (user: User): Promise<customAuthEndpoint> => {
 export const handleLogout = async () => {
   await axios.get<APIResponse<string>>("/api/signout");
 };
+
+// ✨✨ USAGE ✨✨
+// async function loadElections(forceRefresh: boolean = false) {
+//   try {
+//     const result = await fetchFromFirebase<Election>("elections", {
+//       cacheKey: "elections",
+//     }, forceRefresh);
+//     setElections(result);
+//   } catch (e) {
+//     console.error("Error loading elections: ", e);
+//   }
+// }
+export async function fetchFromFirebase<T>(
+  collectionName: string,
+  options: FetchOptions,
+  forceRefresh: boolean = false
+): Promise<T[]> {
+  const { cacheKey, cacheExpiry = 1000 * 60 * 60 } = options;
+  // Default cache expiry to 1 hour
+  // Check local storage for cached data if not forcing a refresh
+  if (!forceRefresh) {
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(`${cacheKey}_time`);
+    const currentTime = new Date().getTime();
+
+    if (cachedData && cachedTime) {
+      const cacheAge = currentTime - parseInt(cachedTime, 10);
+      if (cacheAge < cacheExpiry) {
+        // Use cached data
+        console.log(`fetching ${collectionName} from local storage 🍪`);
+        return JSON.parse(cachedData);
+      }
+    }
+  }
+
+  // Fetch from Firebase
+  try {
+    console.log(`Fetching data from collection: ${collectionName}`);
+    const querySnapshot = await getDocs(collection(db, collectionName));
+    const result = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as T),
+    }));
+
+    // Cache the result and current timestamp
+    localStorage.setItem(cacheKey, JSON.stringify(result));
+    localStorage.setItem(`${cacheKey}_time`, new Date().getTime().toString());
+
+    return result;
+  } catch (e) {
+    console.error(
+      `Error retrieving data from collection ${collectionName}: `,
+      e
+    );
+    throw e;
+  }
+}

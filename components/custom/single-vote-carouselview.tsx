@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { Candidate } from "@/lib/definitions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import VoteConfirmation from "./vote-confirmation";
 
 type SingleVoteCarouselViewProps = {
   candidates: Candidate[];
@@ -63,11 +64,13 @@ const SingleVoteCarouselView = ({
               <div className='flex flex-col h-96 w-full sm:aspect-square items-center justify-center rounded-xl overflow-hidden'>
                 <div className='relative h-full w-full rounded-xl overflow-hidden'>
                   <Image
+                    priority
                     alt={candidate.name}
                     src={candidate.image}
-                    layout='fill'
+                    fill
+                    sizes='50'
                     className='-z-10'
-                    objectFit='cover'
+                    style={{ objectFit: "cover" }}
                   />
                   <div className='flex flex-1 bg-rose-500 h-full bg-opacity-20 items-start justify-end flex-col p-5'>
                     <div className='text-xl font-semibold z-10 text-white'>
@@ -80,11 +83,13 @@ const SingleVoteCarouselView = ({
                       Lorem ipsum dolor, sit amet consectetur adipisicing elit.
                       Fuga error voluptatibus nam saepe nostrum.
                     </div>
-                    <Button
-                      size='sm'
-                      className='w-36 mt-5 self-center hidden sm:block'>
-                      Vote
-                    </Button>
+                    <VoteConfirmation key={index} candidate={candidate}>
+                      <div
+                        // size='sm'
+                        className='w-36 mt-5 self-center hidden sm:block'>
+                        Vote
+                      </div>
+                    </VoteConfirmation>
                   </div>
                 </div>
               </div>
@@ -96,9 +101,11 @@ const SingleVoteCarouselView = ({
 
         <div className='flex gap-x-1.5 justify-center mt-4'>{renderDots()}</div>
         <div className='flex flex-1 w-full mt-5 sm:hidden'>
-          <Button size='lg' className='flex flex-1'>
-            Vote
-          </Button>
+          <VoteConfirmation candidate={candidates[activeIndex]}>
+            <div className='flex flex-1 bg-primary text-white justify-center items-center h-[40px] rounded-md text-sm cursor-pointer font-semibold hover:bg-opacity-5'>
+              Vote
+            </div>
+          </VoteConfirmation>
         </div>
       </Carousel>
     </div>
