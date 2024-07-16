@@ -19,13 +19,13 @@ export const navItems: NavItem[] = [
   {
     title: "Election",
     href: "/master/election",
-    icon: "user",
+    icon: "vote",
     label: "Election",
   },
   {
-    title: "Candidate",
-    href: "/master/candidate",
-    icon: "employee",
-    label: "Candidate",
+    title: "Candidates",
+    href: "/master/candidates",
+    icon: "users",
+    label: "Candidates",
   },
 ];

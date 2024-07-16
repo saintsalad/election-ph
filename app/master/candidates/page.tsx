@@ -48,16 +48,18 @@ import Link from "next/link";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { format } from "date-fns";
+import type { Candidate } from "@/lib/definitions";
 import { fetchFromFirebase } from "@/lib/firebase/functions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Image from "next/image";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
-  { title: "Election", link: "/master/election" },
+  { title: "Candidates", link: "/master/candidates" },
 ];
 
-export const columns: ColumnDef<Election>[] = [
+const columns: ColumnDef<Candidate>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -81,75 +83,47 @@ export const columns: ColumnDef<Election>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "electionType",
-    header: "Election Type",
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+  },
+  {
+    accessorKey: "party",
+    header: "Party",
+    cell: ({ row }) => <div>{row.getValue("party")}</div>,
+  },
+  {
+    accessorKey: "image",
+    header: "Image",
     cell: ({ row }) => (
-      <div className='capitalize'>{row.getValue("electionType")}</div>
+      <Image
+        src={row.getValue("image")}
+        alt={row.getValue("name")}
+        height={50}
+        width={50}
+        className='w-10 h-10 object-cover rounded-full border'
+      />
     ),
   },
   {
-    accessorKey: "votingType",
-    header: "Voting Type",
+    accessorKey: "shortDescription",
+    header: "Short Description",
     cell: ({ row }) => (
-      <div className='capitalize'>{row.getValue("votingType")}</div>
+      <div className='text-xs'>{row.getValue("shortDescription") || "N/A"}</div>
     ),
-  },
-  {
-    accessorKey: "numberOfVotes",
-    header: "Vote/s",
-    cell: ({ row }) => (
-      <div className='text-left'>{row.getValue("numberOfVotes")}</div>
-    ),
-  },
-  {
-    accessorKey: "startDate",
-    header: "Start Date",
-    cell: ({ row }) => {
-      const dateStr = row.getValue<string>("startDate");
-      const date = new Date(dateStr); // Convert to Date object
-      const formattedDate = format(date, "MMMM dd, yyyy"); // Format date
-      return <div className='text-left text-xs'>{formattedDate}</div>;
-    },
-  },
-  {
-    accessorKey: "endDate",
-    header: "End Date",
-    cell: ({ row }) => {
-      const dateStr = row.getValue<string>("endDate");
-      const date = new Date(dateStr); // Convert to Date object
-      const formattedDate = format(date, "MMMM dd, yyyy"); // Format date
-      return <div className='text-left text-xs'>{formattedDate}</div>;
-    },
   },
   {
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => (
-      <div className='text-xs'>{row.getValue("description")}</div>
-    ),
-  },
-  {
-    accessorKey: "candidates",
-    header: "Candidates",
-    cell: ({ row }) => {
-      const candidates = row.getValue("candidates") as string[];
-      return <div>{candidates.join(", ")}</div>;
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className='text-xs text-center' title={row.getValue("status")}>
-        {row.getValue("status") == "active" ? "🟢" : "🔴"}
-      </div>
+      <div className='text-xs'>{row.getValue("description") || "N/A"}</div>
     ),
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const election = row.original;
+      const candidate = row.original;
 
       return (
         <DropdownMenu>
@@ -162,15 +136,17 @@ export const columns: ColumnDef<Election>[] = [
           <DropdownMenuContent align='end'>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(election.id)}>
-              Copy Election ID
+              onClick={() =>
+                navigator.clipboard.writeText(candidate.id.toString())
+              }>
+              Copy Candidate ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link
                 href={{
-                  pathname: "/master/election/update",
-                  query: { id: election.id },
+                  pathname: "/master/candidates/update",
+                  query: { id: candidate.id },
                 }}>
                 Update Details
               </Link>
@@ -182,17 +158,17 @@ export const columns: ColumnDef<Election>[] = [
   },
 ];
 
-function Election() {
+export default function Candidates() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [elections, setElections] = useState<Election[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const table = useReactTable({
-    data: elections,
+    data: candidates,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -210,17 +186,17 @@ function Election() {
     },
   });
 
-  async function loadElections(forceRefresh: boolean = false) {
+  async function loadCandidates(forceRefresh: boolean = false) {
     try {
       setIsLoading(true);
-      const result = await fetchFromFirebase<Election>(
-        "elections",
+      const result = await fetchFromFirebase<Candidate>(
+        "candidates",
         {
-          cacheKey: "elections",
+          cacheKey: "candidates",
         },
         forceRefresh
       );
-      setElections(result);
+      setCandidates(result);
     } catch (e) {
       console.error("Error loading elections: ", e);
     } finally {
@@ -230,9 +206,9 @@ function Election() {
     }
   }
 
-  const handleRefreshElection = async () => {
+  const handleRefreshCandidates = async () => {
     setIsRefreshing(true);
-    await loadElections(true).then(() => {
+    await loadCandidates(true).then(() => {
       setTimeout(() => {
         setIsRefreshing(false);
       }, 500);
@@ -240,29 +216,26 @@ function Election() {
   };
 
   useEffect(() => {
-    loadElections();
+    loadCandidates();
   }, []);
 
   return (
     <>
       <Breadcrumbs items={breadcrumbItems} />
-      <Heading
-        title={`Election(${elections.length || 0})`}
-        description='Manages election details.'
-      />
+      <Heading title='Candidate' description='Manages election candidates.' />
       <Separator className='mt-4' />
 
       <div className='w-full'>
         <div className='flex items-center py-4'>
           <Link
             title='Add new entry'
-            href={"/master/election/new"}
+            href={"/master/candidates/new"}
             className={cn(buttonVariants({ variant: "default" }))}>
             <Plus className='mr-2 h-4 w-4' /> Add New
           </Link>
           <Button
             title='Refresh table'
-            onClick={handleRefreshElection}
+            onClick={handleRefreshCandidates}
             variant={"outline"}
             className='ml-2'
             size={"icon"}>
@@ -270,19 +243,6 @@ function Election() {
               className={`h-4 w-4 ${isRefreshing && "animate-spin"}`}
             />
           </Button>
-          {/* <Input
-            placeholder='Filter by election type...'
-            value={
-              (table.getColumn("electionType")?.getFilterValue() as string) ??
-              ""
-            }
-            onChange={(event) =>
-              table
-                .getColumn("electionType")
-                ?.setFilterValue(event.target.value)
-            }
-            className='max-w-sm'
-          /> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -397,5 +357,3 @@ function Election() {
     </>
   );
 }
-
-export default Election;

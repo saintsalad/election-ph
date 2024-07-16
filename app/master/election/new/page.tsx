@@ -3,11 +3,6 @@
 import { Breadcrumbs } from "@/components/custom/breadcrumbs";
 import { Heading } from "@/components/custom/heading";
 import { Separator } from "@/components/ui/separator";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,53 +15,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { DatePicker } from "@/components/custom/date-picker";
 import { ComboBox } from "@/components/custom/combo-box";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { differenceInYears, isAfter, isBefore, parseISO } from "date-fns";
-
-const FormSchema = z
-  .object({
-    electionType: z.string().min(1, {
-      message: "Election type is required.",
-    }),
-    votingType: z.enum(["single", "multiple"], {
-      required_error: "Voting type is required.",
-    }),
-    numberOfVotes: z
-      .number()
-      .min(1, {
-        message: "Number of votes must be at least 1.",
-      })
-      .max(30),
-    startDate: z.string().min(1, {
-      message: "Election start date is required.",
-    }),
-    endDate: z.string().min(1, {
-      message: "Election end date is required.",
-    }),
-    description: z.string().optional(),
-    candidates: z.string().array().min(1, {
-      message: "At least one candidate is required.",
-    }),
-    status: z.enum(["active", "inactive"], {
-      required_error: "Status is required.",
-    }),
-  })
-  .refine(
-    (data) => {
-      const startDate = new Date(data.startDate);
-      const endDate = new Date(data.endDate);
-
-      // Ensure endDate is after startDate
-      return isAfter(endDate, startDate);
-    },
-    {
-      message: "The end date must be after the start date.",
-      path: ["endDate"], // Show error on the endDate field
-    }
-  );
+import { ElectionSchema } from "@/lib/form-schema";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
@@ -75,8 +33,8 @@ const breadcrumbItems = [
 ];
 
 function AddNewElection() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<z.infer<typeof ElectionSchema>>({
+    resolver: zodResolver(ElectionSchema),
     defaultValues: {
       electionType: "",
       votingType: "single",
@@ -89,8 +47,9 @@ function AddNewElection() {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof ElectionSchema>) {
     try {
+      data.electionType = data.electionType.toLowerCase();
       const docRef = await addDoc(collection(db, "elections"), data);
       console.log("Document written with ID: ", docRef.id);
       if (docRef) {
@@ -129,7 +88,11 @@ function AddNewElection() {
                   <FormItem>
                     <FormLabel>Election Type</FormLabel>
                     <FormControl>
-                      <Input placeholder='e.g., presidential' {...field} />
+                      <Input
+                        className='capitalize'
+                        placeholder='e.g., presidential'
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       Type of election (e.g., presidential, senatorial, etc.).

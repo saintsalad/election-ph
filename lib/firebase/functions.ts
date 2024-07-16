@@ -118,3 +118,21 @@ export async function fetchFromFirebase<T>(
     throw e;
   }
 }
+
+export const getPathFromUrl = (url: string): string => {
+  const url_token = url.split("?");
+  const _url = url_token[0].split("/");
+  const filePath = _url[_url.length - 1].replaceAll("%2F", "/");
+  return decodeURIComponent(filePath);
+};
+
+export const getFileNameFromUrl = (url: string): string => {
+  const url_token = url.split("?");
+  const _url = url_token[0].split("/");
+  const filePath = _url[_url.length - 1].replaceAll("%2F", "/");
+  const decodedFilePath = decodeURIComponent(filePath);
+
+  // Extract the filename from the path
+  const fileName = decodedFilePath.split("/").pop();
+  return fileName || "";
+};
