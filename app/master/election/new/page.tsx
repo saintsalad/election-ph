@@ -47,12 +47,29 @@ function AddNewElection() {
     },
   });
 
+  const { reset } = form;
+
+  // TODO
+  const resetForm = () => {
+    reset({
+      electionType: "",
+      votingType: "single",
+      numberOfVotes: 1,
+      startDate: "",
+      endDate: "",
+      description: "",
+      candidates: [""],
+      status: "active",
+    });
+  };
+
   async function onSubmit(data: z.infer<typeof ElectionSchema>) {
     try {
       data.electionType = data.electionType.toLowerCase();
       const docRef = await addDoc(collection(db, "elections"), data);
       console.log("Document written with ID: ", docRef.id);
       if (docRef) {
+        resetForm();
         toast({
           title: "You submitted the following values:",
           description: (
@@ -234,9 +251,13 @@ function AddNewElection() {
                     <FormControl>
                       <Input
                         placeholder='Candidate names (comma-separated)'
-                        value={field.value.join(", ")}
+                        value={field.value ? field.value.join(", ") : ""}
                         onChange={(e) => {
-                          field.onChange(e);
+                          const inputValue = e.target.value;
+                          const candidateArray = inputValue
+                            .split(",")
+                            .map((item) => item.trim());
+                          field.onChange(candidateArray);
                         }}
                       />
                     </FormControl>

@@ -52,8 +52,9 @@ const SingleVoteListView = ({ candidates }: SingleVoteListViewProps) => {
                 <Image
                   src={item.image}
                   alt='Candidate 1'
-                  width={55}
-                  height={55}
+                  width={100}
+                  height={100}
+                  style={{ objectFit: "cover" }}
                   className='rounded-md h-[55px] w-[55px]'
                   priority
                 />

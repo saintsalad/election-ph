@@ -103,13 +103,13 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
       <DrawerContent className='min-h-52'>
         <DrawerTitle hidden={true}>Confirm Vote</DrawerTitle>
         <div className='p-6'>
-          <div className='relative h-[300px] overflow-hidden rounded-lg mb-5'>
+          <div className='relative overflow-hidden rounded-lg mb-5'>
             {/* <div className='bg-red-50 object-cover w-[600px] h-[400px]' /> */}
             <Image
               src={candidate.image}
               alt='Candidate'
-              width={600}
-              height={400}
+              width={500}
+              height={500}
               className='h-full w-full object-cover'
             />
             <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6'>
@@ -118,8 +118,7 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
               </div>
               <p className='text-xs uppercase text-white'>{candidate.party}</p>
               <DialogDescription className='text-xs text-white/80'>
-                Experienced leader with a proven track record of driving
-                positive change in the community.
+                {candidate.shortDescription}
               </DialogDescription>
             </div>
           </div>

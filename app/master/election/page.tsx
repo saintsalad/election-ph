@@ -2,11 +2,7 @@
 
 import { Breadcrumbs } from "@/components/custom/breadcrumbs";
 import { Heading } from "@/components/custom/heading";
-import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
+import { ChevronDownIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -30,7 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -45,12 +40,9 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Plus, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { format } from "date-fns";
 import { fetchFromFirebase } from "@/lib/firebase/functions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import useLocalStorageExpiration from "@/hooks/useLocalStorageExpiration";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
@@ -191,6 +183,12 @@ function Election() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // TODO: implement auto refresh
+  // const { isEnabled, start, stop } = useLocalStorageExpiration(
+  //   "elections",
+  //   onExpired
+  // );
+
   const table = useReactTable({
     data: elections,
     columns,
@@ -233,7 +231,7 @@ function Election() {
   const handleRefreshElection = async () => {
     setIsRefreshing(true);
     await loadElections(true).then(() => {
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsRefreshing(false);
       }, 500);
     });
