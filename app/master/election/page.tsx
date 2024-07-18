@@ -49,7 +49,7 @@ const breadcrumbItems = [
   { title: "Election", link: "/master/election" },
 ];
 
-export const columns: ColumnDef<Election>[] = [
+const columns: ColumnDef<Election>[] = [
   {
     id: "select",
     header: ({ table }) => (
