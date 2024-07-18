@@ -1,9 +1,8 @@
 "use client";
 
-import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import FullscreenLoader from "@/components/custom/fullscreen-loader";
 import { handleLogout } from "@/lib/firebase/functions";
 
@@ -20,7 +19,9 @@ function Logout() {
       .catch(() => router.push("/"));
   }, [router]);
 
-  handleOnLogout();
+  useEffect(() => {
+    handleOnLogout();
+  }, [handleOnLogout]);
 
   return <FullscreenLoader />;
 }
