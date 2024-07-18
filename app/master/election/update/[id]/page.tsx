@@ -33,10 +33,8 @@ const breadcrumbItems = [
   { title: "Update Election", link: "/master/update" },
 ];
 
-const UpdateElection = () => {
-  const searchParams = useSearchParams();
-
-  const id = searchParams?.get("id");
+const UpdateElection = ({ params }: { params: { id: string } }) => {
+  const id = params.id;
 
   const form = useForm<z.infer<typeof ElectionSchema>>({
     resolver: zodResolver(ElectionSchema),

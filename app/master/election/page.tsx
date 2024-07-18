@@ -160,10 +160,8 @@ const columns: ColumnDef<Election>[] = [
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link
-                href={{
-                  pathname: "/master/election/update",
-                  query: { id: election.id },
-                }}>
+                prefetch={true}
+                href={`/master/election/update/${election.id}`}>
                 Update Details
               </Link>
             </DropdownMenuItem>
