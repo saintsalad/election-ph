@@ -5,6 +5,7 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const sessionCookie = request.cookies.get("__session")?.value;
   const publicRoutes = ["/signin", "/signup", "/signup/success", "/api/signin"];
+
   // If the request URL matches one of the public routes, bypass authentication
   if (publicRoutes.some((route) => url.pathname.startsWith(route))) {
     return NextResponse.next();
@@ -13,25 +14,33 @@ export async function middleware(request: NextRequest) {
   if (!sessionCookie) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
-  try {
-    const responseAPI = await axios.get(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/signin`,
-      {
-        headers: {
-          Cookie: `__session=${sessionCookie}`,
-        },
-      }
-    );
 
-    // Redirect to login page if the session is invalid
-    if (responseAPI.status !== 200) {
-      console.log("❌❌❌", responseAPI.status);
+  const origin = request.nextUrl.origin;
+
+  try {
+    const responseAPI = await axios.get(`${origin}/api/signin`, {
+      headers: {
+        Cookie: `__session=${sessionCookie}`,
+      },
+    });
+
+    // Allow access to the protected route if the session is valid
+    if (responseAPI.status === 200) {
+      return NextResponse.next();
+    } else {
+      console.log("❌ Unauthorized access:", responseAPI.status);
       return NextResponse.redirect(new URL("/signin", request.url));
     }
-    // Allow access to the protected route
-    return NextResponse.next();
   } catch (error) {
-    console.error("Authentication error:", error);
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Authentication error:",
+        error.response?.status,
+        error.response?.data
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
     // Redirect to login page if authentication fails
     return NextResponse.redirect(new URL("/signin", request.url));
   }
@@ -39,13 +48,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
