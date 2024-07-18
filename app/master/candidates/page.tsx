@@ -144,10 +144,8 @@ const columns: ColumnDef<Candidate>[] = [
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link
-                href={{
-                  pathname: "/master/candidates/update",
-                  query: { id: candidate.id },
-                }}>
+                prefetch={true}
+                href={`/master/candidates/update/${candidate.id}`}>
                 Update Details
               </Link>
             </DropdownMenuItem>

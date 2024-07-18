@@ -39,11 +39,10 @@ const breadcrumbItems = [
   { title: "Update Candidate", link: "/master/update-candidate" },
 ];
 
-const UpdateCandidate = () => {
+const UpdateCandidate = ({ params }: { params: { id: string } }) => {
   const [fileName, setFileName] = useState("");
   const [candidateCopy, setCandidateCopy] = useState<Candidate>();
-  const searchParams = useSearchParams();
-  const id = searchParams?.get("id") || "";
+  const id = params.id;
   const fileUploadRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof CandidateSchema>>({
