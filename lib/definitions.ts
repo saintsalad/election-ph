@@ -1,4 +1,5 @@
 import { Icons } from "@/components/custom/icons";
+import { FieldValue } from "firebase/firestore";
 
 export type Candidate = {
   id: number;
@@ -31,6 +32,19 @@ export type Election = {
   description: string;
   candidates: string[]; // candidate id
   status: "active" | "inactive";
+};
+
+export type Vote = {
+  id: string;
+  electionId: string;
+  userId: string;
+  value: string | string[];
+  dateCreated: FieldValue;
+};
+
+export type UserVotes = {
+  electionId: string;
+  candidate: string | string[];
 };
 
 export interface NavItem {

@@ -21,4 +21,9 @@ export const navigation: NavigationProps[] = [
     label: "About",
     icon: "BadgeInfo",
   },
+  {
+    route: "/logout",
+    label: "Logout",
+    icon: "LogOut",
+  },
 ];

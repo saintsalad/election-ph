@@ -1,14 +1,22 @@
 "use client";
 
+import ElectionBanner from "@/components/custom/election-banner";
 import { Button } from "@/components/ui/button";
-import { Election } from "@/lib/definitions";
-import { fetchFromFirebase } from "@/lib/firebase/functions";
+import type { Election, UserVotes, Vote } from "@/lib/definitions";
+import {
+  fetchDocumentById,
+  fetchDocumentsByIds,
+  fetchFromFirebase,
+  getDocumentsByField,
+} from "@/lib/firebase/functions";
+import { useAuthStore } from "@/lib/store";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 export default function Vote() {
   const [elections, setElections] = useState<Election[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { user, userVotes, setUserVotes, hasUserVotedZ } = useAuthStore();
 
   async function loadElections(forceRefresh: boolean = false) {
     try {
@@ -35,25 +43,15 @@ export default function Vote() {
   }, []);
 
   return (
-    <div className='p-3 flex-1 space-y-5 w-full'>
-      {elections &&
-        elections.map((item, i) => (
-          <div
-            key={item.id}
-            className={`${
-              item.status === "active"
-                ? "bg-slate-100"
-                : "bg-slate-200 opacity-80 pointer-events-none"
-            } rounded-lg p-5 min-h-44 flex flex-col justify-center items-center`}>
-            <h2 className='text-3xl font-bold tracking-tight capitalize'>
-              {item.electionType}
-            </h2>
-            <div className='pb-3 text-sm font-sans'>{item.description}</div>
-            <Link prefetch={true} href={`/vote/${item.id}`}>
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        ))}
+    <div className='w-full'>
+      <div className='p-4 grid grid-cols-1 gap-6 md:grid-cols-2 md:p-6'>
+        {elections &&
+          elections.map((item, i) => (
+            <div key={i} className='w-full'>
+              <ElectionBanner userId={user?.uid || ""} election={item} />
+            </div>
+          ))}
+      </div>
     </div>
   );
 }

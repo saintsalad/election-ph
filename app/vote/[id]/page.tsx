@@ -1,94 +1,97 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Candidate, Election } from "@/lib/definitions";
 import {
   fetchDocumentById,
   fetchDocumentsByIds,
+  hasUserVoted,
 } from "@/lib/firebase/functions";
-import { GalleryHorizontal, Rows3 } from "lucide-react";
 import SingleVoteListView from "@/components/custom/single-vote-listview";
-import SingleVoteCarouselViewProps from "@/components/custom/single-vote-carouselview";
-
-type DisplayType = "list" | "carousel" | "grid";
-
-type DisplayTogglesType = {
-  id: DisplayType;
-  icon: () => JSX.Element;
-};
-
-const DisplayToggles: DisplayTogglesType[] = [
-  {
-    id: "carousel",
-    icon: () => <GalleryHorizontal />,
-  },
-  {
-    id: "list",
-    icon: () => <Rows3 />,
-  },
-];
+import { useAuthStore } from "@/lib/store";
+import emitter from "@/lib/event";
 
 function VotingPage({ params }: { params: { id: string } }) {
-  const [displayType, setDisplayType] = useState<DisplayType>("list");
+  const electionId = params.id;
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [voted, setVoted] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const userId = user?.uid || "";
 
-  const loadCandidate = useCallback(async () => {
-    await fetchDocumentById<Election>("elections", params.id)
-      .then(async (election) => {
-        if (election) {
-          const candidateIds = election.candidates;
-          const _candidates = await fetchDocumentsByIds<Candidate>(
-            "candidates",
-            candidateIds
-          );
-
-          setCandidates(_candidates);
+  const loadCandidates = useCallback(async () => {
+    try {
+      const election = await fetchDocumentById<Election>(
+        "elections",
+        electionId
+      );
+      if (election) {
+        const candidateIds = election.candidates;
+        // TODO: fix candidateIds has 1 item in a blank array
+        if (candidateIds.length <= 1) {
+          // no candidates found
+          return false;
         }
-      })
-      .catch((error: Error) => {
-        console.error("Error fetching document:", error);
-      });
-  }, [params.id]);
+
+        const _candidates = await fetchDocumentsByIds<Candidate>(
+          "candidates",
+          candidateIds
+        );
+        setCandidates(_candidates);
+      }
+    } catch (error) {
+      console.error("Error fetching document:", error);
+    }
+  }, [electionId]);
+
+  const checkIfUserVoted = useCallback(
+    async (forceRefresh = false) => {
+      if (!userId) return;
+      try {
+        const hasVoted = await hasUserVoted(userId, electionId, forceRefresh);
+        setVoted(hasVoted);
+      } catch (error) {
+        console.error("Error occurred while checking vote status:", error);
+      }
+    },
+    [electionId, userId]
+  );
 
   useEffect(() => {
-    loadCandidate();
-  }, [loadCandidate]);
+    checkIfUserVoted();
+    loadCandidates();
+  }, [loadCandidates, checkIfUserVoted]);
+
+  useEffect(() => {
+    const handleVoteSubmit = () => {
+      setVoted(true);
+      checkIfUserVoted(true); // Force refresh
+    };
+
+    emitter.on("onVoteSubmit", handleVoteSubmit);
+    return () => emitter.off("onVoteSubmit", handleVoteSubmit);
+  }, [checkIfUserVoted]);
 
   return (
-    <div className='flex flex-1 flex-col p-3 min-w-[340px]'>
-      <div className='justify-end flex'>
-        <ToggleGroup size='lg' defaultValue={displayType} type='single'>
-          {DisplayToggles.map((item: DisplayTogglesType) => (
-            <ToggleGroupItem
-              key={item.id}
-              onClick={() => setDisplayType(item.id)}
-              value={item.id}>
-              {item.icon()}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
-
-      {candidates.length > 0 ? (
-        <div className='flex justify-start mt-5'>
-          <div
-            className={`${
-              displayType === "carousel" ? "block" : "hidden"
-            } w-full`}>
-            <SingleVoteCarouselViewProps candidates={candidates} />
-          </div>
-
-          <div
-            className={`${displayType === "list" ? "block" : "hidden"} w-full`}>
-            <SingleVoteListView candidates={candidates} />
-          </div>
+    <>
+      {!voted ? (
+        <div className='flex flex-1 flex-col p-3 min-w-[340px]'>
+          {candidates.length > 0 && userId ? (
+            <div className='flex justify-start mt-5'>
+              <div className='w-full'>
+                <SingleVoteListView
+                  electionId={electionId}
+                  candidates={candidates}
+                />
+              </div>
+            </div>
+          ) : (
+            <div>No candidates found ... </div>
+          )}
         </div>
       ) : (
-        <div>Loading ...</div>
+        <div>Voted ...</div>
       )}
-    </div>
+    </>
   );
 }
 

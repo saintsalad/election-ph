@@ -37,17 +37,17 @@ function MainLayout({
   }
 
   return (
-    <ScrollArea>
-      <div className='flex-1 flex flex-col-reverse content-between'>
-        <MainHeader />
+    // <ScrollArea>
+    <div className='flex-1 flex flex-col-reverse content-between bg-[#F2F2F7] h-full'>
+      <MainHeader />
 
-        <div className='flex flex-1 pt-11 w-full max-w-5xl self-center'>
-          {children}
-        </div>
-
-        <MainNavigation navigations={navigation} />
+      <div className='flex flex-1 pt-11 w-full max-w-5xl self-center'>
+        {children}
       </div>
-    </ScrollArea>
+
+      {/* <MainNavigation navigations={navigation} /> */}
+    </div>
+    // </ScrollArea>
   );
 }
 

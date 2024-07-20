@@ -15,7 +15,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
-  const origin = request.nextUrl.origin;
+  let origin = request.nextUrl.origin;
+  if (request.nextUrl.hostname === "localhost") {
+    console.log("Running on localhost");
+    origin = process.env.NEXT_PUBLIC_SITE_URL || "";
+  } else {
+    console.log("Running on deployed environment");
+  }
 
   try {
     const responseAPI = await axios.get(`${origin}/api/signin`, {

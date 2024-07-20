@@ -6,9 +6,13 @@ import Link from "next/link";
 
 type SingleVoteListViewProps = {
   candidates: Candidate[];
+  electionId: string;
 };
 
-const SingleVoteListView = ({ candidates }: SingleVoteListViewProps) => {
+const SingleVoteListView = ({
+  candidates,
+  electionId,
+}: SingleVoteListViewProps) => {
   return (
     <div className='flex flex-1 flex-row mb-20 ios-scroll-fix'>
       <div className='flex-col flex space-y-2.5 flex-1'>
@@ -44,7 +48,7 @@ const SingleVoteListView = ({ candidates }: SingleVoteListViewProps) => {
           //   </div>
           // </div>
 
-          <VoteConfirmation key={i} candidate={item}>
+          <VoteConfirmation key={i} candidate={item} electionId={electionId}>
             <div
               key={i}
               className='bg-background rounded-lg overflow-hidden shadow-md transition-transform duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-lg hover:bg-[#f0f8ff]'>

@@ -8,13 +8,13 @@ function MasterLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div>
       <Header />
       <div className='flex h-screen overflow-hidden'>
         <Sidebar />
         <main className='flex-1 overflow-hidden pt-24 px-8'>{children}</main>
       </div>
-    </>
+    </div>
   );
 }
 
