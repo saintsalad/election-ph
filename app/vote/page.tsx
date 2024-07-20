@@ -2,15 +2,9 @@
 
 import ElectionBanner from "@/components/custom/election-banner";
 import { Button } from "@/components/ui/button";
-import type { Election, UserVotes, Vote } from "@/lib/definitions";
-import {
-  fetchDocumentById,
-  fetchDocumentsByIds,
-  fetchFromFirebase,
-  getDocumentsByField,
-} from "@/lib/firebase/functions";
+import type { Election, Vote } from "@/lib/definitions";
+import { fetchFromFirebase } from "@/lib/firebase/functions";
 import { useAuthStore } from "@/lib/store";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 export default function Vote() {
