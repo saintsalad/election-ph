@@ -52,7 +52,7 @@ const SingleVoteListView = ({
             <div
               key={i}
               className='bg-background rounded-lg overflow-hidden shadow-md transition-transform duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-lg hover:bg-[#f0f8ff]'>
-              <div className='flex items-center gap-4 w-full p-3.5 hover:bg-[#f0f8ff] active:bg-primary-foreground active:text-primary transition-colors duration-300 hover:cursor-pointer'>
+              <div className='flex items-center gap-4 w-full p-3.5 hover:bg-[#f0f8ff] active:bg-primary-foreground active:text-primary transition-all duration-1000 hover:cursor-pointer'>
                 <Image
                   src={item.image}
                   alt='Candidate 1'

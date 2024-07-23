@@ -68,10 +68,32 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        shake: {
+          "0%, 80%": {
+            transform: "translate3d(0, 0, 0)",
+          },
+          "10%, 70%": {
+            transform: "translate3d(-0.5px, 0, 0)",
+          },
+          "20%, 60%": {
+            transform: "translate3d(1px, 0, 0)",
+          },
+          "30%, 50%": {
+            transform: "translate3d(-2px, 0, 0)",
+          },
+          "40%": {
+            transform: "translate3d(2px, 0, 0)",
+          },
+          "90%, 100%": {
+            transform: "translate3d(0, 0, 0)",
+            animationTimingFunction: "ease-in-out",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shake: "shake 1.5s cubic-bezier(.36,.07,.19,.97) both infinite",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],

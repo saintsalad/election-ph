@@ -17,9 +17,14 @@ import { Input } from "@/components/ui/input";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { navigation } from "@/lib/app-settings";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePathname } from "next/navigation";
 
 function MainHeader() {
   const user = useAuthStore((state) => state.user);
+
+  const pathname = usePathname();
+  const pathParts = pathname?.split("/");
+  const desiredPath = pathParts ? `/${pathParts[1]}` : "";
 
   return (
     <header className='fixed top-0 left-0 z-50 w-full bg-background border-b sm:border-0 px-3 '>
@@ -29,33 +34,30 @@ function MainHeader() {
         </Link>
         <nav className='justify-around items-center h-14 gap-x-9 hidden sm:flex'>
           {navigation &&
-            navigation.map((item, i) => (
-              <>
-                {item.route !== "/logout" ? (
-                  <Link
-                    key={i}
-                    href={item.route}
-                    className='flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground'>
-                    {item.label}
-                  </Link>
-                ) : (
-                  <Link href={"/logout"}>
-                    <Avatar className='border h-6 w-6'>
-                      <AvatarImage
-                        src={user?.photoURL || ""}
-                        alt='user picture 🤣'
-                      />
-                      <AvatarFallback>
-                        {user?.displayName
-                          ?.toString()
-                          .slice(0, 2)
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Link>
-                )}
-              </>
-            ))}
+            navigation.map((item, i) =>
+              item.route !== "/logout" ? (
+                <Link
+                  key={i}
+                  href={item.route}
+                  className={`${
+                    desiredPath === item.route && "text-slate-800"
+                  } flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground`}>
+                  {item.label}
+                </Link>
+              ) : (
+                <Link key={i} href='/logout'>
+                  <Avatar className='border h-6 w-6'>
+                    <AvatarImage
+                      src={user?.photoURL || ""}
+                      alt='user picture 🤣'
+                    />
+                    <AvatarFallback>
+                      {user?.displayName?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              )
+            )}
         </nav>
 
         <nav className='sm:hidden'>

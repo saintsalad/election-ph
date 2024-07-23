@@ -1,5 +1,4 @@
 import React, { ReactNode, useRef } from "react";
-import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +10,6 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerOverlay,
-  DrawerPortal,
 } from "@/components/ui/drawer";
 import {
   Dialog,
@@ -26,17 +23,14 @@ import {
 } from "@/components/ui/dialog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useState } from "react";
-import { Candidate, Vote } from "@/lib/definitions";
+import { Candidate } from "@/lib/definitions";
 import Image from "next/image";
-import { LoaderCircle } from "lucide-react";
+import { Fingerprint, LoaderCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useStore } from "zustand";
 import { useAuthStore } from "@/lib/store";
-import { serverTimestamp } from "firebase/firestore";
 import { hasUserVoted, saveDocument } from "@/lib/firebase/functions";
-import type { UserVotes } from "@/lib/definitions";
-import { redirect } from "next/navigation";
 import emitter from "@/lib/event";
+import { serverTimestamp } from "firebase/firestore";
 
 type VoteConfirmationProps = {
   candidate: Candidate;
@@ -72,6 +66,8 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
         description:
           "Looks like you've already cast your vote. No double-dipping allowed, buddy!",
       });
+      setIsDrawerOpen(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -99,8 +95,10 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
       });
 
       // onSubmitEvent
-      emitter.emit("onVoteSubmit", { data: result.data });
+      emitter.emit("onVoteSubmit", result.data);
     } else {
+      setIsDrawerOpen(false);
+      setIsSubmitting(false);
       toast({
         variant: "default",
         title: "Uh ohhh! 😥",
@@ -111,25 +109,35 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
 
   if (isDesktop) {
     return (
-      <Dialog>
+      <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className=''>
           <DialogHeader className='mb-5'>
-            <DialogTitle className='text-slate-800 mb-1'>
-              Vote Confirmation ℹ️
+            <DialogTitle className='text-gray-400 text-xl font-bold'>
+              Confirmation 💭
             </DialogTitle>
-            <DialogDescription className='font-semibold text-slate-700'>
-              Are you sure? Once you vote, you can&apos;t change it. Please
-              review your choice before proceeding.
+            <DialogDescription className='font-medium text-slate-700'>
+              Are you sure about your choice? Once you vote, it can&apos;t be
+              changed. Please take a moment to review before proceeding.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <DialogClose>
+            <DialogClose asChild>
               <Button size='lg' variant='outline'>
                 Cancel
               </Button>
             </DialogClose>
-            <Button size='lg'>Confirm Vote</Button>
+            <Button
+              disabled={isSubmiting}
+              onClick={() => handleSubmitVote()}
+              size='lg'>
+              {isSubmiting ? (
+                <LoaderCircle size={20} className='animate-spin mr-1' />
+              ) : (
+                <Fingerprint className='h-5 w-5 mr-1' />
+              )}
+              Confirm Vote
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -175,8 +183,9 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
             {isSubmiting ? (
               <LoaderCircle size={20} className='animate-spin mr-1' />
             ) : (
-              "Confirm Vote"
+              <Fingerprint className='h-5 w-5 mr-1' />
             )}
+            Confirm Vote
           </Button>
           <DrawerClose asChild>
             <Button
