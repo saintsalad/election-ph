@@ -20,7 +20,7 @@ function Logout() {
   }, [router]);
 
   useEffect(() => {
-    handleOnLogout();
+    // handleOnLogout();
   }, [handleOnLogout]);
 
   return <FullscreenLoader />;

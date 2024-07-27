@@ -199,7 +199,7 @@ export const fetchDocumentById = async <T extends DocumentData>(
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() } as T;
     } else {
-      console.log("No such document!");
+      console.log(`No such document in ${collectionName}`);
       return null;
     }
   } catch (error) {

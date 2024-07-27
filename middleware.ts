@@ -32,6 +32,25 @@ export async function middleware(request: NextRequest) {
 
     // Allow access to the protected route if the session is valid
     if (responseAPI.status === 200) {
+      // ✨✨✨ Route checking ✨✨✨
+
+      // const votePathPattern = /^\/vote\/([^\/]+)$/;
+      // const match = url.pathname.match(votePathPattern);
+
+      // if (match) {
+      //   const voteId = match[1];
+      //   // Validate the vote ID (e.g., check length, format, etc.)
+      //   if (!(voteId && voteId.length > 0)) {
+      //     console.log("✅ Valid vote ID:", voteId);
+      //     return NextResponse.next();
+      //   } else {
+      //     console.log("❌ Invalid vote ID");
+      //     return NextResponse.redirect(new URL("/not-found", request.url));
+      //   }
+      // }
+
+      // ✨✨✨ Route checking end ✨✨✨
+
       return NextResponse.next();
     } else {
       console.log("❌ Unauthorized access:", responseAPI.status);

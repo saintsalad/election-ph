@@ -83,7 +83,7 @@ function VotingPage({ params }: { params: { id: string } }) {
       checkIfUserVoted(true); // Force refresh
       if (data) {
         const { id }: VoteProps = data;
-        router.push(`/vote/success/${id}`);
+        router.push(`/vote/verify?id=${id}`);
       } else {
         console.error("Vote details not receive", data);
       }

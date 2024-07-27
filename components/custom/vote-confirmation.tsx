@@ -31,6 +31,7 @@ import { useAuthStore } from "@/lib/store";
 import { hasUserVoted, saveDocument } from "@/lib/firebase/functions";
 import emitter from "@/lib/event";
 import { serverTimestamp } from "firebase/firestore";
+import { generateReferenceNumber } from "@/lib/functions";
 
 type VoteConfirmationProps = {
   candidate: Candidate;
@@ -73,9 +74,10 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
 
     const vote = {
       electionId: electionId,
+      referenceId: generateReferenceNumber(),
       userId: userId,
       value: candidate.id.toString(),
-      dateCreated: serverTimestamp(),
+      dateCreated: new Date().toISOString(),
     };
 
     const result = await saveDocument("votes", vote);

@@ -36,6 +36,7 @@ export type Election = {
 
 export type Vote = {
   id: string;
+  referenceId: string;
   electionId: string;
   userId: string;
   value: string | string[];
@@ -77,3 +78,11 @@ export interface FooterItem {
 export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;
+
+export type VoteReceiptProps = {
+  referenceId: string;
+  dateCreated: string;
+  electionTitle: string;
+  userId: string;
+  voteId: string;
+};
