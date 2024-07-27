@@ -74,7 +74,7 @@ function VerifyPage() {
 
   return (
     <div className='flex flex-1 flex-col bg-[#F2F2F7]'>
-      <div className='px-10 md:px-5 mt-10'>
+      <div className='px-10 md:px-5 mt-5 md:mt-10'>
         <Link
           href={"/vote"}
           className='hover:text-slate-500 text-slate-600 rounded-full flex flex-1 border h-10 w-10 justify-center items-center bg-white'>
