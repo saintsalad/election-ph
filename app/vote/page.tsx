@@ -38,7 +38,7 @@ export default function Vote() {
 
   return (
     <div className='w-full'>
-      <div className='p-4 grid grid-cols-1 gap-6 md:grid-cols-2 md:p-6'>
+      <div className='px-4 pt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:px-0'>
         {elections &&
           elections.map((item, i) => (
             <div key={i} className='w-full'>

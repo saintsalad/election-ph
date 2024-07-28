@@ -9,6 +9,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import DotPattern from "@/components/magicui/dot-pattern";
+import { cn } from "@/lib/utils";
 
 function MainLayout({
   children,
@@ -17,7 +19,6 @@ function MainLayout({
 }>) {
   const setUser = useAuthStore((state) => state.setUser);
   const setLoading = useAuthStore((state) => state.setLoading);
-  const loading = useAuthStore((state) => state.loading);
 
   const pathname = usePathname();
   const pathParts = pathname?.split("/");
@@ -39,8 +40,21 @@ function MainLayout({
   return (
     <div className='flex-1 flex flex-col content-between bg-[#F2F2F7] h-full'>
       <MainHeader />
+      <DotPattern
+        width={20}
+        height={20}
+        cx={1}
+        cy={1}
+        cr={1}
+        className={cn(
+          "[mask-image:linear-gradient(to_bottom_right,white,transparent,white)] "
+        )}
+      />
 
-      <ScrollArea className='h-full pt-11 w-full max-w-5xl self-center'>
+      <ScrollArea
+        className={`h-full  w-full self-center ${
+          desiredPath !== "/" && "max-w-5xl pt-11 sm:pt-16"
+        }`}>
         {children}
       </ScrollArea>
 

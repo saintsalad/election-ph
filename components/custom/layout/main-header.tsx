@@ -83,7 +83,7 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
           href={item.route}
           className={`${
             desiredPath === item.route && "text-slate-800 font-semibold"
-          } flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground`}>
+          } flex flex-col items-center gap-1 text-slate-800 hover:text-foreground`}>
           {item.label}
         </Link>
       ) : (
@@ -118,8 +118,8 @@ function MainHeader() {
     : null;
 
   return (
-    <div className='fixed top-0 left-0 z-50 w-full border-b sm:border-0 px-3 border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-      <div className='container mx-auto flex h-11 items-center justify-between px-0 max-w-5xl'>
+    <div className='absolute top-0 z-50 w-full shadow-sm border-b sm:border-0 px-5 border-border/40 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/30 self-center lg:max-w-5xl lg:rounded-full lg:mt-3 lg:overflow-hidden'>
+      <div className='container mx-auto flex h-11 items-center justify-between px-0'>
         <Link href='/' className='flex items-center gap-2' prefetch={false}>
           <span className='text-base font-medium'>Election PH</span>
         </Link>

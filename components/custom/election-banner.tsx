@@ -47,10 +47,11 @@ function ElectionBanner({ election, userId }: ElectionBannerProps) {
     <div
       key={election.id}
       className={` bg-white
-       rounded-lg p-5  flex flex-col justify-center h-48`}>
+       rounded-lg p-6  flex flex-col justify-center h-48 shadow-sm`}>
       <h2 className='text-3xl sm:text-4xl font-bold tracking-tight capitalize'>
         {election.electionType}
       </h2>
+
       <div className='pb-3 text-xs sm:text-sm font-sans text-slate-700 mb-5'>
         {election.description}
       </div>

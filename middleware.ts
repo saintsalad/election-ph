@@ -4,10 +4,16 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const sessionCookie = request.cookies.get("__session")?.value;
-  const publicRoutes = ["/signin", "/signup", "/signup/success", "/api/signin"];
+  const publicRoutes = [
+    "/",
+    "/signin",
+    "/signup",
+    "/signup/success",
+    "/api/signin",
+  ];
 
   // If the request URL matches one of the public routes, bypass authentication
-  if (publicRoutes.some((route) => url.pathname.startsWith(route))) {
+  if (publicRoutes.includes(url.pathname)) {
     return NextResponse.next();
   }
 

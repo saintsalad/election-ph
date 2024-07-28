@@ -107,7 +107,7 @@ function CandidateCard({ candidate }: CandidateCardProps) {
       />
       <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent '>
         <div className='flex flex-col justify-end p-3 text-white'>
-          <h2 className='text-base font-bold'>{candidate.name}</h2>
+          <h2 className='text-sm md:text-base font-bold'>{candidate.name}</h2>
           <p className='text-xs uppercase'>{candidate.party}</p>
         </div>
       </div>
