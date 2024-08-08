@@ -9,6 +9,7 @@ import memoji1 from "@/public/images/memoji1.png";
 import memoji2 from "@/public/images/memoji2.png";
 import memoji3 from "@/public/images/memoji3.png";
 import memoji4 from "@/public/images/memoji4.png";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const interestingFeatures = [
   {
@@ -50,56 +51,65 @@ const interestingFeatures = [
 ];
 
 export default function Home() {
-  function getFlagEmoji(countryCode: string): string {
-    const codePoints = countryCode
-      .toUpperCase()
-      .split("")
-      .map((char) => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-  }
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
     <main>
       {/* Hero Section */}
-      <AspectRatio ratio={16 / 8.5} className='bg-transparent relative'>
-        <Image
-          draggable={false}
-          priority={true}
-          src={hero}
-          alt='Election PH Hero banner'
-          fill
-          className='object-cover hero-banner'
-        />
-        <div className='absolute flex flex-col w-full h-full bg-opacity-40 items-center md:items-start justify-center'>
-          <div className='text-center md:text-left lg:max-w-[900px] md:pl-40 pt-12 md:pt-0'>
-            <h1 className='text-white text-3xl md:text-7xl font-light'>
-              ELECTION PH
-            </h1>
-            <div className='text-white mt-3 px-10 md:px-0 flex flex-col items-center md:items-start'>
-              <p className='font-extralight md:text-lg'>
-                Welcome to your trusted space for impartial surveys. Share your
-                political views and participate in meaningful discussions. Join
-                our community and help shape the future of our country. Your
-                voice matters!
-              </p>
-              <Link href='/signup'>
-                <ShimmerButton
-                  shimmerColor='yellow'
-                  background='#020617'
-                  color='#020617'
-                  className='h-10 mt-4 px-10'>
-                  Join Now
-                </ShimmerButton>
-              </Link>
+      {isDesktop ? (
+        <AspectRatio ratio={16 / 8.5} className='bg-transparent relative'>
+          <Image
+            draggable={false}
+            priority={true}
+            src={hero}
+            alt='Election PH Hero banner'
+            fill
+            className='object-cover hero-banner'
+          />
+          <div className='absolute flex flex-col w-full h-full bg-opacity-40 items-center md:items-start justify-center'>
+            <div className='text-center md:text-left lg:max-w-[900px] md:pl-40 pt-12 md:pt-0'>
+              <h1 className='text-white text-3xl md:text-7xl font-light'>
+                ELECTION PH
+              </h1>
+              <div className='text-white mt-3 px-10 md:px-0 flex flex-col items-center md:items-start'>
+                <p className='font-extralight md:text-lg'>
+                  Welcome to your trusted space for impartial surveys. Share
+                  your political views and participate in meaningful
+                  discussions. Join our community and help shape the future of
+                  our country. Your voice matters!
+                </p>
+                <Link href='/signup'>
+                  <ShimmerButton
+                    shimmerColor='yellow'
+                    background='#020617'
+                    color='#020617'
+                    className='h-10 mt-4 px-10'>
+                    Join Now
+                  </ShimmerButton>
+                </Link>
+              </div>
             </div>
           </div>
+        </AspectRatio>
+      ) : (
+        <div className=' min-h-40 mb-16 '>
+          <div className='h-[600px] relative'>
+            <Image
+              draggable={false}
+              priority={true}
+              src={hero}
+              alt='Election PH Hero banner'
+              fill
+              className='object-cover hero-banner'
+            />
+          </div>
         </div>
-      </AspectRatio>
+      )}
 
       {/* Interesting Features Section */}
       <div className='relative flex justify-center mx-5 md:mx-0 py-26 sm:py-28'>
         <div className='max-w-5xl w-full'>
-          <h1 className='text-4xl font-black mb-10 text-slate-800'>
+          <h1 className='text-3xl sm:text-4xl text-center sm:text-left font-black mb-5 sm:mb-10 text-slate-800'>
             What&#39;s interesting? 🤔
           </h1>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -107,7 +117,7 @@ export default function Home() {
               <div
                 key={index}
                 className='flex flex-1 gap-x-3 bg-gray-200 p-5 rounded-lg shadow'>
-                <div className='bg-gray-50 max-h-28 max-w-28 md:max-h-32 md:max-w-32 aspect-square rounded-full flex flex-1 justify-center items-center overflow-hidden pt-[40px]'>
+                <div className='bg-gradient-to-r from-orange-400 to-yellow-200 max-h-28 max-w-28 md:max-h-32 md:max-w-32 aspect-square rounded-full flex flex-1 justify-center items-center overflow-hidden pt-[40px]'>
                   <Image
                     draggable={false}
                     alt={feature.title}
@@ -152,6 +162,18 @@ export default function Home() {
           </h1> */}
         </div>
       </div>
+
+      <footer className='footer-wave-clip bg-primary h-96 pt-20 px-5 sm:px-20 flex  flex-1 flex-col'>
+        <div className='text-white flex-1 '>
+          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Mollitia,
+          libero sint! Sapiente rerum doloribus exercitationem eligendi
+          voluptatibus facilis maiores, id dignissimos quo labore ratione
+          dolorum laboriosam ut accusantium aliquam eos.
+        </div>
+        <div className='text-white py-5 text-center font-extralight text-sm'>
+          Copyright © 2024 Election PH. All Rights Reserved.
+        </div>
+      </footer>
     </main>
   );
 }
