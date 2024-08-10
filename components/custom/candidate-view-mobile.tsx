@@ -49,7 +49,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
   console.log(candidate);
 
   return (
-    <div className='flex flex-1 w-full items-end'>
+    <div className='flex flex-1 w-full items-end max-h-screen'>
       {/* <Image
         src={candidate.image}
         fill
@@ -69,6 +69,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
           <CarouselItem>
             <div className='h-full relative'>
               <Image
+                draggable='false'
                 src={candidate.image}
                 fill
                 alt={candidate.name}
