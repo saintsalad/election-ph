@@ -2,7 +2,7 @@ import { Icons } from "@/components/custom/icons";
 import { FieldValue } from "firebase/firestore";
 
 export type Candidate = {
-  id: number;
+  id: string;
   name: string;
   party: string;
   image: string;

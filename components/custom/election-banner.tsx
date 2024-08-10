@@ -4,13 +4,6 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCallback, useEffect, useState } from "react";
 import { hasUserVoted } from "@/lib/firebase/functions";
-import {
-  BadgeCheck,
-  CheckCheckIcon,
-  CheckCircle,
-  CheckCircle2Icon,
-  Fingerprint,
-} from "lucide-react";
 
 type ElectionBannerProps = {
   election: Election;
@@ -28,7 +21,7 @@ function ElectionBanner({ election, userId }: ElectionBannerProps) {
     }
 
     try {
-      const hasVoted = await hasUserVoted(userId, election.id, true);
+      const hasVoted = await hasUserVoted(userId, election.id, false);
       setDisable(hasVoted);
     } catch (error) {
       console.error("Error occurred while checking if user has voted", error);
@@ -61,9 +54,9 @@ function ElectionBanner({ election, userId }: ElectionBannerProps) {
         </Link>
       ) : (
         <Button
-          variant={"ghost"}
-          className='w-28 pointer-events-none border border-slate-400 font-mono text-slate-500 font-semibold'>
-          Voted <Fingerprint className='h-4 w-4 ml-1' color='green' />
+          // variant={"ghost"}
+          className='w-28 pointer-events-none border font-semibold opacity-80'>
+          🔒Voted
         </Button>
       )}
     </div>

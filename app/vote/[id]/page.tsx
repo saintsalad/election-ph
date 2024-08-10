@@ -64,13 +64,14 @@ function VotingPage({ params }: { params: { id: string } }) {
       try {
         const hasVoted = await hasUserVoted(userId, electionId, forceRefresh);
         if (hasVoted) {
+          router.push("/vote");
         }
         // redirect to receipt page
       } catch (error) {
         console.error("Error occurred while checking vote status:", error);
       }
     },
-    [electionId, userId]
+    [electionId, userId, router]
   );
 
   useEffect(() => {

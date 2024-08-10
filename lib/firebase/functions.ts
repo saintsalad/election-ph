@@ -317,7 +317,7 @@ export const hasUserVoted = async (
           localStorage.removeItem(`${cacheKey}_time`);
         }
       } else {
-        console.warn("Cache is stale or corrupted. Fetching new data...");
+        console.error("Cache is stale or corrupted. Fetching new data...");
         // Clear corrupted cache
         localStorage.removeItem(cacheKey);
         localStorage.removeItem(cacheHashKey);
