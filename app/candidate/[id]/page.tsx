@@ -5,7 +5,6 @@ import { decryptJson } from "@/lib/functions/crypto";
 import { Candidate } from "@/lib/definitions";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import SingleVoteCarouselView from "@/components/custom/single-vote-carouselview";
 import CandidateViewMobile from "@/components/custom/candidate-view-mobile";
 
 function CandidateViewPage({ params }: { params: { id: string } }) {
