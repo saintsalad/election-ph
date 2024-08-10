@@ -91,7 +91,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
                 quas sunt exercitationem ut delectus doloremque fuga
                 repellendus, ipsa illum odio cum eius nisi quo nesciunt
-                excepturi tenetur debitis ullam vel?
+                excepturi tenetur debitis ullam vel test?
               </div>
             </div>
           </CarouselItem>
