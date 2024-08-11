@@ -1,10 +1,7 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { decryptJson } from "@/lib/functions/crypto";
 import { Candidate } from "@/lib/definitions";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import CandidateViewMobile from "@/components/custom/candidate-view-mobile";
 
 function CandidateViewPage({ params }: { params: { id: string } }) {

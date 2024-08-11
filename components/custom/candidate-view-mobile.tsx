@@ -49,7 +49,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
   console.log(candidate);
 
   return (
-    <div className='flex flex-1 w-full items-end max-h-screen'>
+    <div className='flex flex-1 w-full items-end'>
       {/* <Image
         src={candidate.image}
         fill
@@ -64,10 +64,10 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
         </div>
       </div> */}
 
-      <Carousel setApi={setApi} className='w-full h-full'>
+      <Carousel setApi={setApi} className='w-full '>
         <CarouselContent>
-          <CarouselItem>
-            <div className='h-full relative'>
+          <CarouselItem className='bg-black'>
+            <div className='h-[95%] relative '>
               <Image
                 draggable='false'
                 src={candidate.image}
@@ -86,7 +86,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
             </div>
           </CarouselItem>
 
-          <CarouselItem className='pt-[44px]'>
+          <CarouselItem className='pt-[44px] bg-transparent'>
             <div className='h-screen relative p-5'>
               <div>
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
@@ -99,7 +99,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
         </CarouselContent>
       </Carousel>
 
-      <div className='absolute bottom-0 left-0 right-0 flex justify-center p-4 pointer-events-none'>
+      <div className='absolute bottom-10 left-0 right-0 flex justify-center p-4 pointer-events-none'>
         <div className='flex gap-x-1.5 '>{renderDots()}</div>
       </div>
 
