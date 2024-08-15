@@ -15,7 +15,7 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
   }, [params.id]);
 
   return (
-    <div className='absolute top-0 left-0 w-full h-full '>
+    <div className='absolute top-0 left-0 w-full'>
       {candidate && <CandidateViewMobile candidate={candidate} />}
     </div>
   );
