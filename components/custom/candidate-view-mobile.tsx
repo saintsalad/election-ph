@@ -49,25 +49,11 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
   console.log(candidate);
 
   return (
-    <div className='flex flex-1 w-full'>
-      {/* <Image
-        src={candidate.image}
-        fill
-        alt={candidate.name}
-        className='object-cover'
-      />
-
-      <div className='absolute h-2/5 bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent '>
-        <div className='flex flex-col justify-end p-3 text-white'>
-          <h2 className='text-sm md:text-base font-bold'>{candidate.name}</h2>
-          <p className='text-xs uppercase'>{candidate.party}</p>
-        </div>
-      </div> */}
-
-      <Carousel setApi={setApi} className='w-full '>
+    <div className='flex flex-1 w-full h-full'>
+      <Carousel setApi={setApi} className='w-full h-full'>
         <CarouselContent>
-          <CarouselItem className=' bg-black'>
-            <div className='w-full flex flex-1 justify-center p-5 h-[85%] relative '>
+          <CarouselItem>
+            <div className=' h-[100vh] relative '>
               <Image
                 draggable={"false"}
                 src={candidate.image}
@@ -91,10 +77,23 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
             </div>
           </CarouselItem>
 
-          <CarouselItem className=' bg-transparent pt-[44px]'>
-            <div className='h-screen relative p-5'>
+          <CarouselItem
+            style={{ overflowY: "scroll" }}
+            className=' bg-transparent'>
+            <div className=' relative p-5 pb-[100px]  mt-[44px] max-h-[100vh] overflow-scroll'>
               <h2 className='text-2xl font-extrabold'>Biography</h2>
               <div>{candidate.description}</div>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsam,
+              perspiciatis? Laboriosam hic quidem, suscipit voluptatum, placeat
+              fuga culpa, alias quaerat et commodi eos soluta. Laborum a
+              accusantium delectus eligendi facilis. Lorem ipsum dolor sit amet
+              consectetur adipisicing elit. Alias, laboriosam? Minima odio
+              veritatis eligendi omnis corrupti itaque porro labore dolorum
+              perspiciatis, blanditiis consequatur vitae ratione ab facilis quod
+              maxime expedita. Lorem ipsum dolor sit amet consectetur
+              adipisicing elit. Voluptatum iste, fugiat temporibus tempore
+              corporis voluptate! Sed quidem nisi voluptas minima architecto
+              ullam nam libero suscipit, iusto illum quas quaerat eum.
             </div>
           </CarouselItem>
         </CarouselContent>
