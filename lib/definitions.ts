@@ -86,3 +86,9 @@ export type VoteReceiptProps = {
   userId: string;
   voteId: string;
 };
+
+export type CandidateRating = {
+  rate: number;
+  candidateId: string;
+  userId: string;
+};
