@@ -27,16 +27,19 @@ import axios from "axios";
 import { useQuery } from "react-query";
 
 function useCandidateRating(candidateId: string) {
-  return useQuery<CandidateRating>("candidate-rating", async () => {
-    const { data } = await axios.get<CandidateRating>(
-      `/api/candidate/rate?candidateId=${candidateId}`
-    );
-    return data;
-  });
+  return useQuery<CandidateRating>(
+    `candidate-rating-${candidateId}`,
+    async () => {
+      const { data } = await axios.get<CandidateRating>(
+        `/api/candidate/rate?candidateId=${candidateId}`
+      );
+      return data;
+    }
+  );
 }
 
 function useUserRating(candidateId: string) {
-  return useQuery<UserRating>("user-rating", async () => {
+  return useQuery<UserRating>(`user-rating-${candidateId}`, async () => {
     const { data } = await axios.get<UserRating>(
       `/api/user/rate?candidateId=${candidateId}`
     );
@@ -208,7 +211,8 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
                 color={rating || userRating?.rate ? "#facc15" : "white"}
               />
               <div className='text-xs font-semibold text-white mt-0.5 drop-shadow-xl'>
-                {candRating ? candRating.averageRating : 0}
+                {candRatingLoading && "..."}
+                {candRating && !candRatingLoading && candRating.averageRating}
               </div>
             </div>
           </DrawerTrigger>

@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UserRating } from "@/lib/definitions";
-import {
-  db,
-  getCurrentUser,
-  isUserAuthenticated,
-} from "@/lib/firebase/firebase-admin";
+import { db, isUserAuthenticated } from "@/lib/firebase/firebase-admin";
 
 export async function GET(req: NextRequest) {
-  // Extract the candidateId and userId from the query string
   const { searchParams } = new URL(req.url);
   const candidateId = searchParams.get("candidateId");
-  const user = await getCurrentUser();
-  const userId = user?.uid;
 
-  if (!candidateId || candidateId == "undefined") {
+  if (!candidateId) {
     return NextResponse.json(
       { message: "Candidate ID is missing" },
       { status: 400 }
@@ -29,14 +22,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Otherwise, fetch all ratings for the candidate
-    // TODO: use aggragate to get average
-    const querySnapshot = await db
-      .collection("candidateRate")
-      .where("candidateId", "==", candidateId)
+    const docSnapshot = await db
+      .collection("candidates")
+      .doc(candidateId)
       .get();
 
-    if (querySnapshot.empty) {
+    if (!docSnapshot.exists) {
       console.log(`No document found for candidateId: ${candidateId}`);
 
       return NextResponse.json(
@@ -49,23 +40,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Calculate the total and average rating for all users
-    let totalRating = 0;
-    querySnapshot.forEach((doc) => {
-      const data = doc.data() as UserRating;
-      totalRating += data.rate;
-    });
-
-    const averageRating = totalRating / querySnapshot.size;
-
-    const resultObj = {
-      candidateId: candidateId,
-      averageRating: averageRating,
-      numberOfRatings: querySnapshot.size,
-    };
-
-    // Return the total and average rating or specific user's rating
-    const response = NextResponse.json(resultObj, { status: 200 });
+    const documentData = docSnapshot.data();
+    const response = NextResponse.json(
+      { ...documentData, id: candidateId },
+      { status: 200 }
+    );
 
     // Set cache headers to revalidate every 5 minutes
     response.headers.set(
