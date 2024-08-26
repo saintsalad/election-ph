@@ -25,17 +25,12 @@ import { ChevronLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { handleLogin, isUnique } from "@/lib/firebase/functions";
-import { APIResponse } from "@/lib/definitions";
-import axios from "axios";
 
 // Validation functions
 const isValidUsername = (str: string) => /^(?!.*[_.]{3})[\w.]*$/.test(str);

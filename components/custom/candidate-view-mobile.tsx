@@ -1,4 +1,4 @@
-import { Candidate, CandidateRating } from "@/lib/definitions";
+import { Candidate, CandidateRating, UserRating } from "@/lib/definitions";
 import Image from "next/image";
 import {
   Carousel,
@@ -23,13 +23,50 @@ import {
 } from "@/components/ui/drawer";
 import { saveDocument } from "@/lib/firebase/functions";
 import { useAuthStore } from "@/lib/store";
+import axios from "axios";
+import { useQuery } from "react-query";
+
+function useCandidateRating(candidateId: string) {
+  return useQuery<CandidateRating>("candidate-rating", async () => {
+    const { data } = await axios.get<CandidateRating>(
+      `/api/candidate/rate?candidateId=${candidateId}`
+    );
+    return data;
+  });
+}
+
+function useUserRating(candidateId: string) {
+  return useQuery<UserRating>("user-rating", async () => {
+    const { data } = await axios.get<UserRating>(
+      `/api/user/rate?candidateId=${candidateId}`
+    );
+    return data;
+  });
+}
 
 const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
   const [api, setApi] = useState<CarouselApi>();
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [rating, setRating] = useState<number>(0);
   const [tempRating, setTempRating] = useState<number>(0);
+  const [isEditRating, setIsEditRating] = useState(false);
   const user = useAuthStore((state) => state.user);
+
+  const {
+    status: candRatingSts,
+    data: candRating,
+    error: candRatingErr,
+    isFetching: candRatingLoading,
+    refetch: candRatingRefetch,
+  } = useCandidateRating(candidate.id);
+
+  const {
+    status: userRatingSts,
+    data: userRating,
+    error: userRatingErr,
+    isFetching: userRatingLoading,
+    refetch: userRatingRefetch,
+  } = useUserRating(candidate.id);
 
   const { browserType, deviceType } = useBrowserAndDevice();
 
@@ -86,6 +123,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
     setTempRating(newStars);
   };
 
+  // TODO: move inserting data to api route; api/candidate/rate
   const handleSubmitRating = async () => {
     const _userId = user?.uid;
     if (_userId === "" || !_userId) {
@@ -97,11 +135,14 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
       rate: tempRating,
       candidateId: candidate.id,
       userId: _userId,
+      dateCreated: new Date(),
     };
 
-    const res = await saveDocument<CandidateRating>("candidateRate", rate);
+    const res = await saveDocument<UserRating>("candidateRate", rate);
     if (res.success) {
       console.log("Successfully saved", res.data);
+      userRatingRefetch();
+      candRatingRefetch();
     } else {
       console.error("Error while saving rating", res.data);
     }
@@ -157,49 +198,87 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
 
       {/* actions section  */}
       <div className='fixed pr-4 right-0 bottom-1/3'>
+        {/* Rate section */}
         <Drawer>
           <DrawerTrigger asChild>
             <div className='cursor-pointer text-center mb-5'>
               <Star
-                fill={rating ? "yellow" : "none"}
+                fill={rating || userRating?.rate ? "#facc15" : "none"}
                 className='h-8 w-8 drop-shadow-xl'
-                color={rating ? "yellow" : "white"}
+                color={rating || userRating?.rate ? "#facc15" : "white"}
               />
               <div className='text-xs font-semibold text-white mt-0.5 drop-shadow-xl'>
-                3.5
+                {candRating ? candRating.averageRating : 0}
               </div>
             </div>
           </DrawerTrigger>
           <DrawerContent>
-            <div className='mx-auto w-full max-w-sm'>
-              <DrawerHeader className='pb-0'>
-                <DrawerTitle>Rate Candidate (test mode)</DrawerTitle>
-                <DrawerDescription>
-                  Click on the stars and submit.
-                </DrawerDescription>
-              </DrawerHeader>
-              <DrawerFooter className='pb-5'>
-                <div className='flex flex-1 flex-row w-full justify-center gap-x-4 mb-8'>
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Star
-                      onClick={() => handleRateCandidate(index)}
-                      key={index}
-                      fill={index < tempRating ? "yellow" : "gray"}
-                      className='h-8 w-8'
-                      color={index < tempRating ? "yellow" : "gray"}
-                    />
-                  ))}
-                </div>
-                <DrawerClose asChild>
-                  <Button onClick={handleSubmitRating} size='lg'>
-                    Submit
-                  </Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </div>
+            {!userRating?.rate && (
+              <div className='mx-auto w-full max-w-sm'>
+                <DrawerHeader className='pb-0'>
+                  <DrawerTitle>Rate Candidate (test mode)</DrawerTitle>
+                  <DrawerDescription>
+                    Click on the stars and submit.
+                  </DrawerDescription>
+                </DrawerHeader>
+                <DrawerFooter className='pb-5'>
+                  <div className='flex flex-1 flex-row w-full justify-center gap-x-4 mb-8'>
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Star
+                        onClick={() => handleRateCandidate(index)}
+                        key={index}
+                        fill={index < tempRating ? "#facc15" : "#cbd5e1"}
+                        className='h-8 w-8'
+                        color={index < tempRating ? "#facc15" : "#cbd5e1"}
+                      />
+                    ))}
+                  </div>
+
+                  <DrawerClose asChild>
+                    <Button onClick={handleSubmitRating} size='lg'>
+                      Submit
+                    </Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </div>
+            )}
+
+            {userRating && userRating.rate > 0 && (
+              <div className='mx-auto w-full max-w-sm'>
+                <DrawerHeader className='pb-0'>
+                  <DrawerTitle>Rating Submitted ✨</DrawerTitle>
+                  <DrawerDescription>
+                    Thank you! You can update your rating in 3 days if needed.
+                  </DrawerDescription>
+                </DrawerHeader>
+                <DrawerFooter className='pb-5'>
+                  <div className='flex flex-1 flex-row w-full justify-center gap-x-4 mb-8'>
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Star
+                        onClick={() => handleRateCandidate(index)}
+                        key={index}
+                        fill={index < userRating.rate ? "#facc15" : "#cbd5e1"}
+                        className='h-8 w-8 '
+                        color={index < userRating.rate ? "#facc15" : "#cbd5e1"}
+                      />
+                    ))}
+                  </div>
+
+                  <DrawerClose asChild>
+                    <Button
+                      disabled={true}
+                      onClick={handleSubmitRating}
+                      size='lg'>
+                      Submit
+                    </Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </div>
+            )}
           </DrawerContent>
         </Drawer>
 
+        {/* TODO: comment section */}
         <Drawer>
           <DrawerTrigger asChild>
             <div className='cursor-pointer text-center mb-5'>
@@ -212,7 +291,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
               </div>
             </div>
           </DrawerTrigger>
-          <DrawerContent className='min-h-[50vh]'>
+          <DrawerContent className='min-h-[30vh]'>
             <div className='mx-auto w-full max-w-sm p-5 text-center'>
               <div>Feature will be available soon 🔒</div>
             </div>

@@ -87,8 +87,14 @@ export type VoteReceiptProps = {
   voteId: string;
 };
 
-export type CandidateRating = {
+export type UserRating = {
   rate: number;
   candidateId: string;
   userId: string;
+};
+
+export type CandidateRating = {
+  candidateId: string;
+  averageRating: number;
+  numberOfRatings: number;
 };
