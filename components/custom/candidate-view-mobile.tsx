@@ -7,7 +7,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { useEffect, useState } from "react";
-import { Star, MessageCircleMore } from "lucide-react";
+import { Star, MessageCircleMore, ChevronLeft } from "lucide-react";
 import { useBrowserAndDevice } from "@/hooks/useBrowserAndDevice";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { saveDocument } from "@/lib/firebase/functions";
 import { useAuthStore } from "@/lib/store";
 import axios from "axios";
 import { useQuery } from "react-query";
+import Link from "next/link";
 
 function useCandidateRating(candidateId: string) {
   return useQuery<CandidateRating>(
@@ -198,6 +199,10 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
       <div className='fixed bottom-3 left-0 right-0 flex justify-center p-4 pointer-events-none'>
         <div className='flex gap-x-1.5'>{renderDots()}</div>
       </div>
+
+      <Link href={"/candidate"} className='fixed top-14 left-1'>
+        <ChevronLeft color='#FFF' className='h-8 w-8  drop-shadow-xl' />
+      </Link>
 
       {/* actions section  */}
       <div className='fixed pr-4 right-0 bottom-1/3'>
