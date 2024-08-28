@@ -34,7 +34,8 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
     refetch,
   } = useCandidate(params.id);
 
-  const { data: candidateRate } = useCandidateRate(params.id || "");
+  const { data: candidateRate, refetch: candidateRateRefetch } =
+    useCandidateRate(params.id || "");
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -54,7 +55,11 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
           {isFetching && "Loading ..."}
           {isError && "Error"}
           {candidate && candidateRate && (
-            <CandidateViewMobile candidate={candidate} />
+            <CandidateViewMobile
+              candidateRateRefetch={() => candidateRateRefetch()}
+              candidate={candidate}
+              candidateRate={candidateRate}
+            />
           )}
         </div>
       )}

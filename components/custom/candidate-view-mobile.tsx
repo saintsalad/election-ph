@@ -27,18 +27,6 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import Link from "next/link";
 
-function useCandidateRating(candidateId: string) {
-  return useQuery<CandidateRating>(
-    `candidate-rating-${candidateId}`,
-    async () => {
-      const { data } = await axios.get<CandidateRating>(
-        `/api/candidate/rate?candidateId=${candidateId}`
-      );
-      return data;
-    }
-  );
-}
-
 function useUserRating(candidateId: string) {
   return useQuery<UserRating>(`user-rating-${candidateId}`, async () => {
     const { data } = await axios.get<UserRating>(
@@ -48,21 +36,21 @@ function useUserRating(candidateId: string) {
   });
 }
 
-const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
+const CandidateViewMobile = ({
+  candidate,
+  candidateRate,
+  candidateRateRefetch,
+}: {
+  candidate: Candidate;
+  candidateRate: CandidateRating;
+  candidateRateRefetch: () => void;
+}) => {
   const [api, setApi] = useState<CarouselApi>();
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [rating, setRating] = useState<number>(0);
   const [tempRating, setTempRating] = useState<number>(0);
   const [isEditRating, setIsEditRating] = useState(false);
   const user = useAuthStore((state) => state.user);
-
-  const {
-    status: candRatingSts,
-    data: candRating,
-    error: candRatingErr,
-    isFetching: candRatingLoading,
-    refetch: candRatingRefetch,
-  } = useCandidateRating(candidate.id);
 
   const {
     status: userRatingSts,
@@ -146,7 +134,7 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
     if (res.success) {
       console.log("Successfully saved", res.data);
       userRatingRefetch();
-      candRatingRefetch();
+      candidateRateRefetch();
     } else {
       console.error("Error while saving rating", res.data);
     }
@@ -216,8 +204,8 @@ const CandidateViewMobile = ({ candidate }: { candidate: Candidate }) => {
                 color={rating || userRating?.rate ? "#facc15" : "white"}
               />
               <div className='text-xs font-semibold text-white mt-0.5 drop-shadow-xl'>
-                {candRatingLoading && "..."}
-                {candRating && !candRatingLoading && candRating.averageRating}
+                {/* {candRatingLoading && "..."} */}
+                {candidateRate ? candidateRate.averageRating : 0}
               </div>
             </div>
           </DrawerTrigger>

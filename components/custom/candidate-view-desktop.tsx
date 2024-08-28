@@ -62,6 +62,7 @@ const CandidateViewDeskTop = ({
 
             {/* rate button */}
             <div
+              title={`average of ${candidateRate.averageRating} rating from ${candidateRate.numberOfRatings} user/s`}
               role='button'
               className='font-semibold text-sm text-slate-800 hover:opacity-70 flex self-start'
               onClick={() => setActiveTab("rating")}>
