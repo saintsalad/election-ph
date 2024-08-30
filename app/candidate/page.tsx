@@ -5,19 +5,20 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Candidate } from "@/lib/definitions";
+import type { Candidate, CandidateNext } from "@/lib/definitions";
 import { fetchFromFirebase } from "@/lib/firebase/functions";
 import Link from "next/link";
+import defaultImage from "@/public/images/default.png";
 
 function Candidate() {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidates, setCandidates] = useState<CandidateNext[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
   const loadCandidates = useCallback(async (forceRefresh: boolean = false) => {
     try {
       setLoading(true);
-      const result = await fetchFromFirebase<Candidate>(
+      const result = await fetchFromFirebase<CandidateNext>(
         "candidates",
         {
           cacheKey: "candidates",
@@ -46,7 +47,9 @@ function Candidate() {
   const filteredCandidates = searchQuery
     ? candidates.filter(
         (candidate) =>
-          candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          candidate.displayName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           candidate.party.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : candidates;
@@ -72,7 +75,7 @@ function Candidate() {
               <CandidateCard key={item.id} candidate={item} />
             ))
           ) : (
-            <p>No candidates found.</p>
+            <div>No candidates found.</div>
           )
         ) : (
           Array.from({ length: 3 }).map((_, index) => (
@@ -88,7 +91,8 @@ function Candidate() {
 }
 
 type CandidateCardProps = {
-  candidate: Candidate;
+  // candidate: Candidate;
+  candidate: CandidateNext;
 };
 
 function CandidateCard({ candidate }: CandidateCardProps) {
@@ -99,15 +103,18 @@ function CandidateCard({ candidate }: CandidateCardProps) {
       style={{ paddingBottom: "75%" }}
       data-testid='candidate-card'>
       <Image
-        src={candidate.image}
-        alt={candidate.name}
+        priority
+        src={candidate.displayPhoto ? candidate.displayPhoto : defaultImage}
+        alt={candidate.displayName || "candidate image"}
         width={300}
         height={300}
         className='absolute w-full h-full object-cover'
       />
       <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent '>
         <div className='flex flex-col justify-end p-3 text-white'>
-          <h2 className='text-sm md:text-base font-bold'>{candidate.name}</h2>
+          <h2 className='text-sm md:text-base font-bold'>
+            {candidate.displayName}
+          </h2>
           <p className='text-xs uppercase'>{candidate.party}</p>
         </div>
       </div>

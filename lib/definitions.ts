@@ -10,6 +10,27 @@ export type Candidate = {
   description?: string;
 };
 
+export type CandidateNext = {
+  id: string;
+  displayName: string;
+  party: string;
+  displayPhoto: string;
+  shortDescription: string;
+
+  balotNumber: number;
+  coverPhoto: string;
+  biography: string; //markedjs
+  educAttainment: string; //markedjs
+  achievements: string; //markedjs
+  platformAndPolicy: string; //markedjs
+  socialLinks: SocialLinks[] | [];
+};
+
+export type SocialLinks = {
+  type: string; // facebook | x | instagram
+  url: string;
+};
+
 export type NavigationProps = {
   route: string;
   label: string;

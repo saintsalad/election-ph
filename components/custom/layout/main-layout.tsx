@@ -56,8 +56,9 @@ function MainLayout({
         />
 
         <ScrollArea
+          id='main-layout-scroll-area'
           className={`h-full  w-full self-center ${
-            desiredPath !== "/" && "max-w-5xl pt-11 sm:pt-16"
+            desiredPath !== "/" ? "max-w-5xl" : ""
           }`}>
           {children}
         </ScrollArea>

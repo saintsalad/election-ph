@@ -1,15 +1,16 @@
 "use client";
 
-import { Candidate, CandidateRating } from "@/lib/definitions";
+import { Candidate, CandidateNext, CandidateRating } from "@/lib/definitions";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import CandidateViewMobile from "@/components/custom/candidate-view-mobile";
 import { useQuery } from "react-query";
 import axios from "axios";
 import CandidateViewDeskTop from "@/components/custom/candidate-view-desktop";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function useCandidate(candidateId: string) {
-  return useQuery<Candidate>(`candidate-${candidateId}`, async () => {
-    const { data } = await axios.get<Candidate>(
+  return useQuery<CandidateNext>(`candidate-${candidateId}`, async () => {
+    const { data } = await axios.get<CandidateNext>(
       `/api/candidate?candidateId=${candidateId}`
     );
     return data;
@@ -41,26 +42,22 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
 
   return (
     <>
-      {isDesktop ? (
-        <div className='absolute  top-0 sm:pt-[44px] lg:pt-[58px] overflow-y-scroll flex-1 h-full w-full no-scrollbar'>
-          {candidate && candidateRate && (
-            <CandidateViewDeskTop
-              candidate={candidate}
-              candidateRate={candidateRate}
-            />
-          )}
-        </div>
+      {isDesktop && candidate && candidateRate ? (
+        <ScrollArea className='pt-11 lg:pt-16 flex-1 min-h-[100vh] w-full !overflow-y-scroll no-scrollbar'>
+          <CandidateViewDeskTop
+            candidate={candidate}
+            candidateRate={candidateRate}
+          />
+        </ScrollArea>
       ) : (
         <div className='absolute top-0 left-0 w-full min-h-[100vh]'>
-          {isFetching && "Loading ..."}
-          {isError && "Error"}
-          {candidate && candidateRate && (
+          {/* {candidate && candidateRate && (
             <CandidateViewMobile
               candidateRateRefetch={() => candidateRateRefetch()}
               candidate={candidate}
               candidateRate={candidateRate}
             />
-          )}
+          )} */}
         </div>
       )}
     </>
