@@ -3,7 +3,7 @@
 import { Breadcrumbs } from "@/components/custom/breadcrumbs";
 import { Heading } from "@/components/custom/heading";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -27,6 +27,8 @@ import { addDoc, collection } from "firebase/firestore";
 import { CandidateSchema, SocialLink, SocialLinkType } from "@/lib/form-schema";
 import { Tag, TagInput } from "emblor";
 import { useState } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
@@ -45,7 +47,7 @@ function AddNewCandidate() {
       party: "",
       displayPhoto: "",
       shortDescription: "",
-      balotNumber: 1,
+      balotNumber: 0,
       coverPhoto: "",
       biography: "",
       educAttainment: "",
@@ -345,6 +347,25 @@ function AddNewCandidate() {
 
             <FormField
               control={form.control}
+              name='platformAndPolicy'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Platform & Policy 🥳</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Platform & Policy'
+                      {...field}
+                      rows={5} // Adjust the number of rows as needed
+                    />
+                  </FormControl>
+                  <FormDescription>Platform & Policy blah blah</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name='socialLinks'
               render={({ field }) => (
                 <FormItem className='flex flex-col items-start'>
@@ -387,7 +408,15 @@ function AddNewCandidate() {
               )}
             />
 
-            <Button type='submit'>Submit</Button>
+            <Button className='mr-2' type='submit'>
+              Submit
+            </Button>
+
+            <Link
+              href={"/master/candidates"}
+              className={cn(buttonVariants({ variant: "outline" }))}>
+              Cancel
+            </Link>
           </form>
         </Form>
       </div>

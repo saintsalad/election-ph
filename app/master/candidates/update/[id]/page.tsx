@@ -2,7 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { CandidateSchema, SocialLink, SocialLinkType } from "@/lib/form-schema";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useRef, useState } from "react";
@@ -25,7 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, InputProps } from "@/components/ui/input";
 import { Breadcrumbs } from "@/components/custom/breadcrumbs";
 import { Heading } from "@/components/custom/heading";
@@ -33,6 +34,7 @@ import { Separator } from "@/components/ui/separator";
 import { getFileNameFromUrl, getPathFromUrl } from "@/lib/firebase/functions";
 import { Textarea } from "@/components/ui/textarea";
 import { Tag, TagInput } from "emblor";
+import Link from "next/link";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
@@ -56,7 +58,7 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
       party: "",
       displayPhoto: "",
       shortDescription: "",
-      balotNumber: 1,
+      balotNumber: 0,
       coverPhoto: "",
       biography: "",
       educAttainment: "",
@@ -507,6 +509,7 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
 
                         form.setValue("socialLinks", socialLinks, {
                           shouldValidate: true,
+                          shouldDirty: true,
                         });
                       }}
                       activeTagIndex={activeTagIndex}
@@ -521,9 +524,15 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
               )}
             />
 
-            <Button type='submit' disabled={!isDirty}>
+            <Button className='mr-2' type='submit' disabled={!isDirty}>
               Save Changes
             </Button>
+
+            <Link
+              href={"/master/candidates"}
+              className={cn(buttonVariants({ variant: "outline" }))}>
+              Cancel
+            </Link>
           </form>
         </Form>
       </div>

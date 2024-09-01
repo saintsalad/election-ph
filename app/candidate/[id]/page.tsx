@@ -1,6 +1,11 @@
 "use client";
 
-import { Candidate, CandidateNext, CandidateRating } from "@/lib/definitions";
+import {
+  Candidate,
+  CandidateNext,
+  CandidateRating,
+  UserRating,
+} from "@/lib/definitions";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import CandidateViewMobile from "@/components/custom/candidate-view-mobile";
 import { useQuery } from "react-query";
@@ -26,6 +31,15 @@ function useCandidateRate(candidateId: string) {
   });
 }
 
+function useUserRating(candidateId: string) {
+  return useQuery<UserRating>(`user-rating-${candidateId}`, async () => {
+    const { data } = await axios.get<UserRating>(
+      `/api/user/rate?candidateId=${candidateId}`
+    );
+    return data;
+  });
+}
+
 function CandidateViewPage({ params }: { params: { id: string } }) {
   const {
     status,
@@ -38,27 +52,38 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
   const { data: candidateRate, refetch: candidateRateRefetch } =
     useCandidateRate(params.id || "");
 
+  const { data: userRate, refetch: userRateRefetch } = useUserRating(params.id);
+
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
     <>
-      {isDesktop && candidate && candidateRate ? (
+      {/* {isDesktop && candidate && candidateRate && (
         <ScrollArea className='pt-11 lg:pt-16 flex-1 min-h-[100vh] w-full !overflow-y-scroll no-scrollbar'>
           <CandidateViewDeskTop
             candidate={candidate}
             candidateRate={candidateRate}
           />
         </ScrollArea>
-      ) : (
+      )}*/}
+
+      {candidate && candidateRate ? (
         <div className='absolute top-0 left-0 w-full min-h-[100vh]'>
-          {/* {candidate && candidateRate && (
-            <CandidateViewMobile
-              candidateRateRefetch={() => candidateRateRefetch()}
-              candidate={candidate}
-              candidateRate={candidateRate}
-            />
-          )} */}
+          <CandidateViewMobile
+            userRateRefetch={() => userRateRefetch()}
+            userRate={userRate}
+            candidateRateRefetch={() => candidateRateRefetch()}
+            candidate={candidate}
+            candidateRate={candidateRate}
+          />
         </div>
+      ) : (
+        <>
+          <div className='mt-[100px]'>
+            iserror: {isError} | status: {status} | isloading: {isFetching}
+          </div>
+          <div>Loading ...{JSON.stringify(candidateRate)}</div>
+        </>
       )}
     </>
   );

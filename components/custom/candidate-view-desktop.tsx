@@ -1,6 +1,6 @@
 "use client";
 
-import { Candidate, CandidateNext, CandidateRating } from "@/lib/definitions";
+import { CandidateNext, CandidateRating } from "@/lib/definitions";
 import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import hero from "@/public/images/hero.jpg";
