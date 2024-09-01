@@ -27,7 +27,7 @@ export type CandidateNext = {
 };
 
 export type SocialLinks = {
-  type: string; // facebook | x | instagram
+  type: "facebook" | "x" | "instagram" | "custom";
   url: string;
 };
 

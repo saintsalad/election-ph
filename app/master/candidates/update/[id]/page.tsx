@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { CandidateSchema } from "@/lib/form-schema";
+import { CandidateSchema, SocialLink, SocialLinkType } from "@/lib/form-schema";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,7 +14,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import { Candidate } from "@/lib/definitions";
+import { Candidate, CandidateNext } from "@/lib/definitions";
 import { toast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -32,6 +32,7 @@ import { Heading } from "@/components/custom/heading";
 import { Separator } from "@/components/ui/separator";
 import { getFileNameFromUrl, getPathFromUrl } from "@/lib/firebase/functions";
 import { Textarea } from "@/components/ui/textarea";
+import { Tag, TagInput } from "emblor";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
@@ -41,18 +42,27 @@ const breadcrumbItems = [
 
 const UpdateCandidate = ({ params }: { params: { id: string } }) => {
   const [fileName, setFileName] = useState("");
-  const [candidateCopy, setCandidateCopy] = useState<Candidate>();
+  const [candidateCopy, setCandidateCopy] = useState<CandidateNext>();
   const id = params.id;
   const fileUploadRef = useRef<HTMLInputElement>(null);
+
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const form = useForm<z.infer<typeof CandidateSchema>>({
     resolver: zodResolver(CandidateSchema),
     defaultValues: {
-      name: "",
+      displayName: "",
       party: "",
-      image: "",
+      displayPhoto: "",
       shortDescription: "",
-      description: "",
+      balotNumber: 1,
+      coverPhoto: "",
+      biography: "",
+      educAttainment: "",
+      achievements: "",
+      platformAndPolicy: "",
+      socialLinks: [],
     },
   });
 
@@ -62,7 +72,7 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
     resetField,
     control,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = form;
 
   useEffect(() => {
@@ -72,9 +82,12 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const d = docSnap.data() as Candidate;
-          setCandidateCopy(d);
-          reset(d);
+          const d = docSnap.data() as CandidateNext;
+          if (d) {
+            setCandidateCopy(d);
+            reset(d);
+            mapTags(d.socialLinks);
+          }
         } else {
           console.log("No such document!");
         }
@@ -88,11 +101,11 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
     const file = event.target.files?.[0];
     if (file) {
       setFileName(file.name); // Set file name for display
-      setValue("image", file); // Pass the file object to the form
+      setValue("displayPhoto", file, { shouldDirty: true }); // Pass the file object to the form
     } else {
       setFileName(""); // Reset file name if no file selected
-      setValue("image", ""); // Clear the image field if no file
-      resetField("image", undefined);
+      setValue("displayPhoto", "", { shouldDirty: true }); // Clear the image field if no file
+      resetField("displayPhoto", undefined);
     }
   };
 
@@ -108,11 +121,11 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
       }
 
       const existingData = docSnap.data();
-      const existingImageUrl = existingData?.image as string;
+      const existingImageUrl = existingData.displayPhoto as string;
 
       // Check if new image is being uploaded
-      if (data.image instanceof File) {
-        const file = data.image as File;
+      if (data.displayPhoto instanceof File) {
+        const file = data.displayPhoto as File;
         const reader = new FileReader();
 
         reader.onload = async (e) => {
@@ -135,7 +148,7 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
           // Upload new image to Firebase Storage
           const newImageRef = ref(
             storage,
-            `candidates/${Date.now()}_${data.name}`
+            `candidates/${Date.now()}_${data.displayName}`
           );
           await uploadString(newImageRef, fileDataUrl, "data_url");
           const newImageUrl = await getDownloadURL(newImageRef);
@@ -185,12 +198,42 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
 
   const resetFileUpload = () => {
     setFileName("");
-    setValue("image", "");
-    resetField("image", undefined);
+    setValue("displayPhoto", "");
+    resetField("displayPhoto", undefined);
     if (fileUploadRef.current) {
       fileUploadRef.current.value = "";
     }
   };
+
+  function getUrlType(url: string): SocialLinkType {
+    const patterns: { [key in SocialLinkType]: RegExp } = {
+      facebook: /facebook\.com/i,
+      instagram: /instagram\.com/i,
+      x: /x\.com|twitter\.com/i, // Both X.com and Twitter.com
+      custom: /.*/, // Default case
+    };
+
+    for (const type in patterns) {
+      if (patterns[type as SocialLinkType].test(url)) {
+        return type as SocialLinkType;
+      }
+    }
+
+    return "custom"; // If no pattern matches, return "custom"
+  }
+
+  function mapTags(links: SocialLink[]) {
+    if (links && links.length) {
+      const tags = links.map((item, i) => {
+        return {
+          id: i.toString(),
+          text: item.url,
+        };
+      });
+
+      setTags(tags);
+    }
+  }
 
   return (
     <>
@@ -207,12 +250,15 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
             onSubmit={handleSubmit(onSubmit)}
             className='space-y-6 overflow-auto'>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              {/* ⭐ displayName */}
               <FormField
                 control={control}
-                name='name'
+                name='displayName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>
+                      Display Name<span className='text-red-600'>*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder='Candidate name' {...field} />
                     </FormControl>
@@ -228,7 +274,9 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
                 name='party'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Party</FormLabel>
+                    <FormLabel>
+                      Party<span className='text-red-600'>*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder='Political party' {...field} />
                     </FormControl>
@@ -239,12 +287,16 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
                   </FormItem>
                 )}
               />
+
+              {/* ⭐ displayPhoto */}
               <FormField
                 control={control}
-                name='image'
+                name='displayPhoto'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image Upload</FormLabel>
+                    <FormLabel>
+                      Candidate Photo<span className='text-red-600'>*</span>
+                    </FormLabel>
 
                     <FormControl>
                       <Input
@@ -261,7 +313,9 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
                         <span className='mr-1'>🖼️</span>
                         {fileName
                           ? fileName
-                          : getFileNameFromUrl(candidateCopy?.image || "")}
+                          : getFileNameFromUrl(
+                              candidateCopy?.displayPhoto || ""
+                            )}
                       </span>
                       {fileName && (
                         <span
@@ -276,44 +330,200 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
                   </FormItem>
                 )}
               />
+
+              {/* ⭐ coverPhoto */}
               <FormField
-                control={control}
-                name='shortDescription'
+                control={form.control}
+                name='coverPhoto'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Short Description</FormLabel>
+                    <FormLabel>Cover Photo</FormLabel>
                     <FormControl>
-                      <Input placeholder='Short description' {...field} />
+                      <Input
+                        disabled
+                        type='file'
+                        accept='image/jpg,image/jpeg,image/png'
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            field.onChange(file);
+                          }
+                        }}
+                      />
                     </FormControl>
                     <FormDescription>
-                      Brief description of the candidate.
+                      Upload cover photo (JPG, JPEG, PNG).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* ⭐ balotNumber */}
               <FormField
-                control={control}
-                name='description'
+                control={form.control}
+                name='balotNumber'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>
+                      Balot Number<span className='text-red-600'>*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder='Detailed description'
-                        {...field}
-                        rows={4}
-                      />
+                      <Input placeholder='e.g, 69' {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Detailed description of the candidate.
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <Button type='submit'>Submit</Button>
+
+            <FormField
+              control={form.control}
+              name='shortDescription'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Short Description<span className='text-red-600'>*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder='Short description' {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    A brief summary about the candidate.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='biography'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Biography<span className='text-red-600'>*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Detailed Biography'
+                      {...field}
+                      rows={5} // Adjust the number of rows as needed
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Detailed information about the candidate.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='educAttainment'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Educational Attainment 🎓</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Detailed Educational Attainment'
+                      {...field}
+                      rows={5} // Adjust the number of rows as needed
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Educational Attainment blah blah
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='achievements'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Achievements 🥳</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Achievements'
+                      {...field}
+                      rows={5} // Adjust the number of rows as needed
+                    />
+                  </FormControl>
+                  <FormDescription>Achievements blah blah</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='platformAndPolicy'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Platform & Policy 🥳</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Platform & Policy'
+                      {...field}
+                      rows={5} // Adjust the number of rows as needed
+                    />
+                  </FormControl>
+                  <FormDescription>Platform & Policy blah blah</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='socialLinks'
+              render={({ field }) => (
+                <FormItem className='flex flex-col items-start'>
+                  <FormLabel className='text-left'>Social Link 🌐</FormLabel>
+                  <FormControl className='w-full'>
+                    <TagInput
+                      styleClasses={{
+                        input: "border-none shadow-none px-2",
+                        inlineTagsContainer: "white p-2 rounded",
+                        tag: {
+                          body: "flex items-center pl-3 ",
+                        },
+                      }}
+                      placeholder='https://'
+                      tags={tags}
+                      className='sm:min-w-[450px]'
+                      setTags={(newTags) => {
+                        setTags(newTags);
+                        const socialLinks: SocialLink[] = (
+                          newTags as Tag[]
+                        ).map((tag) => ({
+                          type: getUrlType(tag.text),
+                          url: tag.text,
+                        }));
+
+                        form.setValue("socialLinks", socialLinks, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      activeTagIndex={activeTagIndex}
+                      setActiveTagIndex={setActiveTagIndex}
+                    />
+                  </FormControl>
+                  <FormDescription className='text-left'>
+                    Social accounts that the candidate related.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type='submit' disabled={!isDirty}>
+              Save Changes
+            </Button>
           </form>
         </Form>
       </div>
