@@ -51,10 +51,23 @@ const validateImageFile = (file: File) => {
   return allowedExtensions.includes(extension || "");
 };
 
+export type SocialLinkType = "facebook" | "instagram" | "x" | "custom";
+export type SocialLink = {
+  type: SocialLinkType;
+  url: string;
+};
+
+// Helper schema for SocialLinks
+const SocialLinksSchema = z.object({
+  type: z.enum(["facebook", "x", "instagram", "custom"]),
+  url: z.string().url("Invalid URL format"),
+});
+
 export const CandidateSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  // id: z.string(),
+  displayName: z.string().min(1, "Name is required"),
   party: z.string().min(1, "Party is required"),
-  image: z.any().refine(
+  displayPhoto: z.any().refine(
     (file) => {
       // Skip validation if the file is undefined (no new file uploaded)
       if (!(file === undefined || file === null)) {
@@ -67,6 +80,30 @@ export const CandidateSchema = z.object({
       message: "Invalid image file. Only JPG, JPEG, PNG formats allowed.",
     }
   ),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
+  coverPhoto: z
+    .any()
+    .refine(
+      (file) => {
+        // Skip validation if the file is undefined (no new file uploaded)
+        if (!(file === undefined || file === null)) {
+          return true;
+        }
+        // Validate the file if it exists
+        return file instanceof File && validateImageFile(file);
+      },
+      {
+        message: "Invalid image file. Only JPG, JPEG, PNG formats allowed.",
+      }
+    )
+    .optional(),
+  shortDescription: z.string(),
+  balotNumber: z.coerce
+    .number()
+    .positive("Balot number must be a positive integer"),
+  // Fields that accept markdown content, including newlines
+  biography: z.string(),
+  educAttainment: z.string().optional(),
+  achievements: z.string().optional(),
+  platformAndPolicy: z.string().optional(),
+  socialLinks: z.array(SocialLinksSchema).optional(),
 });

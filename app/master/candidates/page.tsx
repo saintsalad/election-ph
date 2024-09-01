@@ -40,7 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import type { Election } from "@/lib/definitions";
+import type { CandidateNext, Election } from "@/lib/definitions";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Plus, RefreshCw } from "lucide-react";
@@ -53,107 +53,12 @@ import { fetchFromFirebase } from "@/lib/firebase/functions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
+import { useMutation } from "react-query";
+import axios from "axios";
 
 const breadcrumbItems = [
   { title: "Dashboard", link: "/master" },
   { title: "Candidates", link: "/master/candidates" },
-];
-
-const columns: ColumnDef<Candidate>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label='Select all'
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label='Select row'
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "party",
-    header: "Party",
-    cell: ({ row }) => <div>{row.getValue("party")}</div>,
-  },
-  {
-    accessorKey: "image",
-    header: "Image",
-    cell: ({ row }) => (
-      <Image
-        src={row.getValue("image")}
-        alt={row.getValue("name")}
-        height={50}
-        width={50}
-        className='w-10 h-10 object-cover rounded-full border'
-      />
-    ),
-  },
-  {
-    accessorKey: "shortDescription",
-    header: "Short Description",
-    cell: ({ row }) => (
-      <div className='text-xs'>{row.getValue("shortDescription") || "N/A"}</div>
-    ),
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => (
-      <div className='text-xs'>{row.getValue("description") || "N/A"}</div>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const candidate = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <DotsHorizontalIcon className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(candidate.id.toString())
-              }>
-              Copy Candidate ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link
-                prefetch={true}
-                href={`/master/candidates/update/${candidate.id}`}>
-                Update Details
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
 ];
 
 export default function Candidates() {
@@ -161,9 +66,126 @@ export default function Candidates() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidates, setCandidates] = useState<CandidateNext[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { mutate: deleteCandidate } = useMutation({
+    mutationFn: (candidateId: string) => {
+      return axios.delete(`/api/candidate/delete?candidateId=${candidateId}`);
+    },
+    onSuccess: () => {
+      // Optionally handle success, e.g., refetch the table data
+    },
+    onError: (error) => {
+      // Optionally handle error
+      console.error("Error deleting candidate:", error);
+    },
+  });
+
+  const columns: ColumnDef<CandidateNext>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label='Select all'
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label='Select row'
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "displayName",
+      header: "Name",
+      cell: ({ row }) => <div>{row.getValue("displayName")}</div>,
+    },
+    {
+      accessorKey: "party",
+      header: "Party",
+      cell: ({ row }) => <div>{row.getValue("party")}</div>,
+    },
+    {
+      accessorKey: "displayPhoto",
+      header: "Image",
+      cell: ({ row }) => (
+        <Image
+          src={row.getValue("displayPhoto")}
+          alt={row.getValue("displayName") || "test"}
+          height={50}
+          width={50}
+          className='w-10 h-10 object-cover rounded-full border'
+        />
+      ),
+    },
+    {
+      accessorKey: "shortDescription",
+      header: "Short Description",
+      cell: ({ row }) => (
+        <div className='text-xs'>
+          {row.getValue("shortDescription") || "N/A"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "biography",
+      header: "Description",
+      cell: ({ row }) => (
+        <div className='text-xs'>{row.getValue("biography") || "N/A"}</div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const candidate = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <DotsHorizontalIcon className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigator.clipboard.writeText(candidate.id.toString())
+                }>
+                Copy Candidate ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link
+                  prefetch={true}
+                  href={`/master/candidates/update/${candidate.id}`}>
+                  Update Details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => deleteCandidate(candidate.id)}
+                className='text-red-600  cursor-pointer'>
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
     data: candidates,
@@ -187,7 +209,7 @@ export default function Candidates() {
   async function loadCandidates(forceRefresh: boolean = false) {
     try {
       setIsLoading(true);
-      const result = await fetchFromFirebase<Candidate>(
+      const result = await fetchFromFirebase<CandidateNext>(
         "candidates",
         {
           cacheKey: "candidates",
@@ -216,6 +238,12 @@ export default function Candidates() {
   useEffect(() => {
     loadCandidates();
   }, []);
+
+  // const deleteCandidate = useMutation({
+  //   mutationFn: (candidateId: string) => {
+  //     return axios.delete(`/api/candidate/delete?candidateId=${candidateId}`);
+  //   },
+  // });
 
   return (
     <>

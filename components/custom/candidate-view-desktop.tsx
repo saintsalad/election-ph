@@ -15,6 +15,8 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SocialIcon } from "react-social-icons/component";
 import { Badge } from "@/components/ui/badge";
+import { Link as LinkIcon } from "lucide-react";
+import Link from "next/link";
 import "react-social-icons/x";
 import "react-social-icons/facebook";
 
@@ -103,17 +105,34 @@ const CandidateViewDeskTop = ({
             <Separator className='my-4' />
 
             <div className='flex gap-x-3'>
-              {candidate &&
+              {candidate.socialLinks &&
                 candidate.socialLinks.map((item, i) => {
-                  return (
-                    <SocialIcon
-                      className='max-h-8 max-w-8 antialiased'
-                      network={item.type}
-                      key={i}
-                      target='_blank'
-                      href={item.url}
-                    />
-                  );
+                  if (item.type !== "custom") {
+                    return (
+                      <SocialIcon
+                        title={item.url}
+                        className='max-h-8 max-w-8 antialiased'
+                        network={item.type}
+                        key={i}
+                        target='_blank'
+                        href={item.url}
+                      />
+                    );
+                  } else {
+                    return (
+                      <Link
+                        title={item.url}
+                        target='_blank'
+                        href={item.url}
+                        key={i}
+                        className='rounded-full h-8 w-8 bg-slate-900 flex justify-center items-center'>
+                        <LinkIcon
+                          color='white'
+                          className='h-4 w-4 antialiased'
+                        />
+                      </Link>
+                    );
+                  }
                 })}
             </div>
           </div>

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { SessionCookieOptions, getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 if (!getApps().length) {
   initializeApp({
@@ -13,12 +14,14 @@ if (!getApps().length) {
         ? process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, "\n")
         : undefined,
     }),
+    storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
   });
 }
 
 export const auth = getAuth();
 
 export const db = getFirestore();
+export const storage = getStorage().bucket();
 
 export async function isUserAuthenticated(
   session: string | undefined = undefined
@@ -67,4 +70,15 @@ export async function revokeAllSessions(session: string) {
   const decodedIdToken = await auth.verifySessionCookie(session);
 
   return await auth.revokeRefreshTokens(decodedIdToken.sub);
+}
+
+export function getRelativePath(fullUrl: string): string {
+  const regex =
+    /https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/[^\/]+\/o\/(.+?)\?alt=media.*/;
+  const match = fullUrl.match(regex);
+  if (match && match[1]) {
+    // Decode the URL-encoded path
+    return decodeURIComponent(match[1]);
+  }
+  throw new Error("Invalid Firebase Storage URL");
 }
