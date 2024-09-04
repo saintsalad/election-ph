@@ -45,6 +45,7 @@ const CandidateViewMobile = ({
   const [rating, setRating] = useState<number>(0);
   const [tempRating, setTempRating] = useState<number>(0);
   const [isEditRating, setIsEditRating] = useState(false);
+  const [openRateDrawer, setOpenRateDrawer] = useState(false);
   const user = useAuthStore((state) => state.user);
 
   const { browserType, deviceType } = useBrowserAndDevice();
@@ -128,6 +129,9 @@ const CandidateViewMobile = ({
       console.log("Successfully saved", res.data);
       candidateRateRefetch();
       userRateRefetch();
+      setTimeout(() => {
+        setOpenRateDrawer(true);
+      }, 1500);
     } else {
       console.error("Error while saving rating", res.data);
     }
@@ -222,7 +226,7 @@ const CandidateViewMobile = ({
           {/* actions section  */}
           <div className='fixed pr-4 right-0 bottom-1/3'>
             {/* Rate section */}
-            <Drawer>
+            <Drawer open={openRateDrawer} onOpenChange={setOpenRateDrawer}>
               <DrawerTrigger asChild>
                 <div className='cursor-pointer text-center mb-5'>
                   <Star
@@ -319,9 +323,10 @@ const CandidateViewMobile = ({
                 </div>
               </DrawerTrigger>
               <DrawerContent className='min-h-[30vh]'>
-                <div className='mx-auto w-full max-w-sm p-5 text-center'>
-                  <div>Feature will be available soon 🔒</div>
-                </div>
+                <DrawerTitle hidden></DrawerTitle>
+                <DrawerDescription className='mx-auto w-full max-w-sm p-5 text-center'>
+                  Feature will be available soon 🔒
+                </DrawerDescription>
               </DrawerContent>
             </Drawer>
           </div>

@@ -29,3 +29,36 @@ export const navItems: NavItem[] = [
     label: "Candidates",
   },
 ];
+
+export type CandidateViewTab = {
+  id?: string;
+  value: string;
+  label: string;
+};
+
+export const candidateViewTabs: CandidateViewTab[] = [
+  {
+    value: "rating",
+    label: "Rating ✨",
+  },
+  {
+    id: "biography",
+    value: "bio",
+    label: "Biography",
+  },
+  {
+    id: "educAttainment",
+    value: "educ-attainment",
+    label: "Educational Attainment",
+  },
+  {
+    id: "achievements",
+    value: "achievements",
+    label: "Achievements",
+  },
+  {
+    id: "platformAndPolicy",
+    value: "platform-policy",
+    label: "Platform & Policy",
+  },
+];

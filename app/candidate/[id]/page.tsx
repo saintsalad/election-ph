@@ -58,16 +58,16 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
 
   return (
     <>
-      {/* {isDesktop && candidate && candidateRate && (
+      {isDesktop && candidate && candidateRate && (
         <ScrollArea className='pt-11 lg:pt-16 flex-1 min-h-[100vh] w-full !overflow-y-scroll no-scrollbar'>
           <CandidateViewDeskTop
             candidate={candidate}
             candidateRate={candidateRate}
           />
         </ScrollArea>
-      )}*/}
+      )}
 
-      {candidate && candidateRate ? (
+      {!isDesktop && !isFetching && (
         <div className='absolute top-0 left-0 w-full min-h-[100vh]'>
           <CandidateViewMobile
             userRateRefetch={() => userRateRefetch()}
@@ -77,13 +77,6 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
             candidateRate={candidateRate}
           />
         </div>
-      ) : (
-        <>
-          <div className='mt-[100px]'>
-            iserror: {isError} | status: {status} | isloading: {isFetching}
-          </div>
-          <div>Loading ...{JSON.stringify(candidateRate)}</div>
-        </>
       )}
     </>
   );
