@@ -1,11 +1,11 @@
 import React from "react";
-import { Candidate } from "@/lib/definitions";
+import { Candidate, CandidateNext } from "@/lib/definitions";
 import Image from "next/image";
 import VoteConfirmation from "@/components/custom/vote-confirmation";
 import Link from "next/link";
 
 type SingleVoteListViewProps = {
-  candidates: Candidate[];
+  candidates: CandidateNext[];
   electionId: string;
 };
 
@@ -54,7 +54,7 @@ const SingleVoteListView = ({
               className='bg-background rounded-lg overflow-hidden shadow-md transition-transform duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-lg hover:bg-[#f0f8ff]'>
               <div className='flex items-center gap-4 w-full p-3.5 hover:bg-[#f0f8ff] active:bg-primary-foreground active:text-primary transition-all duration-1000 hover:cursor-pointer'>
                 <Image
-                  src={item.image}
+                  src={item.displayPhoto}
                   alt='Candidate 1'
                   width={100}
                   height={100}
@@ -63,7 +63,9 @@ const SingleVoteListView = ({
                   priority
                 />
                 <div>
-                  <h3 className='text-base font-semibold'>{item.name}</h3>
+                  <h3 className='text-base font-semibold'>
+                    {item.displayName}
+                  </h3>
                   <p className='text-muted-foreground text-xs uppercase'>
                     {item.party}
                   </p>

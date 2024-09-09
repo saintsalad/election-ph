@@ -55,6 +55,13 @@ export type Election = {
   status: "active" | "inactive";
 };
 
+export type ElectionWithVoteStatus = Election & {
+  isVoted: boolean;
+};
+export type ElectionNext = Omit<ElectionWithVoteStatus, "candidates"> & {
+  candidates: CandidateNext[];
+};
+
 export type Vote = {
   id: string;
   referenceId: string;

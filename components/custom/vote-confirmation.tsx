@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useState } from "react";
-import { Candidate } from "@/lib/definitions";
+import { Candidate, CandidateNext } from "@/lib/definitions";
 import Image from "next/image";
 import { Fingerprint, LoaderCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -34,7 +34,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { generateReferenceNumber } from "@/lib/functions";
 
 type VoteConfirmationProps = {
-  candidate: Candidate;
+  candidate: CandidateNext;
   electionId: string;
   children: ReactNode;
 };
@@ -157,7 +157,7 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
         <div className='p-4'>
           <div className='relative overflow-hidden rounded-lg mb-5'>
             <Image
-              src={candidate.image}
+              src={candidate.displayPhoto}
               alt='Candidate'
               width={500}
               height={500}
@@ -165,7 +165,7 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
             />
             <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6'>
               <div className='text-2xl font-bold text-white'>
-                {candidate.name}
+                {candidate.displayName}
               </div>
               <p className='text-xs uppercase text-white'>{candidate.party}</p>
               <DialogDescription className='text-xs text-white/80'>

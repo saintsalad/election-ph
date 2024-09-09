@@ -1,50 +1,62 @@
 "use client";
 
 import ElectionBanner from "@/components/custom/election-banner";
-import { Button } from "@/components/ui/button";
-import type { Election, Vote } from "@/lib/definitions";
-import { fetchFromFirebase } from "@/lib/firebase/functions";
+import type { ElectionWithVoteStatus, Vote } from "@/lib/definitions";
 import { useAuthStore } from "@/lib/store";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+
+function useElections() {
+  return useQuery<ElectionWithVoteStatus[]>(`elections`, async () => {
+    const { data } = await axios.get<ElectionWithVoteStatus[]>(`/api/election`);
+    return data;
+  });
+}
 
 export default function Vote() {
-  const [elections, setElections] = useState<Election[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user, userVotes, setUserVotes, hasUserVotedZ } = useAuthStore();
+  // const [elections, setElections] = useState<Election[]>([]);
+  const { user } = useAuthStore();
 
-  async function loadElections(forceRefresh: boolean = false) {
-    try {
-      setIsLoading(true);
-      const result = await fetchFromFirebase<Election>(
-        "elections",
-        {
-          cacheKey: "elections",
-        },
-        forceRefresh
-      );
-      setElections(result);
-    } catch (e) {
-      console.error("Error loading elections: ", e);
-    } finally {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-    }
-  }
+  const { data: elections, isError, isFetching, refetch } = useElections();
 
-  useEffect(() => {
-    loadElections();
-  }, []);
+  // async function loadElections(forceRefresh: boolean = false) {
+  //   try {
+  //     setIsLoading(true);
+  //     const result = await fetchFromFirebase<Election>(
+  //       "elections",
+  //       {
+  //         cacheKey: "elections",
+  //       },
+  //       forceRefresh
+  //     );
+  //     setElections(result);
+  //   } catch (e) {
+  //     console.error("Error loading elections: ", e);
+  //   } finally {
+  //     setTimeout(() => {
+  //       setIsLoading(false);
+  //     }, 500);
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   loadElections();
+  // }, []);
 
   return (
-    <div className='w-full'>
-      <div className='px-4 pt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:px-0'>
-        {elections &&
+    <div className='w-full pt-11 lg:pt-16'>
+      <div className='px-4 pt-5 grid grid-cols-1 gap-6 md:grid-cols-2 lg:px-0'>
+        {!isFetching &&
+          elections &&
           elections.map((item, i) => (
             <div key={i} className='w-full'>
               <ElectionBanner userId={user?.uid || ""} election={item} />
             </div>
           ))}
+
+        {/* TODO: implement skeleton */}
+        {isFetching && <div>Loading...</div>}
       </div>
     </div>
   );
