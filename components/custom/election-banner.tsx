@@ -1,9 +1,9 @@
-import { ElectionResponse } from "@/lib/definitions";
+import { ElectionWithVoteStatus } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 type ElectionBannerProps = {
-  election: ElectionResponse;
+  election: ElectionWithVoteStatus;
   userId: string;
 };
 
