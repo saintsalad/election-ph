@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import DotPattern from "@/components/magicui/dot-pattern";
 import { cn } from "@/lib/utils";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { AuroraBackgroundProvider } from "@nauverse/react-aurora-background";
 
 const queryClient = new QueryClient();
 
@@ -42,9 +43,9 @@ function MainLayout({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className='flex-1 flex flex-col content-between bg-[#F2F2F7] h-full'>
+      <div className='flex-1 flex flex-col content-between bg-slate-50 h-full'>
         <MainHeader />
-        <DotPattern
+        {/* <DotPattern
           width={20}
           height={20}
           cx={1}
@@ -53,7 +54,7 @@ function MainLayout({
           className={cn(
             "[mask-image:linear-gradient(to_bottom_right,white,transparent,white)] "
           )}
-        />
+        /> */}
 
         <ScrollArea
           id='main-layout-scroll-area'
@@ -66,6 +67,7 @@ function MainLayout({
         {/* <MainNavigation navigations={navigation} /> */}
       </div>
     </QueryClientProvider>
+    // </AuroraBackgroundProvider>
   );
 }
 

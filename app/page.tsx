@@ -64,27 +64,25 @@ export default function Home() {
             src={hero}
             alt='Election PH Hero banner'
             fill
-            className='object-cover hero-banner'
+            className='object-cover'
           />
-          <div className='absolute flex flex-col w-full h-full bg-opacity-40 items-center md:items-start justify-center'>
-            <div className='text-center md:text-left lg:max-w-[900px] md:pl-40 pt-12 md:pt-0'>
-              <h1 className='text-white text-3xl md:text-7xl font-light'>
-                ELECTION PH
+          <div className='absolute flex flex-col w-full h-full bg-opacity-40 items-center justify-center'>
+            <div className='text-center pt-12 md:pt-0'>
+              <h1 className='text-white text-3xl md:text-4xl font-semibold'>
+                Survey. Share. Influence
               </h1>
-              <div className='text-white mt-3 px-10 md:px-0 flex flex-col items-center md:items-start'>
-                <p className='font-extralight md:text-lg'>
-                  Welcome to your trusted space for impartial surveys. Share
-                  your political views and participate in meaningful
-                  discussions. Join our community and help shape the future of
-                  our country. Your voice matters!
+              <div className='text-white mt-3 px-10 md:px-0 flex flex-col items-center'>
+                <p className='font-extralight md:text-lg max-w-[550px]'>
+                  Take part in fair surveys, voice your thoughts, and help shape
+                  tomorrow with Election PH.
                 </p>
                 <Link href='/signup'>
                   <ShimmerButton
-                    shimmerColor='yellow'
-                    background='#020617'
-                    color='#020617'
+                    // shimmerColor='yellow'
+                    // background='#020617'
+                    // color='#020617'
                     className='h-10 mt-4 px-10'>
-                    Join Now
+                    Join Us
                   </ShimmerButton>
                 </Link>
               </div>
@@ -92,16 +90,35 @@ export default function Home() {
           </div>
         </AspectRatio>
       ) : (
-        <div className=' min-h-40 mb-16 '>
-          <div className='h-[600px] relative'>
+        <div className='min-h-40 mb-16 '>
+          <div className='h-screen relative'>
             <Image
               draggable={false}
               priority={true}
               src={hero}
               alt='Election PH Hero banner'
               fill
-              className='object-cover hero-banner'
+              className='object-cover'
             />
+
+            <div className='absolute flex flex-col w-full h-full bg-opacity-40 mt-24'>
+              <div className='text-center pt-12 md:pt-0'>
+                <h1 className='text-white text-2xl md:text-4xl font-semibold'>
+                  Survey. Share. Influence
+                </h1>
+                <div className='text-white mt-1 md:mt-3 px-10 md:px-0 flex flex-col items-center'>
+                  <p className='font-extralight text-base md:text-lg max-w-[550px]'>
+                    Take part in fair surveys, voice your thoughts, and help
+                    shape tomorrow with Election PH.
+                  </p>
+                  <Link href='/signup'>
+                    <ShimmerButton className='h-10 mt-4 px-10'>
+                      Join Us
+                    </ShimmerButton>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

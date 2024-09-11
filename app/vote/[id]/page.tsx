@@ -116,7 +116,7 @@ function VotingPage({ params }: { params: { id: string } }) {
           <>
             <Alert
               hidden={!showAlertBanner}
-              className='relative rounded-none lg:rounded mb-5 bg-gradient-to-r from-yellow-500 to-orange-700 text-white'>
+              className='relative rounded-none lg:rounded mb-5 bg-gradient-to-r from-yellow-500 to-orange-600 text-white'>
               {/* <Fingerprint color='white' className='h-4 w-4' /> */}
               <div
                 title='Close Alert'
@@ -154,7 +154,7 @@ function VotingPage({ params }: { params: { id: string } }) {
                     />
                   </div>
                   <div className='hidden md:block w-full'>
-                    <div className=' flex flex-1 flex-wrap gap-3 justify-start'>
+                    <div className=' flex flex-1 flex-wrap gap-3 justify-center'>
                       {election.candidates &&
                         election.candidates.map((item, i) => (
                           <VoteConfirmation
