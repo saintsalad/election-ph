@@ -10,6 +10,9 @@ import memoji2 from "@/public/images/memoji2.png";
 import memoji3 from "@/public/images/memoji3.png";
 import memoji4 from "@/public/images/memoji4.png";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import GridPattern from "@/components/magicui/grid-pattern";
+import { cn } from "@/lib/utils";
+import WordFadeIn from "@/components/magicui/word-fade-in";
 
 const interestingFeatures = [
   {
@@ -56,8 +59,8 @@ export default function Home() {
   return (
     <main>
       {/* Hero Section */}
-      {isDesktop ? (
-        <AspectRatio ratio={16 / 8.5} className='bg-transparent relative'>
+      <div className='relative hidden sm:block'>
+        <AspectRatio ratio={16 / 8.5} className='bg-transparent'>
           <Image
             draggable={false}
             priority={true}
@@ -68,20 +71,18 @@ export default function Home() {
           />
           <div className='absolute flex flex-col w-full h-full bg-opacity-40 items-center justify-center'>
             <div className='text-center pt-12 md:pt-0'>
-              <h1 className='text-white text-3xl md:text-4xl font-semibold'>
-                Survey. Share. Influence
-              </h1>
+              <WordFadeIn
+                delay={0.05}
+                className='text-white text-3xl md:text-4xl font-semibold'
+                words='Your Voice Matters'
+              />
               <div className='text-white mt-3 px-10 md:px-0 flex flex-col items-center'>
-                <p className='font-extralight md:text-lg max-w-[550px]'>
+                <div className='font-extralight md:text-lg max-w-[550px]'>
                   Take part in fair surveys, voice your thoughts, and help shape
-                  tomorrow with Election PH.
-                </p>
+                  tomorrow with <b>Election PH</b>.
+                </div>
                 <Link href='/signup'>
-                  <ShimmerButton
-                    // shimmerColor='yellow'
-                    // background='#020617'
-                    // color='#020617'
-                    className='h-10 mt-4 px-10'>
+                  <ShimmerButton className='h-10 mt-4 px-10'>
                     Join Us
                   </ShimmerButton>
                 </Link>
@@ -89,39 +90,43 @@ export default function Home() {
             </div>
           </div>
         </AspectRatio>
-      ) : (
-        <div className='min-h-40 mb-16 '>
-          <div className='h-screen relative'>
-            <Image
-              draggable={false}
-              priority={true}
-              src={hero}
-              alt='Election PH Hero banner'
-              fill
-              className='object-cover'
-            />
+      </div>
 
-            <div className='absolute flex flex-col w-full h-full bg-opacity-40 mt-24'>
-              <div className='text-center pt-12 md:pt-0'>
-                <h1 className='text-white text-2xl md:text-4xl font-semibold'>
-                  Survey. Share. Influence
-                </h1>
-                <div className='text-white mt-1 md:mt-3 px-10 md:px-0 flex flex-col items-center'>
-                  <p className='font-extralight text-base md:text-lg max-w-[550px]'>
-                    Take part in fair surveys, voice your thoughts, and help
-                    shape tomorrow with Election PH.
-                  </p>
-                  <Link href='/signup'>
-                    <ShimmerButton className='h-10 mt-4 px-10'>
-                      Join Us
-                    </ShimmerButton>
-                  </Link>
+      {/* desktop hero */}
+      <div className='min-h-40 mb-16 sm:hidden'>
+        <div className='h-screen relative'>
+          <Image
+            draggable={false}
+            priority={true}
+            src={hero}
+            alt='Election PH Hero banner'
+            fill
+            className='object-cover'
+          />
+
+          {/* mobile hero */}
+          <div className='absolute flex flex-col w-full h-full bg-opacity-40  justify-center'>
+            <div className='text-center pt-12 md:pt-0'>
+              <WordFadeIn
+                className='text-white text-2xl md:text-4xl font-semibold'
+                words='Your Voice Matters'
+              />
+              <div className='text-white mt-1 md:mt-3 px-10 md:px-0 flex flex-col items-center'>
+                <div className='font-extralight text-base md:text-lg max-w-[550px]'>
+                  Take part in fair surveys, voice your thoughts, and help shape
+                  tomorrow with
+                  <b>Election PH</b>.
                 </div>
+                <Link href='/signup'>
+                  <ShimmerButton className='h-10 mt-4 px-10'>
+                    Join Us
+                  </ShimmerButton>
+                </Link>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Interesting Features Section */}
       <div className='relative flex justify-center mx-5 md:mx-0 py-26 sm:py-28'>
@@ -133,7 +138,7 @@ export default function Home() {
             {interestingFeatures.map((feature, index) => (
               <div
                 key={index}
-                className='flex flex-1 gap-x-3 bg-gray-200 p-5 rounded-lg shadow'>
+                className='flex flex-1 gap-x-3 bg-slate-100 p-5 rounded-lg border'>
                 <div className='bg-gradient-to-r from-orange-400 to-yellow-200 max-h-28 max-w-28 md:max-h-32 md:max-w-32 aspect-square rounded-full flex flex-1 justify-center items-center overflow-hidden pt-[40px]'>
                   <Image
                     draggable={false}
@@ -148,9 +153,9 @@ export default function Home() {
                   <h2 className='text-xl md:text-2xl font-extrabold text-slate-700'>
                     {feature.title}
                   </h2>
-                  <p className='text-slate-600 text-sm'>
+                  <div className='text-slate-600 text-sm'>
                     {feature.description}
-                  </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -159,38 +164,98 @@ export default function Home() {
       </div>
 
       {/* Placeholder for additional content */}
-      <div className='relative flex flex-1 justify-center px-5 md:px-0'>
-        <div className='flex flex-1 flex-col items-center py-16 sm:py-28 max-w-5xl'>
-          <div className='mb-5 text-sm text-slate-500'>ABOUT US ✨</div>
-          <h1 className='text-center max-w-3xl text-xl sm:text-4xl font-bold md:mb-32 mb-16 text-slate-800'>
-            We are committed to offering a secure and transparent platform for
-            Filipinos to voice their opinions and engage in meaningful community
-            discussions.
-          </h1>
+      <div className='relative flex flex-col w-full  justify-center items-center py-28 mb-28'>
+        <div className='mb-3 text-sm text-slate-500'>ABOUT US ✨</div>
+        <h1 className='text-center max-w-3xl text-xl sm:text-4xl font-bold  text-slate-800 z-10'>
+          We are committed to offering a secure and transparent platform for
+          Filipinos to voice their opinions and engage in meaningful community
+          discussions.
+        </h1>
 
-          {/* <div className='mb-5 text-sm text-slate-500'>OUR MISSION 🚀</div>
-          <h1 className='text-center max-w-4xl text-xl sm:text-xl font-bold md:mb-32 mb-16 text-slate-800'>
-            To provide an engaging and secure platform that enables Filipinos to
-            participate in online voting and surveys. We are dedicated to
-            promoting civic engagement through a user-friendly experience while
-            maintaining the highest standards of privacy and security. Please
-            note that this platform does not reflect or impact official election
-            results or governmental decisions.
-          </h1> */}
-        </div>
+        <GridPattern
+          width={50}
+          height={50}
+          x={-1}
+          y={-1}
+          // strokeDasharray={"4 2"}
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]"
+          )}
+        />
       </div>
 
-      <footer className='footer-wave-clip bg-primary h-96 pt-20 px-5 sm:px-20 flex  flex-1 flex-col'>
-        <div className='text-white flex-1 '>
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Mollitia,
-          libero sint! Sapiente rerum doloribus exercitationem eligendi
-          voluptatibus facilis maiores, id dignissimos quo labore ratione
-          dolorum laboriosam ut accusantium aliquam eos.
+      <div className='w-full bg-primary footer-wave-clip'>
+        <div className='max-w-5xl mx-auto w-full px-5 sm:px-20 pt-20'>
+          <footer className='flex flex-col'>
+            <div className='text-white flex flex-col md:flex-row justify-between mb-20'>
+              <div className='mb-8 md:mb-0 md:w-1/3'>
+                <h3 className='text-xl font-bold mb-4'>Election PH</h3>
+                <div className='text-sm'>
+                  Empowering Filipinos with a secure and transparent platform
+                  for voicing opinions and engaging in meaningful community
+                  discussions about elections and civic matters.
+                </div>
+              </div>
+              <div className='mb-8 md:mb-0'>
+                <h4 className='text-lg font-semibold mb-3'>Quick Links</h4>
+                <ul className='text-sm'>
+                  <li className='mb-2'>
+                    <Link href='/' className='hover:underline'>
+                      Home
+                    </Link>
+                  </li>
+                  <li className='mb-2'>
+                    <Link href='/about' className='hover:underline'>
+                      About Us
+                    </Link>
+                  </li>
+                  <li className='mb-2'>
+                    <Link href='/contact' className='hover:underline'>
+                      Contact
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className='text-lg font-semibold mb-3'>Connect With Us</h4>
+                <ul className='text-sm'>
+                  <li className='mb-2'>
+                    <Link
+                      href='https://facebook.com'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='hover:underline'>
+                      Facebook
+                    </Link>
+                  </li>
+                  <li className='mb-2'>
+                    <Link
+                      href='https://twitter.com'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='hover:underline'>
+                      Twitter
+                    </Link>
+                  </li>
+                  <li className='mb-2'>
+                    <Link
+                      href='https://instagram.com'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='hover:underline'>
+                      Instagram
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className='text-white text-sm text-center pb-8'>
+              © {new Date().getFullYear()} Election PH. All rights reserved.
+            </div>
+          </footer>
         </div>
-        <div className='text-white py-5 text-center font-extralight text-sm'>
-          Copyright © 2024 Election PH. All Rights Reserved.
-        </div>
-      </footer>
+      </div>
     </main>
   );
 }
