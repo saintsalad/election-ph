@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useIsomorphicLayoutEffect } from "usehooks-ts";
 
@@ -16,30 +16,27 @@ export function useMediaQuery(
     initializeWithValue = true,
   }: UseMediaQueryOptions = {}
 ): boolean {
-  const getMatches = (query: string): boolean => {
-    if (IS_SERVER) {
-      return defaultValue;
-    }
-    return window.matchMedia(query).matches;
-  };
+  const getMatches = useCallback(
+    (query: string): boolean => {
+      if (IS_SERVER) {
+        return defaultValue;
+      }
+      return window.matchMedia(query).matches;
+    },
+    [defaultValue]
+  );
 
-  const [matches, setMatches] = useState<boolean>(() => {
-    if (initializeWithValue) {
-      return getMatches(query);
-    }
-    return defaultValue;
-  });
+  const [matches, setMatches] = useState<boolean>(defaultValue);
 
   // Handles the change event of the media query.
-  function handleChange() {
+  const handleChange = useCallback(() => {
     setMatches(getMatches(query));
-  }
+  }, [getMatches, query]);
 
   useIsomorphicLayoutEffect(() => {
-    const matchMedia = window.matchMedia(query);
-
-    // Triggered at the first client-side load and if query changes
     handleChange();
+
+    const matchMedia = window.matchMedia(query);
 
     // Use deprecated `addListener` and `removeListener` to support Safari < 14 (#135)
     if (matchMedia.addListener) {
@@ -55,7 +52,7 @@ export function useMediaQuery(
         matchMedia.removeEventListener("change", handleChange);
       }
     };
-  }, [query]);
+  }, [query, handleChange]);
 
   return matches;
 }

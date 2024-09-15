@@ -67,7 +67,6 @@ function MainLayout({
         {/* <MainNavigation navigations={navigation} /> */}
       </div>
     </QueryClientProvider>
-    // </AuroraBackgroundProvider>
   );
 }
 
