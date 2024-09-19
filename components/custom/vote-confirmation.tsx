@@ -55,14 +55,11 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
     mutationFn: (voteData: VoteRequest) =>
       axios.post("/api/election/vote", voteData),
     onSuccess: (res) => {
-      // toast({
-      //   title: "Vote submitted successfully",
-      //   description: "Your vote has been recorded.",
-      // });
       setIsDrawerOpen(false);
       onVoteSubmitted();
     },
     onError: (error) => {
+      setIsDrawerOpen(false);
       const errorObject = error as any;
       const errorMessage =
         errorObject?.response?.data?.message || "Please try again later.";
