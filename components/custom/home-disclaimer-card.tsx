@@ -15,7 +15,9 @@ function HomeDisclaimerCard() {
           setAnimDuration(5);
         }}
         className='max-w-5xl mx-auto w-full border rounded-lg overflow-hidden'>
+        {/* @ts-ignore */}
         <AuroraBackgroundProvider
+          style={{}}
           numBubbles={5}
           useRandomness
           animDuration={animDuration}

@@ -15,17 +15,14 @@ import { navigation } from "@/lib/app-settings";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import type { User as FirebaseUser } from "@firebase/auth";
+import Image from "next/image";
+import logo from "@/public/images/logo.png";
 
 // Define the User type based on Firebase User properties
 type User = {
   photoURL?: string | null;
   displayName?: string | null;
   email?: string | null;
-};
-
-type NavigationItem = {
-  route: string;
-  label: string;
 };
 
 const MobileNav: React.FC<{ user: User | null }> = ({ user }) => {
@@ -82,8 +79,9 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
           key={i}
           href={item.route}
           className={`${
-            desiredPath === item.route && "text-slate-800 font-semibold"
-          } flex flex-col items-center gap-1 text-slate-800 hover:text-foreground`}>
+            desiredPath === item.route &&
+            "text-slate-950  hover:text-slate-950 font-semibold"
+          } flex flex-col items-center gap-1 text-slate-950 hover:text-slate-800`}>
           {item.label}
         </Link>
       ) : (
@@ -118,10 +116,19 @@ function MainHeader() {
     : null;
 
   return (
-    <div className='absolute top-0 z-50 w-full shadow-sm border-b sm:border-0 px-5 border-border/40 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/30 self-center lg:max-w-5xl lg:rounded-full lg:mt-3 lg:overflow-hidden'>
+    <div className='absolute top-0 z-50 w-full shadow-lg border-b sm:border-0 px-5 border-border/40 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/30 self-center lg:max-w-5xl lg:rounded-full lg:mt-3 lg:overflow-hidden'>
       <div className='container mx-auto flex h-11 items-center justify-between px-0'>
         <Link href='/' className='flex items-center gap-2' prefetch={false}>
-          <span className='text-base font-medium'>Election PH</span>
+          <Image
+            src={logo}
+            alt='Election PH Logo'
+            width={24}
+            height={24}
+            className='rounded-full mr-1'
+          />
+          <span className='text-base text-slate-950 font-medium'>
+            Election PH
+          </span>
         </Link>
         <DesktopNav user={userProps} desiredPath={desiredPath} />
         <nav className='sm:hidden'>

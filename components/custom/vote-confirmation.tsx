@@ -23,90 +23,72 @@ import {
 } from "@/components/ui/dialog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useState } from "react";
-import { Candidate, CandidateNext } from "@/lib/definitions";
+import { CandidateNext, ElectionNext, VoteRequest } from "@/lib/definitions";
 import Image from "next/image";
 import { Fingerprint, LoaderCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuthStore } from "@/lib/store";
-import { hasUserVoted, saveDocument } from "@/lib/firebase/functions";
-import emitter from "@/lib/event";
-import { serverTimestamp } from "firebase/firestore";
 import { generateReferenceNumber } from "@/lib/functions";
+import { useMutation } from "react-query";
+import axios from "axios";
 
 type VoteConfirmationProps = {
   candidate: CandidateNext;
   electionId: string;
   children: ReactNode;
+  election: ElectionNext;
+  onVoteSubmitted: () => void;
 };
 
 const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
   candidate,
   electionId,
   children,
+  election,
+  onVoteSubmitted,
 }) => {
   const [isSubmiting, setIsSubmitting] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { user } = useAuthStore();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { toast } = useToast();
 
-  const handleSubmitVote = async () => {
-    setIsSubmitting(true);
-
-    const userId = user?.uid || "";
-    if (!userId) {
-      console.log("Error: user's credentials are missing");
-    }
-
-    const hasVoted = await hasUserVoted(userId, electionId, true);
-    if (hasVoted) {
-      setIsSubmitting(false);
+  const voteMutation = useMutation({
+    mutationFn: (voteData: VoteRequest) =>
+      axios.post("/api/election/vote", voteData),
+    onSuccess: (res) => {
+      // toast({
+      //   title: "Vote submitted successfully",
+      //   description: "Your vote has been recorded.",
+      // });
+      setIsDrawerOpen(false);
+      onVoteSubmitted();
+    },
+    onError: (error) => {
+      const errorObject = error as any;
+      const errorMessage =
+        errorObject?.response?.data?.message || "Please try again later.";
+      const errorCode = errorObject?.response?.data?.code || "";
       toast({
+        title: "Error occured!",
+        description: errorMessage,
         variant: "destructive",
-        title: "Whoa there! 🚫😤",
-        description:
-          "Looks like you've already cast your vote. No double-dipping allowed, buddy!",
       });
-      setIsDrawerOpen(false);
+    },
+    onMutate: () => {
+      setIsSubmitting(true);
+    },
+    onSettled: () => {
       setIsSubmitting(false);
-      return;
-    }
+    },
+  });
 
-    const vote = {
-      electionId: electionId,
-      referenceId: generateReferenceNumber(),
-      userId: userId,
-      value: candidate.id.toString(),
-      dateCreated: new Date().toISOString(),
-    };
+  const handleSubmitVote = async () => {
+    const referenceId = generateReferenceNumber();
 
-    const result = await saveDocument("votes", vote);
-
-    if (result.success) {
-      // const userVotes: UserVotes = {
-      //   electionId: electionId,
-      //   candidate: candidate.id.toString(),
-      // };
-      setIsDrawerOpen(false);
-      setIsSubmitting(false);
-      toast({
-        variant: "success",
-        title: "Woohoo! 🥳🥂",
-        description:
-          "Your vote is cast. Thank you for participating! You'll be redirected to vote page.",
-      });
-
-      // onSubmitEvent
-      emitter.emit("onVoteSubmit", result.data);
-    } else {
-      setIsDrawerOpen(false);
-      setIsSubmitting(false);
-      toast({
-        variant: "default",
-        title: "Uh ohhh! 😥",
-        description: result.data?.toString(),
-      });
-    }
+    voteMutation.mutate({
+      electionId,
+      referenceId,
+      value: candidate.id,
+    });
   };
 
   if (isDesktop) {
@@ -115,12 +97,11 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className=''>
           <DialogHeader className='mb-5'>
-            <DialogTitle className='text-gray-400 text-xl font-bold'>
-              Confirmation 💭
+            <DialogTitle className='text-gray-800 text-2xl font-extrabold'>
+              Are you sure?
             </DialogTitle>
             <DialogDescription className='font-medium text-slate-700'>
-              Are you sure about your choice? Once you vote, it can&apos;t be
-              changed. Please take a moment to review before proceeding.
+              Click on &quot;Confirm&quot; to vote candidate
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -130,15 +111,15 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
               </Button>
             </DialogClose>
             <Button
+              className='min-w-40'
               disabled={isSubmiting}
               onClick={() => handleSubmitVote()}
               size='lg'>
               {isSubmiting ? (
                 <LoaderCircle size={20} className='animate-spin mr-1' />
               ) : (
-                <Fingerprint className='h-5 w-5 mr-1' />
+                "Confirm"
               )}
-              Confirm Vote
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -165,7 +146,7 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
             />
             <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6'>
               <div className='text-2xl font-bold text-white'>
-                {candidate.displayName}
+                {candidate.balotNumber}. {candidate.displayName}
               </div>
               <p className='text-xs uppercase text-white'>{candidate.party}</p>
               <DialogDescription className='text-xs text-white/80'>
@@ -174,8 +155,7 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
             </div>
           </div>
           <p className='text-xs font-light mb-2'>
-            ☝🏻 Once you confirm, you can&apos;t change it. Please review your
-            choice before proceeding.
+            Click on &quot;Confirm&quot; to vote candidate
           </p>
           <Button
             disabled={isSubmiting}
@@ -185,9 +165,8 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
             {isSubmiting ? (
               <LoaderCircle size={20} className='animate-spin mr-1' />
             ) : (
-              <Fingerprint className='h-5 w-5 mr-1' />
+              "Confirm"
             )}
-            Confirm Vote
           </Button>
           <DrawerClose asChild>
             <Button

@@ -71,6 +71,20 @@ export type Vote = {
   dateCreated: FieldValue;
 };
 
+export type VoteRequest = {
+  electionId: string;
+  referenceId: string;
+  value: string | string[]; //candidateId
+};
+
+export type VoteResponse = {
+  dateCreated: string;
+  electionId: string;
+  referenceId: string;
+  userId: string;
+  type: "single" | "multiple";
+};
+
 export type UserVotes = {
   electionId: string;
   candidate: string | string[];

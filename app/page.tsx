@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import hero from "@/public/images/hero.jpg";
 import ShimmerButton from "@/components/magicui/shimmer-button";
@@ -9,8 +8,9 @@ import GridPattern from "@/components/magicui/grid-pattern";
 import { cn } from "@/lib/utils";
 import WordFadeIn from "@/components/magicui/word-fade-in";
 import HomeFeatures from "@/components/custom/home-features";
-import { AuroraBackgroundProvider } from "@nauverse/react-aurora-background";
 import HomeDisclaimerCard from "@/components/custom/home-disclaimer-card";
+import Image from "next/image";
+import MainFooter from "@/components/custom/layout/main-footer";
 
 export default function Home() {
   return (
@@ -112,76 +112,7 @@ export default function Home() {
         />
       </div>
 
-      <div className='w-full bg-primary footer-wave-clip'>
-        <div className='max-w-5xl mx-auto w-full px-5 sm:px-20 pt-20'>
-          <footer className='flex flex-col'>
-            <div className='text-white flex flex-col md:flex-row justify-between mb-20'>
-              <div className='mb-8 md:mb-0 md:w-1/3'>
-                <h3 className='text-xl font-bold mb-2'>Election PH</h3>
-                <div className='text-xs italic font-thin'>
-                  Someone has to do it.
-                </div>
-              </div>
-              <div className='mb-8 md:mb-0'>
-                <h4 className='text-lg font-semibold mb-3'>Quick Links</h4>
-                <ul className='text-sm'>
-                  <li className='mb-2'>
-                    <Link href='/' className='hover:underline'>
-                      Home
-                    </Link>
-                  </li>
-                  <li className='mb-2'>
-                    <Link href='/about' className='hover:underline'>
-                      About Us
-                    </Link>
-                  </li>
-                  <li className='mb-2'>
-                    <Link href='/contact' className='hover:underline'>
-                      Contact
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className='text-lg font-semibold mb-3'>Connect With Us</h4>
-                <ul className='text-sm'>
-                  <li className='mb-2'>
-                    <Link
-                      href='https://facebook.com'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='hover:underline'>
-                      Facebook
-                    </Link>
-                  </li>
-                  <li className='mb-2'>
-                    <Link
-                      href='https://twitter.com'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='hover:underline'>
-                      Twitter
-                    </Link>
-                  </li>
-                  <li className='mb-2'>
-                    <Link
-                      href='https://instagram.com'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='hover:underline'>
-                      Instagram
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className='text-white text-sm text-center pb-8'>
-              © {new Date().getFullYear()} Election PH. All rights reserved.
-            </div>
-          </footer>
-        </div>
-      </div>
+      <MainFooter />
     </main>
   );
 }
