@@ -65,14 +65,14 @@ export async function GET(
   let election: any = {
     id: doc.id,
     ...doc.data(),
-    isVoted: false, // Default value, will be updated below
+    isVoted: true, // Default value, will be updated below
   } as ElectionNext;
 
   // Check if the user has voted in this election
   const voteSnapshot = await db
     .collection("votes")
     .where("electionId", "==", electionId)
-    .where("userId", "==", user?.uid)
+    .where("userId", "==", user.uid)
     .get();
 
   // Add isVoted flag to the election data
@@ -91,13 +91,13 @@ export async function GET(
   election.candidates = candidatesData;
 
   // Create the response with the fetched election and candidate data
-  const response = NextResponse.json(election);
+  return NextResponse.json(election);
 
-  // Set cache age is 1 week and revalidate once a day
-  response.headers.set(
-    "Cache-Control",
-    "public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400"
-  );
+  // Set cache age to 5 minutes and revalidate every 5 minutes
+  // response.headers.set(
+  //   "Cache-Control",
+  //   "public, max-age=300, s-maxage=300, stale-while-revalidate=300"
+  // );
 
-  return response;
+  // return response;
 }
