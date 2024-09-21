@@ -12,6 +12,12 @@ export const navigation: NavigationProps[] = [
     icon: "Fingerprint",
   },
   {
+    route: "/faq",
+    label: "FAQ",
+    icon: "HelpCircle",
+    isHidden: true,
+  },
+  {
     route: "/candidate",
     label: "Candidates",
     icon: "Users",

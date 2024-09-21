@@ -27,8 +27,17 @@ export default function Vote() {
             <ElectionBanner key={i} userId={user?.uid || ""} election={item} />
           ))}
 
-        {/* TODO: implement skeleton */}
-        {isFetching && <div>Loading...</div>}
+        {isFetching && (
+          <div className='grid grid-cols-1 gap-6'>
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className='animate-pulse'>
+                <div className='bg-gray-200 h-32 rounded-lg mb-2'></div>
+                <div className='bg-gray-200 h-4 w-3/4 rounded mb-2'></div>
+                <div className='bg-gray-200 h-4 w-1/2 rounded'></div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

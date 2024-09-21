@@ -45,6 +45,7 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
     status,
     data: candidate,
     isError,
+    isLoading,
     isFetching,
     refetch,
   } = useCandidate(params.id);
@@ -58,9 +59,10 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
 
   return (
     <>
-      {isDesktop && candidate && candidateRate && (
+      {isDesktop && (
         <ScrollArea className='pt-11 lg:pt-16 flex-1 min-h-[100vh] w-full !overflow-y-scroll no-scrollbar'>
           <CandidateViewDeskTop
+            isLoading={isLoading}
             candidate={candidate}
             candidateRate={candidateRate}
           />

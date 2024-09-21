@@ -73,30 +73,29 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
   desiredPath,
 }) => (
   <nav className='justify-around items-center h-14 gap-x-9 hidden sm:flex'>
-    {navigation.map((item, i) =>
-      item.route !== "/logout" ? (
-        <Link
-          key={i}
-          href={item.route}
-          className={`${
-            desiredPath === item.route &&
-            "text-slate-950  hover:text-slate-950 font-semibold"
-          } flex flex-col items-center gap-1 text-slate-950 hover:text-slate-800`}>
-          {item.label}
-        </Link>
-      ) : (
-        user && (
+    {navigation
+      .filter((item) => !item.isHidden)
+      .map((item, i) =>
+        item.route === "/logout" && user ? (
           <Link key={i} href='/logout'>
             <Avatar className='border h-6 w-6'>
-              <AvatarImage src={user.photoURL || ""} alt='user picture 🤣' />
+              <AvatarImage src={user.photoURL || ""} alt='User avatar' />
               <AvatarFallback>
                 {user.displayName?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </Link>
+        ) : (
+          <Link
+            key={i}
+            href={item.route}
+            className={`flex flex-col items-center gap-1 text-slate-950 hover:text-slate-800 ${
+              desiredPath === item.route ? "font-semibold" : ""
+            }`}>
+            {item.label}
+          </Link>
         )
-      )
-    )}
+      )}
   </nav>
 );
 

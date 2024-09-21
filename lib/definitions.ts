@@ -35,6 +35,7 @@ export type NavigationProps = {
   route: string;
   label: string;
   icon: string;
+  isHidden?: boolean;
 };
 
 export type APIResponse<T> = {

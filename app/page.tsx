@@ -11,6 +11,7 @@ import HomeFeatures from "@/components/custom/home-features";
 import HomeDisclaimerCard from "@/components/custom/home-disclaimer-card";
 import Image from "next/image";
 import MainFooter from "@/components/custom/layout/main-footer";
+import FAQ from "@/components/custom/faq";
 
 export default function Home() {
   return (
@@ -110,6 +111,10 @@ export default function Home() {
             "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]"
           )}
         />
+      </div>
+
+      <div className='mb-20'>
+        <FAQ showItems={5} />
       </div>
 
       <MainFooter />
