@@ -71,14 +71,9 @@ export const faqData = {
         "Election PH is an online, unbiased survey platform where users can participate in political surveys related to upcoming elections. It is not an official voting site but serves as a community-driven platform to gather opinions on candidates.",
     },
     {
-      question: "Is Election PH affiliated with the government?",
+      question: "Is my vote on Election PH counted in the official elections?",
       answer:
-        "No, Election PH is an independent platform and is not affiliated with the government or COMELEC.",
-    },
-    {
-      question: "Can I vote multiple times with different Gmail accounts?",
-      answer:
-        "We have systems in place to monitor and flag unusual voting patterns to maintain survey integrity. Any suspicious activity may result in vote removal.",
+        "No, votes submitted on Election PH are purely for survey purposes and are not counted in any official election. Our platform is designed to gather insights, not to influence or replace formal election processes.",
     },
     {
       question: "How does the survey work?",
@@ -86,9 +81,19 @@ export const faqData = {
         "To participate, users simply select a survey, review the list of candidates, and submit their vote. Your vote helps us understand public sentiment and opinion about the candidates.",
     },
     {
-      question: "Is my vote on Election PH counted in the official elections?",
+      question: "Can I vote multiple times with different Gmail accounts?",
       answer:
-        "No, votes submitted on Election PH are purely for survey purposes and are not counted in any official election. Our platform is designed to gather insights, not to influence or replace formal election processes.",
+        "We have systems in place to monitor and flag unusual voting patterns to maintain survey integrity. Any suspicious activity may result in vote removal.",
+    },
+    {
+      question: "How can I trust that the surveys are unbiased?",
+      answer:
+        "Election PH takes pride in maintaining neutrality and transparency. The platform provides equal representation for all candidates, and the surveys are conducted without bias or agenda.",
+    },
+    {
+      question: "Is Election PH affiliated with the government?",
+      answer:
+        "No, Election PH is an independent platform and is not affiliated with the government or COMELEC.",
     },
     {
       question: "Who can participate in the surveys?",
@@ -101,24 +106,19 @@ export const faqData = {
         "No, each participant can only submit one vote per survey to maintain the integrity of the data.",
     },
     {
-      question: "How are the candidates listed on Election PH?",
-      answer:
-        "Candidates are listed based on publicly available information and their official candidacy for the elections. Profiles include details such as their party affiliation, platform, and biography.",
-    },
-    {
       question: "How are the results used?",
       answer:
         "The results of our surveys are used to reflect public sentiment and may be shared for educational and analytical purposes. They are not official indicators of election outcomes.",
     },
     {
+      question: "How are the candidates listed on Election PH?",
+      answer:
+        "Candidates are listed based on publicly available information and their official candidacy for the elections. Profiles include details such as their party affiliation, platform, and biography.",
+    },
+    {
       question: "Can I share my survey results?",
       answer:
         "Yes, after participating in a survey, you will have the option to share your results on social media to engage others and encourage more participation.",
-    },
-    {
-      question: "How can I trust that the surveys are unbiased?",
-      answer:
-        "Election PH takes pride in maintaining neutrality and transparency. The platform provides equal representation for all candidates, and the surveys are conducted without bias or agenda.",
     },
     {
       question: "How often are new surveys added?",

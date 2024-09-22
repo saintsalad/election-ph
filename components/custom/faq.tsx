@@ -32,7 +32,9 @@ const FAQ = ({ showItems }: FAQProps) => {
         defaultValue='item-0'>
         {displayedFaqs.map((faq, index) => (
           <AccordionItem key={index} value={`item-${index}`}>
-            <AccordionTrigger>{faq.question}</AccordionTrigger>
+            <AccordionTrigger className='text-base font-medium'>
+              {faq.question}
+            </AccordionTrigger>
             <AccordionContent>{faq.answer}</AccordionContent>
           </AccordionItem>
         ))}
