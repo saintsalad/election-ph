@@ -10,7 +10,7 @@ import { fetchFromFirebase } from "@/lib/firebase/functions";
 import Link from "next/link";
 import defaultImage from "@/public/images/default.png";
 
-function Candidate() {
+function Candidates() {
   const [candidates, setCandidates] = useState<CandidateNext[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -98,7 +98,7 @@ type CandidateCardProps = {
 function CandidateCard({ candidate }: CandidateCardProps) {
   return (
     <Link
-      href={`/candidate/${candidate.id}`}
+      href={`/candidates/${candidate.id}`}
       className='relative overflow-hidden rounded-xl shadow-md bg-cover bg-center h-56 min-w-32 cursor-pointer border transition-transform duration-300 ease-in-out hover:-translate-y-0.5'
       style={{ paddingBottom: "75%" }}
       data-testid='candidate-card'>
@@ -122,4 +122,4 @@ function CandidateCard({ candidate }: CandidateCardProps) {
   );
 }
 
-export default Candidate;
+export default Candidates;

@@ -4,32 +4,49 @@ export const navigation: NavigationProps[] = [
   {
     route: "/",
     label: "Home",
-    icon: "LayoutDashboard",
+    isFullWidth: true,
   },
   {
-    route: "/vote",
-    label: "Vote",
-    icon: "Fingerprint",
+    route: "#",
+    label: "Election",
+    isFullWidth: false,
+    children: [
+      {
+        route: "/vote",
+        label: "Vote",
+        isFullWidth: false,
+      },
+      {
+        route: "/candidates",
+        label: "Candidates",
+        isFullWidth: false,
+      },
+      {
+        route: "/results",
+        label: "Results",
+        isFullWidth: false,
+      },
+    ],
+  },
+  {
+    route: "/community",
+    label: "Community",
+    isFullWidth: false,
   },
   {
     route: "/faq",
     label: "FAQ",
-    icon: "HelpCircle",
     isHidden: true,
-  },
-  {
-    route: "/candidate",
-    label: "Candidates",
-    icon: "Users",
+    isFullWidth: false,
   },
   {
     route: "/about",
     label: "About",
-    icon: "BadgeInfo",
+    isFullWidth: false,
   },
   {
     route: "/logout",
     label: "Logout",
-    icon: "LogOut",
+    isFullWidth: true,
   },
 ];

@@ -157,7 +157,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className='flex flex-1'>
+    <div className='flex flex-1 w-full bg-white h-screen'>
       <section className='w-[350px] bg-red-50 hidden md:block lg:w-[450px]'>
         <Image
           className='h-full'

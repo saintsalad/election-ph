@@ -17,6 +17,13 @@ import { usePathname } from "next/navigation";
 import type { User as FirebaseUser } from "@firebase/auth";
 import Image from "next/image";
 import logo from "@/public/images/logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 
 // Define the User type based on Firebase User properties
 type User = {
@@ -75,17 +82,45 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
   <nav className='justify-around items-center h-14 gap-x-9 hidden sm:flex'>
     {navigation
       .filter((item) => !item.isHidden)
-      .map((item, i) =>
-        item.route === "/logout" && user ? (
-          <Link key={i} href='/logout'>
-            <Avatar className='border h-6 w-6'>
-              <AvatarImage src={user.photoURL || ""} alt='User avatar' />
-              <AvatarFallback>
-                {user.displayName?.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-        ) : (
+      .map((item, i) => {
+        if (item.route === "/logout" && user) {
+          return (
+            <Link key={i} href='/logout'>
+              <Avatar className='border h-6 w-6'>
+                <AvatarImage src={user.photoURL || ""} alt='User avatar' />
+                <AvatarFallback>
+                  {user.displayName?.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          );
+        }
+
+        if (item.children) {
+          return (
+            <DropdownMenu key={i}>
+              <DropdownMenuTrigger className='flex items-center gap-1 text-slate-950 hover:text-slate-800'>
+                {item.label}
+                <ChevronDownIcon className='h-4 w-4' />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {item.children.map((child, childIndex) => (
+                  <DropdownMenuItem key={childIndex} asChild>
+                    <Link
+                      href={child.route}
+                      className={`w-full ${
+                        desiredPath === child.route ? "font-semibold" : ""
+                      }`}>
+                      {child.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        }
+
+        return (
           <Link
             key={i}
             href={item.route}
@@ -94,8 +129,8 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
             }`}>
             {item.label}
           </Link>
-        )
-      )}
+        );
+      })}
   </nav>
 );
 
@@ -117,7 +152,7 @@ function MainHeader() {
   return (
     <div className='absolute top-0 z-50 w-full shadow-lg border-b sm:border-0 px-5 border-border/40 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/30 self-center lg:max-w-5xl lg:rounded-full lg:mt-3 lg:overflow-hidden'>
       <div className='container mx-auto flex h-11 items-center justify-between px-0'>
-        <Link href='/' className='flex items-center gap-2' prefetch={false}>
+        <Link href='/' className='flex items-center gap-2'>
           <Image
             src={logo}
             alt='Election PH Logo'

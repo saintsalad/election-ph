@@ -34,8 +34,10 @@ export type SocialLinks = {
 export type NavigationProps = {
   route: string;
   label: string;
-  icon: string;
+  // icon?: string;
   isHidden?: boolean;
+  isFullWidth: boolean;
+  children?: NavigationProps[];
 };
 
 export type APIResponse<T> = {
