@@ -43,9 +43,11 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     <QueryClientProvider client={queryClient}>
       <div className='flex-1 flex flex-col content-between bg-slate-50 h-full'>
         {/* TODO: improve this */}
-        {!(desiredPath === "/signin" || desiredPath === "/signup") && (
-          <MainHeader />
-        )}
+        {!(
+          desiredPath === "/signin" ||
+          desiredPath === "/signup" ||
+          desiredPath === "/logout"
+        ) && <MainHeader />}
         <ScrollArea
           id='main-layout-scroll-area'
           className={`h-full w-full self-center ${

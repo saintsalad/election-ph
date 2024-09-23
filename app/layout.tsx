@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import MainLayout from "@/components/custom/layout/main-layout";
 import { Toaster } from "@/components/ui/toaster";
 import { GeistSans } from "geist/font/sans";
+import NextTopLoader from "nextjs-toploader";
 
 // const fontSans = FontSans({
 //   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={cn("bg-background antialiased", GeistSans.className)}>
+        <NextTopLoader color='#ffbf00' showSpinner={false} />
         <MainLayout>{children} </MainLayout>
         <Toaster />
       </body>

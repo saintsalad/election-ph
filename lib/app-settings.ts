@@ -49,4 +49,16 @@ export const navigation: NavigationProps[] = [
     label: "Logout",
     isFullWidth: true,
   },
+  {
+    route: "/profile",
+    label: "Profile",
+    isFullWidth: false,
+    isHidden: true,
+  },
+  {
+    route: "/settings",
+    label: "Settings",
+    isFullWidth: false,
+    isHidden: true,
+  },
 ];

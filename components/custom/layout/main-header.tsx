@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { Separator } from "@/components/ui/separator";
 
 // Define the User type based on Firebase User properties
 type User = {
@@ -32,7 +33,10 @@ type User = {
   email?: string | null;
 };
 
-const MobileNav: React.FC<{ user: User | null }> = ({ user }) => {
+const MobileNav: React.FC<{ user: User | null; desiredPath: string }> = ({
+  user,
+  desiredPath,
+}) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -43,33 +47,96 @@ const MobileNav: React.FC<{ user: User | null }> = ({ user }) => {
       <SheetContent className='w-64 pt-12'>
         <SheetTitle hidden></SheetTitle>
         <SheetDescription hidden></SheetDescription>
+        <div className='flex flex-col gap-y-4'>
+          {navigation
+            .filter((item) => !item.isHidden && item.route !== "/logout")
+            .map((item, i) => (
+              <div key={i}>
+                {item.children ? (
+                  <div className='space-y-2'>
+                    <div className='text-sm font-semibold text-slate-500'>
+                      {item.label}
+                    </div>
+                    {item.children.map((child, childIndex) => (
+                      <SheetTrigger key={childIndex} asChild>
+                        <Link
+                          href={child.route}
+                          className={`block text-sm pl-4 ${
+                            desiredPath === child.route
+                              ? "font-semibold text-primary"
+                              : "text-slate-700"
+                          }`}>
+                          {child.label}
+                        </Link>
+                      </SheetTrigger>
+                    ))}
+                  </div>
+                ) : (
+                  <SheetTrigger asChild>
+                    <Link
+                      href={item.route}
+                      className={`block text-sm ${
+                        desiredPath === item.route
+                          ? "font-semibold text-primary"
+                          : "text-slate-700"
+                      }`}>
+                      {item.label}
+                    </Link>
+                  </SheetTrigger>
+                )}
+              </div>
+            ))}
+        </div>
         {user && (
-          <div className='flex flex-1 flex-col items-center bg-slate-50 mb-3 py-3.5 rounded-lg'>
-            <Avatar className='border h-11 w-11'>
-              <AvatarImage src={user.photoURL || ""} alt='user picture 🤣' />
+          <>
+            <Separator className='my-4' />
+            <div className='space-y-2'>
+              <div className='text-sm font-semibold text-slate-500'>
+                Account
+              </div>
+              <SheetTrigger asChild>
+                <Link
+                  href='/profile'
+                  className={`block text-sm pl-4 ${
+                    desiredPath === "/profile"
+                      ? "font-semibold text-primary"
+                      : "text-slate-700"
+                  }`}>
+                  Profile
+                </Link>
+              </SheetTrigger>
+              <SheetTrigger asChild>
+                <Link
+                  href='/settings'
+                  className={`block text-sm pl-4 ${
+                    desiredPath === "/settings"
+                      ? "font-semibold text-primary"
+                      : "text-slate-700"
+                  }`}>
+                  Settings
+                </Link>
+              </SheetTrigger>
+              <SheetTrigger asChild>
+                <Link
+                  href='/logout'
+                  className='block text-sm pl-4 text-red-500'>
+                  Logout
+                </Link>
+              </SheetTrigger>
+            </div>
+          </>
+        )}
+        {user && (
+          <div className='absolute bottom-8 left-6 flex items-center space-x-3'>
+            <Avatar className='h-8 w-8'>
+              <AvatarImage src={user.photoURL || ""} alt='User avatar' />
               <AvatarFallback>
                 {user.displayName?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className='text-base font-semibold mt-2'>
-              {user.displayName}
-            </div>
-            <div className='text-xs'>{user.email}</div>
+            <div className='text-sm font-medium'>{user.displayName}</div>
           </div>
         )}
-        <div className='flex flex-1 flex-col items-end gap-y-1'>
-          {navigation.map((item, i) => (
-            <SheetTrigger key={i} asChild>
-              <Link
-                href={item.route}
-                className={`${
-                  item.route === "/logout" ? "text-red-500" : "text-slate-500 "
-                } text-right pr-3 text-base font-base w-full p-1 rounded-md hover:bg-slate-100`}>
-                {item.label}
-              </Link>
-            </SheetTrigger>
-          ))}
-        </div>
       </SheetContent>
     </Sheet>
   );
@@ -85,21 +152,41 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
       .map((item, i) => {
         if (item.route === "/logout" && user) {
           return (
-            <Link key={i} href='/logout'>
-              <Avatar className='border h-6 w-6'>
-                <AvatarImage src={user.photoURL || ""} alt='User avatar' />
-                <AvatarFallback>
-                  {user.displayName?.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
+            <DropdownMenu key={i}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size='icon'
+                  variant='ghost'
+                  className='relative h-6 w-6 rounded-full'>
+                  <Avatar className='h-6 w-6'>
+                    <AvatarImage src={user.photoURL || ""} alt='User avatar' />
+                    <AvatarFallback>
+                      {user.displayName?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem asChild>
+                  <Link href='/profile'>Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href='/settings'>Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href='/logout' className='text-red-500'>
+                    Logout
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           );
         }
 
         if (item.children) {
           return (
             <DropdownMenu key={i}>
-              <DropdownMenuTrigger className='flex items-center gap-1 text-slate-950 hover:text-slate-800'>
+              <DropdownMenuTrigger className='flex items-center text-sm  gap-1 text-slate-950 hover:text-slate-800'>
                 {item.label}
                 <ChevronDownIcon className='h-4 w-4' />
               </DropdownMenuTrigger>
@@ -124,7 +211,7 @@ const DesktopNav: React.FC<{ user: User | null; desiredPath: string }> = ({
           <Link
             key={i}
             href={item.route}
-            className={`flex flex-col items-center gap-1 text-slate-950 hover:text-slate-800 ${
+            className={`flex flex-col items-center text-sm gap-1 text-slate-950 hover:text-slate-800 ${
               desiredPath === item.route ? "font-semibold" : ""
             }`}>
             {item.label}
@@ -166,7 +253,7 @@ function MainHeader() {
         </Link>
         <DesktopNav user={userProps} desiredPath={desiredPath} />
         <nav className='sm:hidden'>
-          <MobileNav user={userProps} />
+          <MobileNav user={userProps} desiredPath={desiredPath} />
         </nav>
       </div>
     </div>

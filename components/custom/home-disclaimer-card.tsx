@@ -23,10 +23,10 @@ function HomeDisclaimerCard() {
           animDuration={animDuration}
           className=' grainy'>
           <div className='sm:p-12 p-10'>
-            <div className='sm:text-5xl text-2xl font-extrabold text-slate-800'>
+            <div className='sm:text-5xl text-3xl font-extrabold text-slate-800'>
               Disclaimer
             </div>
-            <div className='sm:text-base text-sm sm:mt-3 text-slate-800'>
+            <div className='sm:text-base text-sm sm:mt-3 text-slate-900'>
               Election PH is an independent, non-official online survey
               platform. The surveys conducted on this website are solely for the
               purpose of gathering public opinion and do not reflect or
@@ -38,6 +38,18 @@ function HomeDisclaimerCard() {
               solely for the purpose of the survey. Please note that
               participation in our surveys is entirely voluntary, and the
               results are unofficial.
+            </div>
+
+            <div className='mt-4 sm:text-base text-sm sm:mt-3 text-slate-900'>
+              Election PH does not endorse or take responsibility for
+              user-generated content. Users are fully responsible for any
+              comments, posts, or submissions they make on the platform. Any
+              content deemed inappropriate, harmful, or potentially damaging to
+              others may be removed at the discretion of the website
+              administrators. Users should refrain from submitting defamatory or
+              offensive content, as it may result in personal legal
+              consequences. Election PH encourages respectful and responsible
+              participation.
             </div>
           </div>
         </AuroraBackgroundProvider>

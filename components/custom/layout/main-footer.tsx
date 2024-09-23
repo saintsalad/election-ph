@@ -53,8 +53,10 @@ function MainFooter() {
             <FooterSection title='Connect With Us' links={SOCIAL_LINKS} />
           </div>
 
-          <div className='text-white text-sm text-center pb-8'>
-            © {new Date().getFullYear()} Election PH. All rights reserved.
+          <div className='text-white text-sm text-center pb-1'>
+            © {new Date().getFullYear()} Election PH
+          </div>
+          <div className='text-slate-600 italic text-xs text-center pb-8'>
             Someone has to do it.
           </div>
         </footer>
