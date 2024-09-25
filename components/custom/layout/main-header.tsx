@@ -25,9 +25,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Separator } from "@/components/ui/separator";
-import { UserIcon, SettingsIcon, LogOutIcon } from "lucide-react";
+import {
+  UserIcon,
+  SettingsIcon,
+  LogOutIcon,
+  SunIcon,
+  MoonIcon,
+  LogIn,
+} from "lucide-react";
 import { useTheme } from "next-themes";
-import { SunIcon, MoonIcon } from "lucide-react";
 
 // Define the User type based on Firebase User properties
 type User = {
@@ -132,7 +138,7 @@ const MobileNav: React.FC<{
             className={`w-full justify-start ${hoverBgColorClass} ${textColorClass}`}>
             {isDarkMode ? (
               <>
-                <SunIcon className='mr-2 h-4 w-4 text-yellow-500' />
+                <SunIcon className='mr-2 h-4 w-4 text-yellow-200' />
                 Light
               </>
             ) : (
@@ -382,10 +388,24 @@ function MainHeader() {
               ) : (
                 <Button
                   asChild
-                  size='sm'
-                  variant='ghost'
-                  className={`rounded-full h-8 px-4 text-sm font-medium ${textColorClass} ${hoverBgColorClass} ${hoverTextColorClass} transition-colors`}>
-                  <Link href='/login'>Login</Link>
+                  size='default'
+                  className={`
+                    relative overflow-hidden
+                    rounded-full px-6 py-2 text-base font-semibold text-white
+                    transition-all duration-300 ease-out animate-gradient
+                    ${
+                      isDarkMode
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    }
+                    shadow-lg hover:shadow-xl
+                    group
+                  `}>
+                  <Link href='/login' className='flex items-center'>
+                    <span className='relative z-10 mr-2'>Login</span>
+                    <LogIn className='relative z-10 h-5 w-5' />
+                    <span className='absolute inset-0 h-full w-full scale-0 rounded-full bg-white opacity-10 transition-all duration-500 group-hover:scale-100'></span>
+                  </Link>
                 </Button>
               )}
             </div>
