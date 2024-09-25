@@ -40,7 +40,8 @@ const MobileNav: React.FC<{
   user: User | null;
   desiredPath: string;
   isDarkMode: boolean;
-}> = ({ user, desiredPath, isDarkMode }) => {
+  onThemeToggle: () => void;
+}> = ({ user, desiredPath, isDarkMode, onThemeToggle }) => {
   const textColorClass = isDarkMode ? "text-gray-200" : "text-gray-800";
   const hoverTextColorClass = isDarkMode
     ? "hover:text-white"
@@ -123,25 +124,45 @@ const MobileNav: React.FC<{
             ))}
         </div>
 
-        {user && (
-          <div
-            className={`absolute bottom-8 left-6 flex items-center space-x-3 ${
-              isDarkMode ? "bg-gray-800/50" : "bg-white/90"
-            } rounded-full p-2`}>
-            <Avatar className='h-10 w-10 border-2 border-white shadow-sm'>
-              <AvatarImage src={user.photoURL || ""} alt='User avatar' />
-              <AvatarFallback
-                className={`${
-                  isDarkMode ? "bg-blue-600" : "bg-blue-500"
-                } text-white`}>
-                {user.displayName?.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className={`text-sm font-semibold ${textColorClass}`}>
-              {user.displayName}
+        <div className='absolute bottom-8 left-6 right-6 space-y-4'>
+          <Button
+            size='sm'
+            variant='ghost'
+            onClick={onThemeToggle}
+            className={`w-full justify-start ${hoverBgColorClass} ${textColorClass}`}>
+            {isDarkMode ? (
+              <>
+                <SunIcon className='mr-2 h-4 w-4 text-yellow-500' />
+                Light
+              </>
+            ) : (
+              <>
+                <MoonIcon className='mr-2 h-4 w-4 text-blue-500' />
+                Dark
+              </>
+            )}
+          </Button>
+
+          {user && (
+            <div
+              className={`flex items-center space-x-3 ${
+                isDarkMode ? "bg-gray-800/50" : "bg-white/90"
+              } rounded-full p-2`}>
+              <Avatar className='h-10 w-10 border-2 border-white shadow-sm'>
+                <AvatarImage src={user.photoURL || ""} alt='User avatar' />
+                <AvatarFallback
+                  className={`${
+                    isDarkMode ? "bg-blue-600" : "bg-blue-500"
+                  } text-white`}>
+                  {user.displayName?.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className={`text-sm font-semibold ${textColorClass}`}>
+                {user.displayName}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   );
@@ -270,6 +291,8 @@ function MainHeader() {
     ? "hover:bg-gray-700/70"
     : "hover:bg-white/70";
 
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
   return (
     <header
       className={`fixed top-0 z-50 w-full shadow-lg border-b ${
@@ -298,74 +321,82 @@ function MainHeader() {
           />
 
           <div className='flex items-center space-x-4'>
-            <Button
-              size='sm'
-              variant='ghost'
-              className={`rounded-full h-8 w-8 p-0 ${hoverBgColorClass}`}
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              <SunIcon className='h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-yellow-500' />
-              <MoonIcon className='absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-blue-500' />
-              <span className='sr-only'>Toggle theme</span>
-            </Button>
-
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size='sm'
-                    variant='ghost'
-                    className={`rounded-full h-8 px-2 text-sm font-medium ${textColorClass} ${hoverBgColorClass} ${hoverTextColorClass} transition-colors flex gap-x-2`}>
-                    <Avatar className='h-6 w-6'>
-                      <AvatarImage
-                        src={user.photoURL || ""}
-                        alt='User avatar'
-                      />
-                      <AvatarFallback>
-                        {user.displayName?.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className='hidden lg:inline'>{user.displayName}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align='end'
-                  className='w-56 rounded-xl bg-white/90 backdrop-blur-lg'>
-                  <DropdownMenuItem asChild>
-                    <Link href='/profile' className='flex items-center'>
-                      <UserIcon className='mr-2 h-4 w-4' />
-                      <span>Profile</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href='/settings' className='flex items-center'>
-                      <SettingsIcon className='mr-2 h-4 w-4' />
-                      <span>Settings</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href='/logout'
-                      className='flex items-center text-red-500'>
-                      <LogOutIcon className='mr-2 h-4 w-4' />
-                      <span>Logout</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
+            {/* Desktop theme toggle button and user dropdown */}
+            <div className='hidden md:flex items-center space-x-4'>
               <Button
-                asChild
                 size='sm'
                 variant='ghost'
-                className={`rounded-full h-8 px-4 text-sm font-medium ${textColorClass} ${hoverBgColorClass} ${hoverTextColorClass} transition-colors`}>
-                <Link href='/login'>Login</Link>
+                className={`rounded-full h-8 w-8 p-0 ${hoverBgColorClass}`}
+                onClick={toggleTheme}>
+                <SunIcon className='h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-yellow-500' />
+                <MoonIcon className='absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-blue-500' />
+                <span className='sr-only'>Toggle theme</span>
               </Button>
-            )}
+
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      className={`rounded-full h-8 px-2 text-sm font-medium ${textColorClass} ${hoverBgColorClass} ${hoverTextColorClass} transition-colors flex gap-x-2`}>
+                      <Avatar className='h-6 w-6'>
+                        <AvatarImage
+                          src={user.photoURL || ""}
+                          alt='User avatar'
+                        />
+                        <AvatarFallback>
+                          {user.displayName?.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className='hidden lg:inline'>
+                        {user.displayName}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align='end'
+                    className='w-56 rounded-xl bg-white/90 backdrop-blur-lg'>
+                    <DropdownMenuItem asChild>
+                      <Link href='/profile' className='flex items-center'>
+                        <UserIcon className='mr-2 h-4 w-4' />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href='/settings' className='flex items-center'>
+                        <SettingsIcon className='mr-2 h-4 w-4' />
+                        <span>Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href='/logout'
+                        className='flex items-center text-red-500'>
+                        <LogOutIcon className='mr-2 h-4 w-4' />
+                        <span>Logout</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  asChild
+                  size='sm'
+                  variant='ghost'
+                  className={`rounded-full h-8 px-4 text-sm font-medium ${textColorClass} ${hoverBgColorClass} ${hoverTextColorClass} transition-colors`}>
+                  <Link href='/login'>Login</Link>
+                </Button>
+              )}
+            </div>
+
+            {/* Mobile navigation */}
             <div className='md:hidden'>
               <MobileNav
                 user={userProps}
                 desiredPath={desiredPath}
                 isDarkMode={isDarkMode}
+                onThemeToggle={toggleTheme}
               />
             </div>
           </div>
