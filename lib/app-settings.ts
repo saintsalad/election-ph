@@ -45,20 +45,38 @@ export const navigation: NavigationProps[] = [
     isFullWidth: false,
   },
   {
-    route: "/logout",
-    label: "Logout",
+    route: "#",
+    label: "Account",
     isFullWidth: true,
+    children: [
+      {
+        route: "/profile",
+        label: "Profile",
+        isFullWidth: false,
+        isHidden: true,
+      },
+      {
+        route: "/settings",
+        label: "Settings",
+        isFullWidth: false,
+      },
+      {
+        route: "/logout",
+        label: "Logout",
+        isFullWidth: false,
+      },
+    ],
   },
-  {
-    route: "/profile",
-    label: "Profile",
-    isFullWidth: false,
-    isHidden: true,
-  },
-  {
-    route: "/settings",
-    label: "Settings",
-    isFullWidth: false,
-    isHidden: true,
-  },
+  // {
+  //   route: "/profile",
+  //   label: "Profile",
+  //   isFullWidth: false,
+  //   isHidden: true,
+  // },
+  // {
+  //   route: "/settings",
+  //   label: "Settings",
+  //   isFullWidth: false,
+  //   isHidden: true,
+  // },
 ];
