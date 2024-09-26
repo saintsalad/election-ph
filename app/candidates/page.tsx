@@ -55,7 +55,7 @@ function Candidates() {
     : candidates;
 
   return (
-    <div className='pb-10 flex-1 flex flex-col px-3 pt-14 sm:pt-16'>
+    <div className='pb-10 flex-1 flex flex-col px-3 pt-20'>
       <div className='flex items-center gap-4 mb-5'>
         <div className='relative flex-1'>
           <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />

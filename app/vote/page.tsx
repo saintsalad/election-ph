@@ -19,7 +19,7 @@ export default function Vote() {
   const { data: elections, isError, isFetching, refetch } = useElections();
 
   return (
-    <div className='w-full pt-11 lg:pt-16'>
+    <div className='w-full pt-20'>
       <div className='px-4 pt-5 grid grid-cols-1 gap-6  lg:px-0'>
         {!isFetching &&
           elections &&

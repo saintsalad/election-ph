@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { usePathname } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
+import { useTheme } from "next-themes"; // {{ edit_1: import useTheme }}
 
 import MainHeader from "@/components/custom/layout/main-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,6 +16,7 @@ import { NavigationProps } from "@/lib/definitions";
 const queryClient = new QueryClient();
 
 function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { theme } = useTheme(); // {{ edit_2: get current theme }}
   const setUser = useAuthStore((state) => state.setUser);
   const pathname = usePathname();
 
@@ -41,7 +43,12 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className='flex-1 flex flex-col content-between bg-slate-50 h-full'>
+      <div
+        className={`flex-1 flex flex-col content-between ${
+          theme === "dark" ? "bg-gray-900" : "bg-slate-50"
+        } h-full`}>
+        {" "}
+        {/* {{ edit_3: apply dark mode styles }} */}
         {/* TODO: improve this */}
         {!(
           desiredPath === "/signin" ||

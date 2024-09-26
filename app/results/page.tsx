@@ -44,7 +44,7 @@ const Results: React.FC = () => {
   };
 
   return (
-    <div className='container mx-auto py-11 lg:pt-16'>
+    <div className='container mx-auto py-11 pt-20'>
       <h1 className='text-3xl font-bold mb-2 mt-5'>Election Dashboard</h1>
 
       <div

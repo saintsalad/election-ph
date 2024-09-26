@@ -60,6 +60,16 @@ const config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        "gradient-x": {
+          "0%, 100%": {
+            "background-size": "200% 200%",
+            "background-position": "left center",
+          },
+          "50%": {
+            "background-size": "200% 200%",
+            "background-position": "right center",
+          },
+        },
         "accordion-down": {
           from: {
             height: "0",
@@ -123,9 +133,16 @@ const config = {
         shake: "shake 1.5s cubic-bezier(.36,.07,.19,.97) both infinite",
         "spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
         slide: "slide var(--speed) ease-in-out infinite alternate",
+        "gradient-x": "gradient-x 15s ease infinite",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
+      backgroundImage: {
+        "gradient-x-light":
+          "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1), transparent)",
+        "gradient-x-dark":
+          "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1), transparent)",
       },
     },
   },

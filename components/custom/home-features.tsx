@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 
 const features = [
   {
@@ -74,6 +75,7 @@ const features = [
 const HomeFeatures = () => {
   const [showAll, setShowAll] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { theme } = useTheme();
 
   const SHOWN_FEATURES = 6;
 
@@ -83,23 +85,40 @@ const HomeFeatures = () => {
         <div className='mb-3 text-sm text-slate-500'>
           WHAT WE&#39;RE COOKING🔥
         </div>
-        <h1 className='text-center text-xl max-w-sm sm:text-4xl font-bold text-slate-800 z-10 mb-5'>
+        <h1
+          className='text-center text-xl max-w-sm sm:text-4xl font-bold ${
+          theme === "dark" ? "text-white" : "text-slate-900"
+        } z-10 mb-5'>
           Lit Features for Informed Citizens
         </h1>
-        <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
+        <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-5 lg:px-0'>
           {features
             .slice(0, isDesktop || showAll ? features.length : SHOWN_FEATURES)
             .map((feature, index) => (
               <div
                 key={index}
-                className={`bg-slate-100 p-4 sm:p-5 rounded-lg border hover:shadow-lg transition-all duration-300 hover:scale-105`}>
+                className={`p-4 sm:p-5 rounded-lg border hover:shadow-lg transition-all duration-300 hover:scale-105 ${
+                  theme === "dark"
+                    ? "bg-gray-800 text-gray-300"
+                    : "bg-slate-100 text-slate-700"
+                }`}>
                 {feature.icon && (
-                  <feature.icon className='text-slate-700 h-5 w-5' />
+                  <feature.icon
+                    className={`h-5 w-5 ${
+                      theme === "dark" ? "text-gray-400" : "text-slate-700"
+                    }`}
+                  />
                 )}
-                <h2 className='text-base sm:text-lg font-bold text-slate-700 mt-2 sm:mt-3'>
+                <h2
+                  className={`font-bold mt-2 sm:mt-3 ${
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}>
                   {feature.title}
                 </h2>
-                <div className='text-slate-600 text-xs sm:text-sm'>
+                <div
+                  className={`text-xs sm:text-sm ${
+                    theme === "dark" ? "text-gray-500" : "text-slate-600"
+                  }`}>
                   {feature.description}
                 </div>
               </div>

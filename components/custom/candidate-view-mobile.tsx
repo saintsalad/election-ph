@@ -219,7 +219,7 @@ const CandidateViewMobile = ({
             <div className='flex gap-x-1.5'>{renderDots()}</div>
           </div>
 
-          <Link href={"/candidates"} className='fixed top-14 left-1'>
+          <Link href={"/candidates"} className='fixed top-20 left-1'>
             <ChevronLeft color='#FFF' className='h-8 w-8  drop-shadow-xl' />
           </Link>
 

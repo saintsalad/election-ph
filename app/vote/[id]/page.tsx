@@ -60,12 +60,12 @@ function VotingPage({ params }: { params: { id: string } }) {
 
   // 2. Empty state
   if (!election || election.candidates.length === 0) {
-    return <div className='text-center pt-16'>No election data found</div>;
+    return <div className='text-center pt-20'>No election data found</div>;
   }
 
   // 3. Error state
   if (isError) {
-    return <div className='text-center pt-16'>Error loading election data</div>;
+    return <div className='text-center pt-20'>Error loading election data</div>;
   }
 
   // 4. Already voted state
@@ -129,7 +129,7 @@ function VotingPage({ params }: { params: { id: string } }) {
 
   // 6. Default state
   return (
-    <div className='flex flex-1 flex-col pt-11 lg:pt-16 min-w-[340px]'>
+    <div className='flex flex-1 flex-col pt-20 min-w-[340px]'>
       {showAlertBanner && (
         <Alert className='relative rounded-none lg:rounded mt-3 mb-5 bg-gradient-to-r from-yellow-500 to-orange-600 text-white'>
           <div

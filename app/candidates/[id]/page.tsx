@@ -60,7 +60,7 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
   return (
     <>
       {isDesktop && (
-        <ScrollArea className='pt-11 lg:pt-16 flex-1 min-h-[100vh] w-full !overflow-y-scroll no-scrollbar'>
+        <ScrollArea className='pt-20 flex-1 min-h-[100vh] w-full !overflow-y-scroll no-scrollbar'>
           <CandidateViewDeskTop
             isLoading={isLoading}
             candidate={candidate}
