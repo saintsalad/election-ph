@@ -131,7 +131,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   return (
     <div className='flex flex-1 flex-col pt-20 min-w-[340px]'>
       {showAlertBanner && (
-        <Alert className='relative rounded-none lg:rounded mt-3 mb-5 bg-gradient-to-r from-yellow-500 to-orange-600 text-white'>
+        <Alert className='animate-gradient-x relative rounded-none lg:rounded mt-3 mb-5 bg-gradient-to-r from-yellow-400 via-red-500  to-blue-600 text-white'>
           <div
             title='Close Alert'
             onClick={() => setShowAlertBanner(false)}

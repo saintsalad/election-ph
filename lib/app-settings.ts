@@ -24,7 +24,7 @@ export const navigation: NavigationProps[] = [
       {
         route: "/results",
         label: "Results",
-        isFullWidth: false,
+        isFullWidth: true,
       },
     ],
   },

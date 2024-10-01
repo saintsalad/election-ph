@@ -304,7 +304,7 @@ function MainHeader() {
       className={`fixed top-0 z-50 w-full shadow-lg border-b ${
         isDarkMode ? "border-gray-700/30" : "border-gray-200/20"
       } ${bgColorClass} backdrop-blur-xl transition-colors duration-300`}>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+      <div className='container max-w-7xl mx-auto px-4 sm:px-6 lg:px-0'>
         <div className='flex h-16 items-center justify-between'>
           <Link href='/' className='flex items-center space-x-2'>
             <Image
