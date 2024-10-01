@@ -32,7 +32,7 @@ import {
   PieChart,
 } from "recharts";
 import {
-  Card as UICard,
+  Card,
   CardContent,
   CardDescription,
   CardFooter,
@@ -46,464 +46,14 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { TooltipProps } from "recharts";
-import {
-  Card,
-  CardContent as UICardContent,
-  CardDescription as UICardDescription,
-  CardFooter as UICardFooter,
-  CardHeader as UICardHeader,
-  CardTitle as UICardTitle,
-} from "@/components/ui/card";
-
-interface BaseCardProps {
-  title: string;
-  description?: string;
-  expanded: boolean;
-  onToggle: () => void;
-  fullWidth: boolean;
-  isMainCard?: boolean;
-  footerContent?: React.ReactNode;
-}
-
-const BaseCard: React.FC<BaseCardProps & { children?: React.ReactNode }> = ({
-  title,
-  description,
-  expanded,
-  onToggle,
-  fullWidth,
-  isMainCard = false,
-  footerContent,
-  children,
-}) => {
-  const [isExpanding, setIsExpanding] = useState(false);
-
-  useEffect(() => {
-    if (expanded) {
-      setIsExpanding(true);
-      const timer = setTimeout(() => setIsExpanding(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [expanded]);
-
-  const showFooter = isMainCard || expanded;
-
-  return (
-    <Card
-      className={`overflow-hidden ${
-        fullWidth ? "w-full h-full" : "w-full"
-      } transition-all duration-300 ${
-        isExpanding ? "animate-in zoom-in-95" : ""
-      } flex flex-col lg:h-full`}>
-      <CardHeader className='relative flex-shrink-0'>
-        <div className='flex justify-between items-center'>
-          <CardTitle>{title}</CardTitle>
-          <button
-            onClick={onToggle}
-            className='text-gray-500 hover:text-gray-700 transition-colors duration-200'>
-            {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </button>
-        </div>
-        {expanded && description && (
-          <CardDescription>{description}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className='flex-grow overflow-auto'>{children}</CardContent>
-      {showFooter && (
-        <CardFooter className='text-sm text-muted-foreground flex-shrink-0'>
-          {footerContent}
-        </CardFooter>
-      )}
-    </Card>
-  );
-};
-
-interface CandidateData {
-  candidate: string;
-  party: string;
-  votes: number;
-  color: string;
-}
-
-const MainCard: React.FC<
-  BaseCardProps & {
-    electionType: string;
-    candidateVotes: CandidateData[];
-    chartConfig: any;
-  }
-> = (props) => {
-  const [chartDimensions, setChartDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (chartContainerRef.current) {
-        const { width, height } =
-          chartContainerRef.current.getBoundingClientRect();
-        setChartDimensions({ width, height });
-      }
-    };
-
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (chartContainerRef.current) {
-      resizeObserver.observe(chartContainerRef.current);
-    }
-
-    // Ensure dimensions are updated on mount
-    window.addEventListener("resize", updateDimensions);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateDimensions);
-    };
-  }, []);
-
-  const formatYAxis = (value: number) => {
-    return value.toLocaleString();
-  };
-
-  const footerContent = (
-    <div className='ml-auto text-right'>
-      <div className='flex items-center justify-end space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>Voter turnout increased by 7.8% this election</span>
-      </div>
-      <div className='mt-1'>
-        Total votes:{" "}
-        {props.candidateVotes
-          .reduce((sum, candidate) => sum + candidate.votes, 0)
-          .toLocaleString()}
-      </div>
-    </div>
-  );
-
-  return (
-    <BaseCard {...props} isMainCard={true} footerContent={footerContent}>
-      <div
-        ref={chartContainerRef}
-        className='w-full h-full flex-grow min-h-[300px]'>
-        {chartDimensions.width > 0 && chartDimensions.height > 0 && (
-          <ResponsiveContainer width='100%' height='100%' minHeight={300}>
-            <BarChart
-              data={props.candidateVotes}
-              layout='horizontal'
-              margin={{
-                left: 20,
-                right: 20,
-                top: 40,
-                bottom: 20, // Reduced from 40 to 20
-              }}>
-              <CartesianGrid strokeDasharray='3 3' vertical={false} />
-              <XAxis
-                dataKey='candidate'
-                type='category'
-                axisLine={false}
-                tickLine={false}
-                tick={({ x, y, payload }) => (
-                  <g transform={`translate(${x},${y})`}>
-                    <text
-                      x={0}
-                      y={0}
-                      dy={16}
-                      textAnchor='middle'
-                      fill='#111827'
-                      fontSize={14}
-                      fontWeight='bold'>
-                      {payload.value}
-                    </text>
-                    <text
-                      x={0}
-                      y={18} // Reduced from 22 to 18
-                      dy={16}
-                      textAnchor='middle'
-                      fill='#4B5563'
-                      fontSize={12}
-                      fontWeight='medium'>
-                      {
-                        props.candidateVotes.find(
-                          (c) => c.candidate === payload.value
-                        )?.party
-                      }
-                    </text>
-                  </g>
-                )}
-                height={60} // Reduced from 80 to 60
-              />
-              <YAxis
-                type='number'
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#4B5563", fontSize: 12 }}
-                tickFormatter={formatYAxis}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey='votes' radius={[4, 4, 0, 0]}>
-                {props.candidateVotes.map((entry) => (
-                  <Cell key={`cell-${entry.candidate}`} fill={entry.color} />
-                ))}
-                <LabelList
-                  dataKey='votes'
-                  position='top'
-                  fill='#111827'
-                  fontSize={14}
-                  fontWeight='bold'
-                  formatter={(value: number) => value.toLocaleString()}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-    </BaseCard>
-  );
-};
-
-const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
-  active,
-  payload,
-  label,
-}) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload as CandidateData;
-    return (
-      <div className='bg-white bg-opacity-95 p-3 shadow-lg rounded-lg font-sans'>
-        <p className='font-bold text-base mb-1' style={{ color: data.color }}>
-          {data.candidate}
-        </p>
-        <p className='text-gray-700 text-sm mb-1'>
-          Party: <span className='font-semibold'>{data.party}</span>
-        </p>
-        <p className='text-gray-700 text-sm'>
-          Votes: <span className='font-semibold'>{data.votes}</span>
-        </p>
-      </div>
-    );
-  }
-
-  return null;
-};
-
-const GenderCard: React.FC<BaseCardProps> = (props) => {
-  const [chartDimensions, setChartDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (chartContainerRef.current) {
-        const { width, height } =
-          chartContainerRef.current.getBoundingClientRect();
-        setChartDimensions({ width, height });
-      }
-    };
-
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (chartContainerRef.current) {
-      resizeObserver.observe(chartContainerRef.current);
-    }
-
-    // Ensure dimensions are updated on mount
-    window.addEventListener("resize", updateDimensions);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateDimensions);
-    };
-  }, []);
-
-  const genderData = [
-    { gender: "Male", voters: 450000, color: "#3B82F6" },
-    { gender: "Female", voters: 420000, color: "#EC4899" },
-    { gender: "Others", voters: 30000, color: "#10B981" },
-  ];
-
-  const footerContent = (
-    <div className='w-full flex flex-col items-end justify-end text-sm text-muted-foreground'>
-      <div className='flex items-center space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>
-          <strong>Female</strong> voters increased by <strong>3.5%</strong> this
-          election
-        </span>
-      </div>
-      <div className='mt-1'>
-        Total of{" "}
-        <strong>
-          {genderData
-            .reduce((sum, item) => sum + item.voters, 0)
-            .toLocaleString()}
-        </strong>{" "}
-        voters
-      </div>
-    </div>
-  );
-
-  const renderCustomizedLabel = (props: any) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, percent, index } =
-      props;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180);
-    const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180);
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill='inherit'
-        fontSize={13}
-        fontWeight='bold'
-        textAnchor={x > cx ? "start" : "end"}
-        dominantBaseline='central'>
-        {(percent * 100).toFixed(0)}%
-      </text>
-    );
-  };
-
-  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
-    active,
-    payload,
-    label,
-  }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className='bg-white bg-opacity-95 p-3 shadow-lg rounded-lg font-sans'>
-          <p className='font-bold text-base mb-1' style={{ color: data.color }}>
-            {data.gender}
-          </p>
-          <p className='text-gray-700 text-sm mb-1'>
-            Voters:{" "}
-            <span className='font-semibold'>
-              {data.voters.toLocaleString()}
-            </span>
-          </p>
-          <p className='text-gray-700 text-sm'>
-            Percentage:{" "}
-            <span className='font-semibold'>{data.extraInfo.Percentage}</span>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  return (
-    <BaseCard {...props} footerContent={footerContent}>
-      <div className='w-full h-full flex flex-col'>
-        <div ref={chartContainerRef} className='w-full flex-grow min-h-[230px]'>
-          {chartDimensions.width > 0 && chartDimensions.height > 0 && (
-            <ResponsiveContainer width='100%' height='100%' minHeight={230}>
-              <PieChart>
-                <Tooltip content={<CustomTooltip />} />
-                <Pie
-                  data={genderData.map((gd) => ({
-                    ...gd,
-                    label: gd.gender,
-                    value: gd.voters,
-                    extraInfo: {
-                      Percentage: `${(
-                        (gd.voters /
-                          genderData.reduce(
-                            (sum, item) => sum + item.voters,
-                            0
-                          )) *
-                        100
-                      ).toFixed(2)}%`,
-                    },
-                  }))}
-                  dataKey='value'
-                  nameKey='gender'
-                  cx='50%'
-                  cy='50%'
-                  outerRadius={
-                    Math.min(chartDimensions.width, chartDimensions.height) *
-                    0.35
-                  }
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                  strokeWidth={0}>
-                  {genderData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-        <div className='flex justify-center mt-4'>
-          {genderData.map((entry, index) => (
-            <div key={`legend-${index}`} className='flex items-center mx-2'>
-              <div
-                className='w-3 h-3 mr-1'
-                style={{ backgroundColor: entry.color }}></div>
-              <span className='text-sm font-medium'>{entry.gender}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </BaseCard>
-  );
-};
-
-const EducationCard: React.FC<BaseCardProps> = (props) => {
-  const footerContent = (
-    <div className='ml-auto text-right'>
-      <div className='flex items-center justify-end space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>College graduates&apos; turnout up by 4.2%</span>
-      </div>
-      <div className='mt-1'>
-        Highest education level: Bachelor&apos;s degree
-      </div>
-    </div>
-  );
-
-  return (
-    <BaseCard {...props} footerContent={footerContent}>
-      {/* Add education-specific content here */}
-    </BaseCard>
-  );
-};
-
-const AgeCard: React.FC<BaseCardProps> = (props) => {
-  const footerContent = (
-    <div className='ml-auto text-right'>
-      <div className='flex items-center justify-end space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>Youth voter turnout increased by 6.5%</span>
-      </div>
-      <div className='mt-1'>Largest voting bloc: Ages 35-44</div>
-    </div>
-  );
-
-  return (
-    <BaseCard {...props} footerContent={footerContent}>
-      {/* Add age-specific content here */}
-    </BaseCard>
-  );
-};
-
-const CitiesCard: React.FC<BaseCardProps> = (props) => {
-  const footerContent = (
-    <div className='ml-auto text-right'>
-      <div className='flex items-center justify-end space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>Urban voter participation up 5.1%</span>
-      </div>
-      <div className='mt-1'>Highest turnout: New York City</div>
-    </div>
-  );
-
-  return (
-    <BaseCard {...props} footerContent={footerContent}>
-      {/* Add cities-specific content here */}
-    </BaseCard>
-  );
-};
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import BaseCard, {
+  BaseCardProps,
+} from "@/components/custom/dashboard/base-card";
+import MainCard from "@/components/custom/dashboard/main-card";
+import GenderCard from "@/components/custom/dashboard/gender-card";
+import { EducationCard } from "@/components/custom/dashboard/education-card";
+import CityCard from "@/components/custom/dashboard/city-card";
 
 const Page: React.FC = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -554,28 +104,52 @@ const Page: React.FC = () => {
 
   const candidateVotes = [
     {
-      candidate: "John Smith",
-      party: "Democratic",
-      votes: 186000,
-      color: "#3B82F6",
-    },
-    {
-      candidate: "Emily Johnson",
-      party: "Republican",
-      votes: 305000,
-      color: "#EF4444",
-    },
-    {
-      candidate: "Michael Lee",
-      party: "Independent",
-      votes: 237000,
-      color: "#10B981",
-    },
-    {
-      candidate: "Sarah Williams",
-      party: "Green",
+      candidate: "Eren Yeager",
+      party: "Scout Regiment",
       votes: 173000,
-      color: "#F59E0B",
+      color: "#2C3E50",
+    },
+    {
+      candidate: "Mikasa Ackerman",
+      party: "Survey Corps",
+      votes: 186000,
+      color: "#E74C3C",
+    },
+    {
+      candidate: "Armin Arlert",
+      party: "Colossal Titan",
+      votes: 305000,
+      color: "#F1C40F",
+    },
+    {
+      candidate: "Levi Ackerman",
+      party: "Special Operations",
+      votes: 237000,
+      color: "#3498DB",
+    },
+    {
+      candidate: "Historia Reiss",
+      party: "Royal Government",
+      votes: 173000,
+      color: "#9B59B6",
+    },
+    {
+      candidate: "Reiner Braun",
+      party: "Warrior Unit",
+      votes: 30500,
+      color: "#D35400",
+    },
+    {
+      candidate: "Annie Leonhart",
+      party: "Military Police",
+      votes: 2222,
+      color: "#1ABC9C",
+    },
+    {
+      candidate: "Hange Zoë",
+      party: "Research Corps",
+      votes: 46465,
+      color: "#27AE60",
     },
   ];
 
@@ -617,7 +191,7 @@ const Page: React.FC = () => {
       case "Age":
         return <GenderCard {...baseProps} />;
       case "Cities":
-        return <CitiesCard {...baseProps} />;
+        return <CityCard {...baseProps} />;
       default:
         return null;
     }
