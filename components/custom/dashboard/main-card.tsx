@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { TrendingUp } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -62,35 +62,21 @@ function formatYAxis(value: number): string {
 }
 
 const MainCard: React.FC<MainCardProps> = (props) => {
-  const [chartDimensions, setChartDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const chartContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery("(max-width: 640px)");
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const { theme } = useTheme();
 
+  const topCandidates = isMobile
+    ? props.candidateVotes.sort((a, b) => b.votes - a.votes).slice(0, 5)
+    : props.candidateVotes;
+
   useEffect(() => {
-    function updateDimensions() {
-      if (chartContainerRef.current) {
-        const { width, height } =
-          chartContainerRef.current.getBoundingClientRect();
-        setChartDimensions({ width, height });
-      }
-    }
-
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (chartContainerRef.current) {
-      resizeObserver.observe(chartContainerRef.current);
-    }
-
-    window.addEventListener("resize", updateDimensions);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateDimensions);
-    };
-  }, []);
+    const root = document.documentElement;
+    root.style.setProperty(
+      "--chart-height",
+      props.expanded || isLargeScreen ? "500px" : "300px"
+    );
+  }, [props.expanded, isLargeScreen]);
 
   const footerContent = (
     <div className='ml-auto text-right'>
@@ -112,116 +98,113 @@ const MainCard: React.FC<MainCardProps> = (props) => {
 
   return (
     <BaseCard {...props} isMainCard={true} footerContent={footerContent}>
+      {isMobile && (
+        <div className='text-sm text-gray-500 dark:text-gray-400 mb-2 text-center'>
+          Showing top 5 candidates
+        </div>
+      )}
       <div
-        ref={chartContainerRef}
-        className='w-full h-full flex-grow min-h-[300px]'>
-        {chartDimensions.width > 0 && chartDimensions.height > 0 && (
-          <ResponsiveContainer width='100%' height='100%' minHeight={300}>
-            <BarChart
-              data={props.candidateVotes}
-              layout='horizontal'
-              margin={{
-                left: 20,
-                right: 20,
-                top: 40,
-                bottom: 20,
-              }}>
-              <CartesianGrid strokeDasharray='3 3' vertical={false} />
-              <XAxis
-                dataKey='candidate'
-                type='category'
-                axisLine={false}
-                tickLine={false}
-                tick={({ x, y, payload }) => (
-                  <g transform={`translate(${x},${y})`}>
+        className='w-full transition-[height] duration-300 ease-in-out'
+        style={{ height: "var(--chart-height, 300px)" }}>
+        <ResponsiveContainer width='100%' height='100%'>
+          <BarChart
+            data={topCandidates}
+            layout='horizontal'
+            margin={{
+              left: 20,
+              right: 20,
+              top: isMobile ? 20 : isLargeScreen ? 40 : 30,
+              bottom: 20,
+            }}>
+            <CartesianGrid strokeDasharray='3 3' vertical={false} />
+            <XAxis
+              dataKey='candidate'
+              type='category'
+              axisLine={false}
+              tickLine={false}
+              tick={({ x, y, payload }) => (
+                <g transform={`translate(${x},${y})`}>
+                  <text
+                    x={0}
+                    y={0}
+                    dy={16}
+                    textAnchor='middle'
+                    fill={theme === "dark" ? "#D1D5DB" : "#111827"}
+                    className='text-[10px] sm:text-xs font-bold'>
+                    {payload.value.split(" ")[0]}
+                  </text>
+                  {!isMobile && (
                     <text
                       x={0}
-                      y={0}
+                      y={18}
                       dy={16}
                       textAnchor='middle'
-                      fill={theme === "dark" ? "#D1D5DB" : "#111827"}
-                      className='text-[12px] sm:text-xs md:text-base font-bold'
-                      style={{ wordWrap: "break-word", width: "60px" }}>
-                      {payload.value.split(" ")[0]}
+                      fill={theme === "dark" ? "#9CA3AF" : "#4B5563"}
+                      fontSize={10}
+                      fontWeight='medium'>
+                      {
+                        topCandidates.find((c) => c.candidate === payload.value)
+                          ?.party
+                      }
                     </text>
-                    {!isMobile && (
-                      <text
-                        x={0}
-                        y={18}
-                        dy={16}
-                        textAnchor='middle'
-                        fill={theme === "dark" ? "#9CA3AF" : "#4B5563"}
-                        fontSize={12}
-                        fontWeight='medium'>
-                        {
-                          props.candidateVotes.find(
-                            (c) => c.candidate === payload.value
-                          )?.party
-                        }
-                      </text>
-                    )}
-                  </g>
-                )}
-                height={isMobile ? 60 : 100}
-                interval={0}
-              />
-              <YAxis
-                hide={isMobile}
-                type='number'
-                axisLine={false}
-                tickLine={false}
-                tick={{
-                  fill: theme === "dark" ? "#9CA3AF" : "#4B5563",
-                  fontSize: 12,
-                }}
-                tickFormatter={formatYAxis}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <defs>
-                {props.candidateVotes.map((entry) => (
-                  <linearGradient
-                    key={`gradient-${entry.candidate}`}
-                    id={getGradientId(entry.candidate)}
-                    x1='0'
-                    y1='0'
-                    x2='0'
-                    y2='1'>
-                    <stop
-                      offset='5%'
-                      stopColor={entry.color}
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset='95%'
-                      stopColor={entry.color}
-                      stopOpacity={0.3}
-                    />
-                  </linearGradient>
-                ))}
-              </defs>
-              <Bar dataKey='votes' radius={[4, 4, 0, 0]}>
-                {props.candidateVotes.map((entry) => (
-                  <Cell
-                    key={`cell-${entry.candidate}`}
-                    fill={
-                      theme === "dark"
-                        ? `url(#${getGradientId(entry.candidate)})`
-                        : entry.color
-                    }
+                  )}
+                </g>
+              )}
+              height={isMobile ? 40 : 60}
+              interval={0}
+            />
+            <YAxis
+              hide={isMobile}
+              type='number'
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: theme === "dark" ? "#9CA3AF" : "#4B5563",
+                fontSize: 12,
+              }}
+              tickFormatter={formatYAxis}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <defs>
+              {topCandidates.map((entry) => (
+                <linearGradient
+                  key={`gradient-${entry.candidate}`}
+                  id={getGradientId(entry.candidate)}
+                  x1='0'
+                  y1='0'
+                  x2='0'
+                  y2='1'>
+                  <stop offset='5%' stopColor={entry.color} stopOpacity={0.8} />
+                  <stop
+                    offset='95%'
+                    stopColor={entry.color}
+                    stopOpacity={0.3}
                   />
-                ))}
-                <LabelList
-                  dataKey='votes'
-                  position='top'
-                  fill={theme === "dark" ? "#FFFFFF" : "#111827"}
-                  fontSize={14}
-                  fontWeight='bold'
-                  formatter={(value: number) => value.toLocaleString()}
+                </linearGradient>
+              ))}
+            </defs>
+            <Bar dataKey='votes' radius={[4, 4, 0, 0]}>
+              {topCandidates.map((entry) => (
+                <Cell
+                  key={`cell-${entry.candidate}`}
+                  fill={
+                    theme === "dark"
+                      ? `url(#${getGradientId(entry.candidate)})`
+                      : entry.color
+                  }
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+              ))}
+              <LabelList
+                dataKey='votes'
+                position='top'
+                fill={theme === "dark" ? "#FFFFFF" : "#111827"}
+                fontSize={12}
+                fontWeight='bold'
+                formatter={(value: number) => value.toLocaleString()}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </BaseCard>
   );

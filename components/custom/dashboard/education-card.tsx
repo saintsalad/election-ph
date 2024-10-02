@@ -125,8 +125,8 @@ export const EducationCard: React.FC<BaseCardProps> = (props) => {
               margin={{ top: 20, right: 50, left: 20, bottom: 20 }}>
               <CartesianGrid
                 strokeDasharray='3 3'
-                horizontal={true}
-                vertical={false}
+                horizontal={false}
+                vertical={true}
               />
               <XAxis
                 type='number'

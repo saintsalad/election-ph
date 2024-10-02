@@ -54,13 +54,11 @@ const GenderCard: React.FC<BaseCardProps> = (props) => {
 
   const footerContent = (
     <div className='w-full flex flex-col items-end justify-end text-sm text-muted-foreground'>
-      <div className='flex items-center space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>
-          <strong>Female</strong> voters increased by <strong>3.5%</strong> this
-          election
-        </span>
-      </div>
+      <span className='inline-flex items-center space-x-1'>
+        <TrendingUp className='h-4 w-4 text-green-500 mr-1' />
+        <strong>Female </strong> voters increased by <strong>3.5%</strong> this
+        election
+      </span>
       <div className='mt-1'>
         Total of <strong>{totalVoters.toLocaleString()}</strong> voters
       </div>

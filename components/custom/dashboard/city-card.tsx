@@ -15,8 +15,17 @@ export const CityCard: React.FC<BaseCardProps> = (props) => {
     </div>
   );
   return (
-    <BaseCard {...props} footerContent={footerContent}>
+    <BaseCard
+      {...props}
+      // footerContent={footerContent}
+    >
       {/* Add cities-specific content here */}
+      <div className='flex flex-col items-center justify-center h-full min-h-[200px]'>
+        <TrendingUp className='h-6 w-6 text-muted-foreground mb-2' />
+        <span className='text-muted-foreground'>
+          This section is under construction
+        </span>
+      </div>
     </BaseCard>
   );
 };

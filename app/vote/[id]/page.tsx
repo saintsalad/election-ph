@@ -11,6 +11,8 @@ import { CircleCheck, Fingerprint, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { triggerConfettiFireworks } from "@/lib/functions/triggerConfettiFireworks";
+import Image from "next/image";
+import logo from "@/public/images/logo.png";
 
 function useElection(electionId: string) {
   return useQuery<ElectionNext>(`election-${electionId}`, async () => {
@@ -44,48 +46,85 @@ function VotingPage({ params }: { params: { id: string } }) {
     triggerConfettiFireworks();
   };
 
-  // 1. Loading state
+  const ballotStyle = `
+    relative bg-white border-[12px] border-black border-dashed 
+    rounded-lg shadow-md p-6 md:p-12
+    before:content-[''] before:absolute before:top-[-24px] before:left-[-24px] before:w-12 before:h-12 before:bg-black
+    after:content-[''] after:absolute after:bottom-[-24px] after:right-[-24px] before:w-12 before:h-12 before:bg-black
+    [&>*:first-child]:before:content-[''] [&>*:first-child]:before:absolute [&>*:first-child]:before:top-[-24px] [&>*:first-child]:before:right-[-24px] [&>*:first-child]:before:w-12 [&>*:first-child]:before:h-12 [&>*:first-child]:before:bg-black
+    [&>*:last-child]:after:content-[''] [&>*:last-child]:after:absolute [&>*:last-child]:after:bottom-[-24px] [&>*:last-child]:after:left-[-24px] [&>*:last-child]:after:w-12 [&>*:last-child]:after:h-12 [&>*:last-child]:after:bg-black
+  `;
+
+  const contentStyle = "max-w-3xl mx-auto";
+
+  // Loading state
   if (isLoading) {
     return (
-      <div className='flex flex-col gap-y-3 px-5 mt-16 md:flex-row md:gap-x-4 md:justify-center'>
-        {[...Array(4)].map((_, index) => (
-          <Skeleton
-            key={index}
-            className='w-full h-20 rounded-lg md:h-56 md:max-w-52'
-          />
-        ))}
+      <div className='max-w-4xl mx-auto pt-24 text-center'>
+        <h2 className='text-2xl font-bold text-slate-800 mb-2'>
+          Loading Election Data...
+        </h2>
+        <p className='text-gray-600 mb-6'>
+          Please wait while we fetch the latest election information.
+        </p>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {[...Array(6)].map((_, index) => (
+            <Skeleton key={index} className='h-20 w-full rounded-lg' />
+          ))}
+        </div>
       </div>
     );
   }
 
-  // 2. Empty state
+  // Empty state
   if (!election || election.candidates.length === 0) {
-    return <div className='text-center pt-20'>No election data found</div>;
+    return (
+      <div
+        className={`max-w-4xl mx-auto mt-8 ${ballotStyle} text-center py-12`}>
+        <h2 className='text-2xl font-bold text-slate-800 mb-4'>
+          No Election Data Found
+        </h2>
+        <p className='text-gray-600'>
+          There are currently no active elections or candidates available.
+        </p>
+      </div>
+    );
   }
 
-  // 3. Error state
+  // Error state
   if (isError) {
-    return <div className='text-center pt-20'>Error loading election data</div>;
+    return (
+      <div
+        className={`max-w-4xl mx-auto mt-8 ${ballotStyle} text-center py-12`}>
+        <h2 className='text-2xl font-bold text-red-600 mb-4'>
+          Error Loading Election Data
+        </h2>
+        <p className='text-gray-600'>
+          We&apos;re experiencing technical difficulties. Please try again
+          later.
+        </p>
+      </div>
+    );
   }
 
-  // 4. Already voted state
+  // Already voted state
   if (election.isVoted && !isSubmitted) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4'>
-        <div className='bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center'>
+      <div className={`max-w-5xl mx-auto mt-32`}>
+        <div className={contentStyle}>
           <Fingerprint className='h-16 w-16 text-blue-500 mx-auto mb-4' />
-          <h2 className='text-2xl font-bold text-slate-800 mb-4'>
-            You&#39;ve Already Cast Your Vote
+          <h2 className='text-2xl font-bold text-slate-800 mb-4 text-center'>
+            You&apos;ve Already Cast Your Vote
           </h2>
-          <p className='text-gray-600 mb-6'>
+          <p className='text-gray-600 mb-6 text-center max-w-lg mx-auto'>
             Thank you for participating in this election. Your vote has been
             recorded and is contributing to the democratic process.
           </p>
-          <div className='space-y-3'>
-            <Button asChild className='w-full'>
-              <Link href='/dashboard'>View Live Results</Link>
+          <div className='flex justify-center space-x-4'>
+            <Button asChild>
+              <Link href='/results'>View Live Results</Link>
             </Button>
-            <Button asChild variant='outline' className='w-full'>
+            <Button asChild variant='outline'>
               <Link href='/'>Return to Home</Link>
             </Button>
           </div>
@@ -94,31 +133,29 @@ function VotingPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // 5. Successfully voted state
+  // Successfully voted state
   if (isSubmitted) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4'>
-        <div className='bg-white rounded-lg shadow-md p-8 max-w-md w-full'>
-          <div className='flex flex-col items-center'>
-            <CircleCheck
-              className='h-20 w-20 mb-4'
-              strokeWidth={2.5}
-              fill='#16a34a'
-              color='#FFF'
-            />
-            <h2 className='text-2xl font-bold text-green-600 text-center mb-2'>
-              Submitted Successfully
-            </h2>
-            <p className='text-gray-600 text-center mb-6'>
-              Your participation in this online survey is greatly appreciated.
-              Your vote has been safely stored. Thank you for participating.
-            </p>
-          </div>
-          <div className='space-y-2'>
-            <Button asChild className='w-full'>
-              <Link href='/dashboard'>View Election Dashboard</Link>
+      <div className={`max-w-5xl mx-auto pt-36`}>
+        <div className={contentStyle}>
+          <CircleCheck
+            className='h-20 w-20 mb-4 mx-auto'
+            strokeWidth={2.5}
+            fill='#16a34a'
+            color='#FFF'
+          />
+          <h2 className='text-2xl font-bold text-green-600 text-center mb-2'>
+            Submitted Successfully
+          </h2>
+          <p className='text-gray-600 text-center mb-6 max-w-lg mx-auto'>
+            Your participation in this online survey is greatly appreciated.
+            Your vote has been safely stored. Thank you for participating.
+          </p>
+          <div className='flex justify-center space-x-4'>
+            <Button asChild>
+              <Link href='/results'>View Election Dashboard</Link>
             </Button>
-            <Button asChild variant='outline' className='w-full'>
+            <Button asChild variant='outline'>
               <Link href='/'>Return to Home</Link>
             </Button>
           </div>
@@ -127,44 +164,51 @@ function VotingPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // 6. Default state
+  // Default voting state
   return (
-    <div className='flex flex-1 flex-col pt-20 min-w-[340px]'>
-      {showAlertBanner && (
-        <Alert className='animate-gradient-x relative rounded-none lg:rounded mt-3 mb-5 bg-gradient-to-r from-yellow-400 via-red-500  to-blue-600 text-white'>
-          <div
-            title='Close Alert'
-            onClick={() => setShowAlertBanner(false)}
-            role='button'
-            className='absolute top-3.5 right-3'>
-            <X className='h-5 w-5' />
+    <div className='max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8'>
+      <div className={`${ballotStyle}`}>
+        <div className={contentStyle}>
+          <div className='flex flex-col md:flex-row items-center justify-between mb-8'>
+            <div className='flex items-center gap-x-3 mb-4 md:mb-0'>
+              <Image
+                src={logo}
+                alt='Election PH Logo'
+                width={40}
+                height={40}
+                className='object-contain'
+              />
+              <div className='hidden md:block'>
+                <h2 className='text-lg font-bold text-blue-600'>Election PH</h2>
+                <p className='text-xs text-gray-600'>Your Vote Matters</p>
+              </div>
+            </div>
+            <div className='text-center md:text-right'>
+              <h1 className='text-2xl capitalize font-bold text-slate-800'>
+                {election.electionType} Election
+              </h1>
+              <p className='text-sm text-slate-600'>{election.description}</p>
+            </div>
           </div>
-          <AlertTitle className='font-bold text-base mb-0'>
-            Cast Your Vote
-          </AlertTitle>
-          <AlertDescription>
-            Select up to
-            <b className='mx-1'>{election.numberOfVotes} candidate(s)</b>
-            according to the voting rules and submit your vote. Your
-            participation matters—choose wisely! 🤗
-          </AlertDescription>
-        </Alert>
-      )}
 
-      <div className='px-5'>
-        <div className='mt-10 flex flex-1 flex-col items-center '>
-          <div className='text-2xl sm:text-4xl font-bold capitalize items-center text-slate-800'>
-            {election.electionType} Election
+          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8'>
+            <h3 className='font-semibold text-blue-800 mb-2'>
+              Voting Instructions:
+            </h3>
+            <ol className='list-decimal list-inside text-sm text-blue-700 space-y-1'>
+              <li>Review the candidates carefully</li>
+              <li>Select up to {election.numberOfVotes} candidate(s)</li>
+              <li>Double-check your choices</li>
+              <li>Click &quot;Confirm&quot; to submit your vote</li>
+            </ol>
           </div>
-          <div className='text-slate-800 text-center text-sm sm:text-base'>
-            {election.description}
-          </div>
+
+          <SingleVoteListView
+            onVoteSubmitted={handleIsVoted}
+            electionId={electionId}
+            election={election}
+          />
         </div>
-        <SingleVoteListView
-          onVoteSubmitted={handleIsVoted}
-          electionId={electionId}
-          election={election}
-        />
       </div>
     </div>
   );

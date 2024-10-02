@@ -54,6 +54,7 @@ import MainCard from "@/components/custom/dashboard/main-card";
 import GenderCard from "@/components/custom/dashboard/gender-card";
 import { EducationCard } from "@/components/custom/dashboard/education-card";
 import CityCard from "@/components/custom/dashboard/city-card";
+import AgeCard from "@/components/custom/dashboard/age-card";
 
 const Page: React.FC = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -69,13 +70,13 @@ const Page: React.FC = () => {
     setExpandedCard((prev) => (prev === title ? null : title));
   };
 
-  const toggleCardVisibility = (title: string) => {
-    setVisibleCards((prev) =>
-      prev.includes(title)
-        ? prev.filter((card) => card !== title)
-        : [...prev, title]
-    );
-  };
+  // const toggleCardVisibility = (title: string) => {
+  //   setVisibleCards((prev) =>
+  //     prev.includes(title)
+  //       ? prev.filter((card) => card !== title)
+  //       : [...prev, title]
+  //   );
+  // };
 
   const sideCards = [
     {
@@ -189,7 +190,7 @@ const Page: React.FC = () => {
       case "Education":
         return <EducationCard {...baseProps} />;
       case "Age":
-        return <GenderCard {...baseProps} />;
+        return <AgeCard {...baseProps} />;
       case "Cities":
         return <CityCard {...baseProps} />;
       default:
@@ -223,7 +224,7 @@ const Page: React.FC = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='outline' size='icon'>
                   <Settings className='h-4 w-4' />
@@ -241,7 +242,7 @@ const Page: React.FC = () => {
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </div>
       </header>
