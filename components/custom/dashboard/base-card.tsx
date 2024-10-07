@@ -47,7 +47,9 @@ const BaseCard: React.FC<BaseCardProps & { children?: React.ReactNode }> = ({
         fullWidth ? "w-full h-full" : "w-full"
       } transition-all duration-300 ${
         isExpanding ? "animate-in zoom-in-95" : ""
-      } flex flex-col lg:h-full`}>
+      } flex flex-col lg:h-full
+      ${isMainCard ? "max-h-[764px]" : ""}
+      `}>
       <CardHeader className='relative flex-shrink-0'>
         <div className='flex justify-between items-center'>
           <CardTitle>{title}</CardTitle>

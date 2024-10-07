@@ -74,7 +74,7 @@ const MainCard: React.FC<MainCardProps> = (props) => {
     const root = document.documentElement;
     root.style.setProperty(
       "--chart-height",
-      props.expanded || isLargeScreen ? "500px" : "300px"
+      props.expanded || isLargeScreen ? "550px" : "350px"
     );
   }, [props.expanded, isLargeScreen]);
 

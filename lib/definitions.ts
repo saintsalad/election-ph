@@ -1,6 +1,16 @@
 import { Icons } from "@/components/custom/icons";
 import { FieldValue } from "firebase/firestore";
 
+export type UserResponse = {
+  displayName: string;
+  email: string;
+  age?: number;
+  gender?: string;
+  education?: string;
+  city?: string;
+  dateUpdated?: string;
+};
+
 export type Candidate = {
   id: string;
   name: string;

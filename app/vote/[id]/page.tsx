@@ -79,8 +79,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Empty state
   if (!election || election.candidates.length === 0) {
     return (
-      <div
-        className={`max-w-4xl mx-auto mt-8 ${ballotStyle} text-center py-12`}>
+      <div className={`max-w-4xl mx-auto mt-8 text-center py-12`}>
         <h2 className='text-2xl font-bold text-slate-800 mb-4'>
           No Election Data Found
         </h2>
@@ -94,8 +93,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Error state
   if (isError) {
     return (
-      <div
-        className={`max-w-4xl mx-auto mt-8 ${ballotStyle} text-center py-12`}>
+      <div className={`max-w-4xl mx-auto mt-8 text-center py-12`}>
         <h2 className='text-2xl font-bold text-red-600 mb-4'>
           Error Loading Election Data
         </h2>
@@ -167,7 +165,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Default voting state
   return (
     <div className='max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8'>
-      <div className={`${ballotStyle}`}>
+      <div className={``}>
         <div className={contentStyle}>
           <div className='flex flex-col md:flex-row items-center justify-between mb-8'>
             <div className='flex items-center gap-x-3 mb-4 md:mb-0'>
@@ -180,7 +178,7 @@ function VotingPage({ params }: { params: { id: string } }) {
               />
               <div className='hidden md:block'>
                 <h2 className='text-lg font-bold text-blue-600'>Election PH</h2>
-                <p className='text-xs text-gray-600'>Your Vote Matters</p>
+                <p className='text-xs text-gray-600'>Choose Wisely</p>
               </div>
             </div>
             <div className='text-center md:text-right'>
@@ -195,11 +193,13 @@ function VotingPage({ params }: { params: { id: string } }) {
             <h3 className='font-semibold text-blue-800 mb-2'>
               Voting Instructions:
             </h3>
-            <ol className='list-decimal list-inside text-sm text-blue-700 space-y-1'>
+            <ol className='list-decimal list-inside text-xs text-blue-700 space-y-1'>
               <li>Review the candidates carefully</li>
               <li>Select up to {election.numberOfVotes} candidate(s)</li>
               <li>Double-check your choices</li>
-              <li>Click &quot;Confirm&quot; to submit your vote</li>
+              <li>
+                Click <b>Confirm</b> to submit your vote
+              </li>
             </ol>
           </div>
 

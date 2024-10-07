@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { APIResponse } from "@/lib/definitions";
 import { createSessionCookie, auth } from "@/lib/firebase/firebase-admin";
+import { FirebaseAuthError } from "firebase-admin/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,10 +41,21 @@ export async function GET(request: NextRequest) {
   }
 
   // Use Firebase Admin to validate the session cookie
-  const decodedClaims = await auth.verifySessionCookie(session, true);
+  try {
+    const decodedClaims = await auth.verifySessionCookie(session, true);
 
-  if (!decodedClaims) {
-    return NextResponse.json({ isLogged: false }, { status: 402 });
+    if (!decodedClaims) {
+      return NextResponse.json({ isLogged: false }, { status: 402 });
+    }
+  } catch (error) {
+    if (error instanceof FirebaseAuthError) {
+      if (error.code === "auth/session-cookie-expired") {
+        return NextResponse.json(
+          { isLogged: false, code: error.code },
+          { status: 402 }
+        );
+      }
+    }
   }
 
   return NextResponse.json({ isLogged: true }, { status: 200 });

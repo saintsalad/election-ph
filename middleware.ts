@@ -1,5 +1,14 @@
 import axios from "axios";
 import { NextResponse, type NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { kv } from "@vercel/kv";
+import { AxiosError } from "axios";
+
+// const ratelimit = new Ratelimit({
+//   redis: kv,
+//   // 5 requests from the same IP in 10 seconds
+//   limiter: Ratelimit.slidingWindow(10, "10 s"),
+// });
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -17,7 +26,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // if (request.nextUrl.hostname === "production") {
+  //   const ip = request.ip ?? "127.0.0.1";
+  //   const { success, pending, limit, reset, remaining } = await ratelimit.limit(
+  //     ip
+  //   );
+
+  //   if (!success) {
+  //     return NextResponse.redirect(new URL("/blocked", request.url));
+  //   }
+  // }
+
+  //return NextResponse.next();
+
   if (!sessionCookie) {
+    console.log("Cookie not found");
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
@@ -30,49 +53,33 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const responseAPI = await axios.get(`${origin}/api/signin`, {
+    const response = await axios.get(`${origin}/api/signin`, {
       headers: {
         Cookie: `__session=${sessionCookie}`,
       },
+      validateStatus: (status) => status < 500, // Consider all status codes less than 500 as resolved
     });
 
-    // Allow access to the protected route if the session is valid
-    if (responseAPI.status === 200) {
-      // ✨✨✨ Route checking ✨✨✨
-
-      // const votePathPattern = /^\/vote\/([^\/]+)$/;
-      // const match = url.pathname.match(votePathPattern);
-
-      // if (match) {
-      //   const voteId = match[1];
-      //   // Validate the vote ID (e.g., check length, format, etc.)
-      //   if (!(voteId && voteId.length > 0)) {
-      //     console.log("✅ Valid vote ID:", voteId);
-      //     return NextResponse.next();
-      //   } else {
-      //     console.log("❌ Invalid vote ID");
-      //     return NextResponse.redirect(new URL("/not-found", request.url));
-      //   }
-      // }
-
-      // ✨✨✨ Route checking end ✨✨✨
-
+    if (response.status === 200) {
       return NextResponse.next();
     } else {
-      console.log("❌ Unauthorized access:", responseAPI.status);
+      console.log(`❌ Unauthorized access: ${response.status}`);
+      if (response.data?.code === "auth/session-cookie-expired") {
+        console.log("Session cookie expired");
+      }
       return NextResponse.redirect(new URL("/signin", request.url));
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Authentication error:",
-        error.response?.status,
-        error.response?.data
-      );
-    } else {
-      console.error("Unexpected error:", error);
+    console.error("Error verifying session:", error);
+    if (error instanceof AxiosError) {
+      if (error.response) {
+        console.log(`Server responded with status: ${error.response.status}`);
+      } else if (error.request) {
+        console.log("No response received from server");
+      } else {
+        console.log("Error setting up the request:", error.message);
+      }
     }
-    // Redirect to login page if authentication fails
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 }
