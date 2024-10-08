@@ -20,7 +20,7 @@ const FAQ = ({ showItems }: FAQProps) => {
 
   return (
     <div className='w-full max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8'>
-      <h2 className='text-4xl font-bold text-center mb-8'>
+      <h2 className='text-3xl sm:text-4xl font-bold text-left sm:text-center mb-8'>
         <span className='bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600'>
           Frequently Asked Questions
         </span>
@@ -32,15 +32,17 @@ const FAQ = ({ showItems }: FAQProps) => {
         defaultValue='item-0'>
         {displayedFaqs.map((faq, index) => (
           <AccordionItem key={index} value={`item-${index}`}>
-            <AccordionTrigger className='text-base font-medium'>
+            <AccordionTrigger className='text-base font-medium text-left'>
               {faq.question}
             </AccordionTrigger>
-            <AccordionContent>{faq.answer}</AccordionContent>
+            <AccordionContent className='text-left'>
+              {faq.answer}
+            </AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>
       {!showAll && showItems && (
-        <div className='mt-8 text-center'>
+        <div className='mt-8 text-left sm:text-center'>
           <Link href='/faq' className='text-blue-600 hover:text-blue-800'>
             View all FAQs
           </Link>

@@ -143,7 +143,7 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
             />
             <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6'>
               <div className='text-2xl font-bold text-white'>
-                {candidate.balotNumber}. {candidate.displayName}
+                {candidate.ballotNumber}. {candidate.displayName}
               </div>
               <p className='text-xs uppercase text-white'>{candidate.party}</p>
               <DialogDescription className='text-xs text-white/80'>

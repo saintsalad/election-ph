@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Candidate, CandidateNext } from "@/lib/definitions";
+import type { CandidateNext } from "@/lib/definitions";
 import { fetchFromFirebase } from "@/lib/firebase/functions";
 import Link from "next/link";
 import defaultImage from "@/public/images/default.png";

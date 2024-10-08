@@ -15,7 +15,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import { Candidate, CandidateNext } from "@/lib/definitions";
+import { CandidateNext } from "@/lib/definitions";
 import { toast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -58,7 +58,7 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
       party: "",
       displayPhoto: "",
       shortDescription: "",
-      balotNumber: 0,
+      ballotNumber: 0,
       coverPhoto: "",
       biography: "",
       educAttainment: "",
@@ -133,17 +133,18 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
         reader.onload = async (e) => {
           const fileDataUrl = e.target?.result as string;
 
-          // Delete the existing image from Firebase Storage
+          // Delete the existing image from Firebase Storage if it exists
           if (existingImageUrl) {
-            const existingImageRef = ref(
-              storage,
-              getPathFromUrl(existingImageUrl)
-            );
             try {
+              const existingImageRef = ref(
+                storage,
+                getPathFromUrl(existingImageUrl)
+              );
               await deleteObject(existingImageRef);
               console.log("Deleted existing image successfully.");
             } catch (error) {
-              console.error("Error deleting existing image: ", error);
+              // If the file doesn't exist, just log it and continue
+              console.log("No existing image found or error deleting:", error);
             }
           }
 
@@ -155,18 +156,21 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
           await uploadString(newImageRef, fileDataUrl, "data_url");
           const newImageUrl = await getDownloadURL(newImageRef);
 
-          // Update document with the new image URL
-          await updateDoc(docRef, {
+          // Prepare the data for update, excluding the File object
+          const updateData = {
             ...data,
-            image: newImageUrl,
-          });
+            displayPhoto: newImageUrl,
+          };
+
+          // Update document with the new image URL
+          await updateDoc(docRef, updateData);
 
           toast({
             title: "Document updated",
             description: (
               <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
                 <code className='text-white'>
-                  {JSON.stringify(data, null, 2)}
+                  {JSON.stringify(updateData, null, 2)}
                 </code>
               </pre>
             ),
@@ -176,9 +180,12 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
         reader.readAsDataURL(file);
       } else {
         // If no new image, just update the document
+        const updateData = { ...data };
+        delete updateData.displayPhoto; // Remove the displayPhoto field if it's not a new file
+
         await updateDoc(docRef, {
-          ...data,
-          image: existingImageUrl, // Ensure image field is not removed if not updated
+          ...updateData,
+          displayPhoto: existingImageUrl, // Keep the existing image URL
         });
 
         toast({
@@ -186,7 +193,7 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
           description: (
             <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
               <code className='text-white'>
-                {JSON.stringify(data, null, 2)}
+                {JSON.stringify(updateData, null, 2)}
               </code>
             </pre>
           ),
@@ -194,7 +201,11 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
       }
     } catch (e) {
       console.error("Error updating document: ", e);
-      throw e;
+      toast({
+        title: "Error",
+        description: "Failed to update document. Please try again.",
+        variant: "destructive",
+      });
     }
   }
 
@@ -361,14 +372,14 @@ const UpdateCandidate = ({ params }: { params: { id: string } }) => {
                 )}
               />
 
-              {/* ⭐ balotNumber */}
+              {/* ⭐ ballotNumber */}
               <FormField
                 control={form.control}
-                name='balotNumber'
+                name='ballotNumber'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Balot Number<span className='text-red-600'>*</span>
+                      Ballot Number<span className='text-red-600'>*</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder='e.g, 69' {...field} />

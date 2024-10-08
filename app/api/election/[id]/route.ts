@@ -87,17 +87,23 @@ export async function GET(
     candidateIds
   );
 
-  // Attach candidates data to the election
-  election.candidates = candidatesData;
+  // Sort candidates by ballot number
+  const sortedCandidatesData = candidatesData.sort(
+    (a, b) => a.ballotNumber - b.ballotNumber
+  );
+
+  // Attach sorted candidates data to the election
+  election.candidates = sortedCandidatesData;
 
   // Create the response with the fetched election and candidate data
-  return NextResponse.json(election);
+  // return NextResponse.json(election);
+  const response = NextResponse.json(election);
 
   // Set cache age to 5 minutes and revalidate every 5 minutes
-  // response.headers.set(
-  //   "Cache-Control",
-  //   "public, max-age=300, s-maxage=300, stale-while-revalidate=300"
-  // );
+  response.headers.set(
+    "Cache-Control",
+    "public, max-age=360, s-maxage=360, stale-while-revalidate=360"
+  );
 
-  // return response;
+  return response;
 }

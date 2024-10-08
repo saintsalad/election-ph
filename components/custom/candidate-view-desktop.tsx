@@ -103,7 +103,7 @@ const CandidateViewDeskTop = ({
 
                 {/* name */}
                 <h1 className='text-3xl font-bold text-slate-800 flex items-center'>
-                  {candidate.balotNumber}. {candidate.displayName}
+                  {candidate.ballotNumber}. {candidate.displayName}
                 </h1>
 
                 {/* short desc */}

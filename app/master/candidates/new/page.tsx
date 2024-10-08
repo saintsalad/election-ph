@@ -47,7 +47,7 @@ function AddNewCandidate() {
       party: "",
       displayPhoto: "",
       shortDescription: "",
-      balotNumber: 0,
+      ballotNumber: 0,
       coverPhoto: "",
       biography: "",
       educAttainment: "",
@@ -245,14 +245,14 @@ function AddNewCandidate() {
                 )}
               />
 
-              {/* ⭐ balotNumber */}
+              {/* ⭐ ballotNumber */}
               <FormField
                 control={form.control}
-                name='balotNumber'
+                name='ballotNumber'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Balot Number<span className='text-red-600'>*</span>
+                      Ballot Number<span className='text-red-600'>*</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder='e.g, 69' {...field} />

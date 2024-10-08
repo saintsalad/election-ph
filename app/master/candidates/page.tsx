@@ -2,11 +2,7 @@
 
 import { Breadcrumbs } from "@/components/custom/breadcrumbs";
 import { Heading } from "@/components/custom/heading";
-import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
+import { ChevronDownIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -30,7 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -40,18 +35,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import type { CandidateNext, Election } from "@/lib/definitions";
+import type { CandidateNext } from "@/lib/definitions";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Plus, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { format } from "date-fns";
-import type { Candidate } from "@/lib/definitions";
 import { fetchFromFirebase } from "@/lib/firebase/functions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
 import { useMutation } from "react-query";
 import axios from "axios";

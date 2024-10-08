@@ -16,6 +16,22 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Check if the user has voted in this election
+  const voteSnapshot = await db
+    .collection("votes")
+    .where("electionId", "==", electionId)
+    .where("userId", "==", user.uid)
+    .get();
+
+  const isVoted = !voteSnapshot.empty;
+
+  if (isVoted) {
+    return NextResponse.json(
+      { message: "User has already voted", code: "USER_ALREADY_VOTED" },
+      { status: 400 }
+    );
+  }
+
   //check if candidate exists in election
   const electionSnapshot = await db
     .collection("elections")
@@ -35,22 +51,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Check if the user has voted in this election
-  const voteSnapshot = await db
-    .collection("votes")
-    .where("electionId", "==", electionId)
-    .where("userId", "==", user.uid)
-    .get();
-
-  const isVoted = !voteSnapshot.empty;
-
-  if (isVoted) {
-    return NextResponse.json(
-      { message: "User has already voted", code: "USER_ALREADY_VOTED" },
-      { status: 400 }
-    );
-  }
-
   try {
     const dateCreated = new Date();
     //insert the vote to the database
@@ -59,7 +59,6 @@ export async function POST(req: NextRequest) {
       userId: user.uid,
       referenceId,
       value,
-      type,
       dateCreated,
     });
 

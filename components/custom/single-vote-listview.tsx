@@ -1,8 +1,7 @@
 import React from "react";
-import { Candidate, CandidateNext, ElectionNext } from "@/lib/definitions";
+import { CandidateNext, ElectionNext } from "@/lib/definitions";
 import Image from "next/image";
 import VoteConfirmation from "@/components/custom/vote-confirmation";
-import Link from "next/link";
 
 type SingleVoteListViewProps = {
   electionId: string;
@@ -15,6 +14,7 @@ const SingleVoteListView = ({
   election,
   onVoteSubmitted,
 }: SingleVoteListViewProps) => {
+  console.log(election.candidates);
   return (
     <>
       <div className='w-full md:hidden flex justify-start mt-5'>
@@ -42,7 +42,7 @@ const SingleVoteListView = ({
                     />
                     <div>
                       <h3 className='text-base font-bold text-slate-800'>
-                        {item.balotNumber}. {item.displayName}
+                        {item.ballotNumber}. {item.displayName}
                       </h3>
                       <p className='text-slate-500 text-xs uppercase'>
                         {item.party}
@@ -74,7 +74,7 @@ const SingleVoteListView = ({
                 />
                 <div className='flex w-full pb-3 pt-10 text-center flex-col absolute bottom-0 bg-gradient-to-t from-black/80 to-transparent '>
                   <div className='text-center mt-2 text-base font-bold text-white'>
-                    {item.balotNumber}. {item.displayName}
+                    {item.ballotNumber}. {item.displayName}
                   </div>
                   <div className='uppercase text-white text-xs'>
                     {item.party}

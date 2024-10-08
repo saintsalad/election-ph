@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { ElectionNext } from "@/lib/definitions";
 import SingleVoteListView from "@/components/custom/single-vote-listview";
+import MultipleVoteListView from "@/components/custom/multiple-vote-listview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useQueryClient } from "react-query";
 import axios from "axios";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CircleCheck, Fingerprint, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -27,6 +27,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   const electionId = params.id;
   const [showAlertBanner, setShowAlertBanner] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
   const queryClient = useQueryClient();
   const {
     data: election,
@@ -60,14 +61,14 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Loading state
   if (isLoading) {
     return (
-      <div className='max-w-4xl mx-auto pt-24 text-center'>
+      <div className='max-w-4xl mx-auto text-center pt-24'>
         <h2 className='text-2xl font-bold text-slate-800 mb-2'>
           Loading Election Data...
         </h2>
         <p className='text-gray-600 mb-6'>
           Please wait while we fetch the latest election information.
         </p>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 px-5'>
           {[...Array(6)].map((_, index) => (
             <Skeleton key={index} className='h-20 w-full rounded-lg' />
           ))}
@@ -79,7 +80,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Empty state
   if (!election || election.candidates.length === 0) {
     return (
-      <div className={`max-w-4xl mx-auto mt-8 text-center py-12`}>
+      <div className={`max-w-4xl mx-auto text-center pt-24`}>
         <h2 className='text-2xl font-bold text-slate-800 mb-4'>
           No Election Data Found
         </h2>
@@ -93,7 +94,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Error state
   if (isError) {
     return (
-      <div className={`max-w-4xl mx-auto mt-8 text-center py-12`}>
+      <div className={`max-w-4xl mx-auto text-center pt-24`}>
         <h2 className='text-2xl font-bold text-red-600 mb-4'>
           Error Loading Election Data
         </h2>
@@ -108,17 +109,17 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Already voted state
   if (election.isVoted && !isSubmitted) {
     return (
-      <div className={`max-w-5xl mx-auto mt-32`}>
+      <div className='max-w-5xl mx-auto mt-32 px-4 sm:px-6 lg:px-8'>
         <div className={contentStyle}>
-          <Fingerprint className='h-16 w-16 text-blue-500 mx-auto mb-4' />
-          <h2 className='text-2xl font-bold text-slate-800 mb-4 text-center'>
+          <Fingerprint className='h-12 w-12 text-blue-500 mx-auto mb-4 sm:h-16 sm:w-16' />
+          <h2 className='text-xl font-bold text-slate-800 mb-4 text-center sm:text-2xl'>
             You&apos;ve Already Cast Your Vote
           </h2>
-          <p className='text-gray-600 mb-6 text-center max-w-lg mx-auto'>
+          <p className='text-gray-600 mb-6 text-center max-w-md mx-auto text-sm sm:text-base'>
             Thank you for participating in this election. Your vote has been
             recorded and is contributing to the democratic process.
           </p>
-          <div className='flex justify-center space-x-4'>
+          <div className='flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center'>
             <Button asChild>
               <Link href='/results'>View Live Results</Link>
             </Button>
@@ -134,22 +135,22 @@ function VotingPage({ params }: { params: { id: string } }) {
   // Successfully voted state
   if (isSubmitted) {
     return (
-      <div className={`max-w-5xl mx-auto pt-36`}>
+      <div className='max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8'>
         <div className={contentStyle}>
           <CircleCheck
-            className='h-20 w-20 mb-4 mx-auto'
+            className='h-16 w-16 mb-4 mx-auto sm:h-20 sm:w-20'
             strokeWidth={2.5}
             fill='#16a34a'
             color='#FFF'
           />
-          <h2 className='text-2xl font-bold text-green-600 text-center mb-2'>
+          <h2 className='text-xl font-bold text-green-600 text-center mb-2 sm:text-2xl'>
             Submitted Successfully
           </h2>
-          <p className='text-gray-600 text-center mb-6 max-w-lg mx-auto'>
+          <p className='text-gray-600 text-center mb-6 max-w-md mx-auto text-sm sm:text-base'>
             Your participation in this online survey is greatly appreciated.
             Your vote has been safely stored. Thank you for participating.
           </p>
-          <div className='flex justify-center space-x-4'>
+          <div className='flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center'>
             <Button asChild>
               <Link href='/results'>View Election Dashboard</Link>
             </Button>
@@ -189,23 +190,44 @@ function VotingPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8'>
-            <h3 className='font-semibold text-blue-800 mb-2'>
-              Voting Instructions:
-            </h3>
-            <ol className='list-decimal list-inside text-xs text-blue-700 space-y-1'>
-              <li>Review the candidates carefully</li>
-              <li>Select up to {election.numberOfVotes} candidate(s)</li>
-              <li>Double-check your choices</li>
-              <li>
-                Click <b>Confirm</b> to submit your vote
-              </li>
-            </ol>
-          </div>
+          {showInstructions && (
+            <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 relative'>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='absolute top-2 right-2'
+                onClick={() => setShowInstructions(false)}>
+                <X className='h-4 w-4' />
+                <span className='sr-only'>Close</span>
+              </Button>
+              <h3 className='font-semibold text-blue-800 mb-2'>
+                Voting Instructions:
+              </h3>
+              <ol className='list-decimal list-inside text-xs text-blue-700 space-y-1'>
+                <li>Review the candidates carefully</li>
+                <li>
+                  Select up to <b>{election.numberOfVotes}</b> candidate(s)
+                  based on the rules
+                </li>
+                <li>
+                  Click <b>Submit</b> to review your candidates
+                </li>
+                <li>
+                  Swipe <b>Confirm</b> to submit your vote
+                </li>
+              </ol>
+            </div>
+          )}
 
+          {/* 
           <SingleVoteListView
             onVoteSubmitted={handleIsVoted}
             electionId={electionId}
+            election={election}
+          /> */}
+
+          <MultipleVoteListView
+            onVoteSubmitted={handleIsVoted}
             election={election}
           />
         </div>

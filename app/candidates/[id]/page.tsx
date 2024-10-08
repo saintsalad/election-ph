@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Candidate,
-  CandidateNext,
-  CandidateRating,
-  UserRating,
-} from "@/lib/definitions";
+import { CandidateNext, CandidateRating, UserRating } from "@/lib/definitions";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import CandidateViewMobile from "@/components/custom/candidate-view-mobile";
 import { useQuery } from "react-query";

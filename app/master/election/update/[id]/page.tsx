@@ -266,15 +266,22 @@ const UpdateElection = ({ params }: { params: { id: string } }) => {
                     <FormLabel>Candidates</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='Candidate names (comma-separated)'
-                        value={field.value.join(", ")}
+                        placeholder='Candidate IDs (comma-separated)'
+                        value={
+                          Array.isArray(field.value)
+                            ? field.value.join(", ")
+                            : ""
+                        }
                         onChange={(e) => {
-                          field.onChange(e);
+                          const value = e.target.value
+                            .split(",")
+                            .map((id) => id.trim());
+                          field.onChange(value);
                         }}
                       />
                     </FormControl>
                     <FormDescription>
-                      List of candidates (comma-separated).
+                      List of candidate IDs (comma-separated).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

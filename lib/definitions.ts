@@ -11,14 +11,14 @@ export type UserResponse = {
   dateUpdated?: string;
 };
 
-export type Candidate = {
-  id: string;
-  name: string;
-  party: string;
-  image: string;
-  shortDescription?: string;
-  description?: string;
-};
+// export type Candidate = {
+//   id: string;
+//   name: string;
+//   party: string;
+//   image: string;
+//   shortDescription?: string;
+//   description?: string;
+// };
 
 export type CandidateNext = {
   id: string;
@@ -27,7 +27,7 @@ export type CandidateNext = {
   displayPhoto: string;
   shortDescription: string;
 
-  balotNumber: number;
+  ballotNumber: number;
   coverPhoto: string;
   biography: string; //markedjs
   educAttainment: string; //markedjs

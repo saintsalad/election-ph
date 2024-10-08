@@ -97,9 +97,9 @@ export const CandidateSchema = z.object({
     )
     .optional(),
   shortDescription: z.string(),
-  balotNumber: z.coerce
+  ballotNumber: z.coerce
     .number()
-    .positive("Balot number must be a positive integer"),
+    .positive("Ballot number must be a positive integer"),
   // Fields that accept markdown content, including newlines
   biography: z.string(),
   educAttainment: z.string().optional(),
