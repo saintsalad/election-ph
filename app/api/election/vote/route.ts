@@ -53,13 +53,34 @@ export async function POST(req: NextRequest) {
 
   try {
     const dateCreated = new Date();
-    //insert the vote to the database
+
+    // Fetch user details from the users collection
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const userData = userDoc.data();
+
+    if (!userData) {
+      return NextResponse.json(
+        { message: "User data not found", code: "USER_DATA_NOT_FOUND" },
+        { status: 404 }
+      );
+    }
+
+    // Extract required user information
+    const { age, city, education, gender } = userData;
+
+    // Insert the vote to the database with user information
     await db.collection("votes").add({
       electionId,
       userId: user.uid,
       referenceId,
       value,
       dateCreated,
+      userInfo: {
+        age,
+        city,
+        education,
+        gender,
+      },
     });
 
     return NextResponse.json({ message: "Vote submitted" });

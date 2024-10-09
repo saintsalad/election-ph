@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
       candidateId: candidateId,
       userId: userId,
       rate: userRatingData.rate,
+      dateCreated: userRatingData.dateCreated,
     };
 
     // Return the total and average rating or specific user's rating

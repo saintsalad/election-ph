@@ -85,6 +85,7 @@ function MultipleVoteListView({
         description: `Maximum of ${election.numberOfVotes} candidate${
           election.numberOfVotes > 1 ? "s" : ""
         } selected. Deselect one to choose another.`,
+        duration: 2000,
       });
       setShowMaxSelectionToast(false);
     }
@@ -250,12 +251,12 @@ function MultipleVoteListView({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className='sm:max-w-[425px] max-h-[90vh] flex flex-col p-3 sm:p-4'>
+        <DialogContent className='sm:max-w-[425px] w-[95vw] h-[70vh] max-h-[90vh] sm:h-auto flex flex-col p-3 sm:p-4'>
           {voteMutation.isLoading ? (
-            <div className='flex flex-col items-center justify-center h-[300px]'>
+            <div className='flex flex-col flex-1 items-center justify-center min-h-[300px]'>
               <Loader2 className='w-12 h-12 text-blue-500 animate-spin' />
               <p className='mt-4 text-sm text-blue-700'>
-                Submitting your vote...
+                Processing your vote submission...
               </p>
             </div>
           ) : (
@@ -271,51 +272,53 @@ function MultipleVoteListView({
                 </DialogDescription>
               </DialogHeader>
               <Separator className='my-2' />
-              <ScrollArea className='flex-grow pr-2 -mr-2'>
+              <div className='flex-grow overflow-hidden flex flex-col'>
                 <h3 className='font-semibold text-blue-900 text-xs sm:text-sm mb-2'>
                   Selected Candidates:
                 </h3>
-                <ul
-                  className={`grid gap-1 sm:gap-2 ${
-                    isLessThanThree
-                      ? "grid-cols-1"
-                      : "grid-cols-1 sm:grid-cols-2"
-                  }`}>
-                  {selectedCandidateDetails.map((candidate) => (
-                    <li
-                      key={candidate.id}
-                      className='flex items-center space-x-2 bg-blue-50 px-2 py-1.5 rounded-md'>
-                      <div className='relative h-8 w-8 flex-shrink-0'>
-                        <Image
-                          src={candidate.displayPhoto}
-                          alt={candidate.displayName}
-                          fill
-                          className='rounded-full object-cover'
+                <ScrollArea className='flex-grow pr-2 -mr-2'>
+                  <ul
+                    className={`grid gap-1 sm:gap-2 ${
+                      isLessThanThree
+                        ? "grid-cols-1"
+                        : "grid-cols-1 sm:grid-cols-2"
+                    }`}>
+                    {selectedCandidateDetails.map((candidate) => (
+                      <li
+                        key={candidate.id}
+                        className='flex items-center space-x-2 bg-blue-50 px-2 py-1.5 rounded-md'>
+                        <div className='relative h-8 w-8 flex-shrink-0'>
+                          <Image
+                            src={candidate.displayPhoto}
+                            alt={candidate.displayName}
+                            fill
+                            className='rounded-full object-cover'
+                          />
+                        </div>
+                        <div className='flex-grow min-w-0'>
+                          <p className='font-medium text-sm text-blue-900 truncate'>
+                            {candidate.displayName}
+                          </p>
+                          <p className='text-xs text-blue-600 truncate'>
+                            {candidate.party}
+                          </p>
+                        </div>
+                        <Check
+                          size={16}
+                          className='text-green-500 flex-shrink-0'
                         />
-                      </div>
-                      <div className='flex-grow min-w-0'>
-                        <p className='font-medium text-sm text-blue-900 truncate'>
-                          {candidate.displayName}
-                        </p>
-                        <p className='text-xs text-blue-600 truncate'>
-                          {candidate.party}
-                        </p>
-                      </div>
-                      <Check
-                        size={16}
-                        className='text-green-500 flex-shrink-0'
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </ScrollArea>
-              {!isMaxSelected && (
-                <p className='text-xs text-blue-600 mt-2'>
-                  You can select{" "}
-                  {election.numberOfVotes - selectedCandidates.length} more
-                  candidate(s).
-                </p>
-              )}
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
+                {!isMaxSelected && (
+                  <p className='text-xs text-blue-600 mt-2'>
+                    You can select{" "}
+                    {election.numberOfVotes - selectedCandidates.length} more
+                    candidate(s).
+                  </p>
+                )}
+              </div>
               <div className='mt-3 sm:mt-4 text-center'>
                 <SwipeToConfirm
                   onConfirm={handleConfirmSubmit}

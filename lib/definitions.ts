@@ -146,6 +146,7 @@ export type UserRating = {
   rate: number;
   candidateId: string;
   userId: string;
+  dateCreated: string;
 };
 
 export type CandidateRating = {

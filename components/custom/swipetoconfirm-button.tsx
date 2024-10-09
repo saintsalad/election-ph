@@ -105,7 +105,7 @@ export function SwipeToConfirm({ onConfirm, className }: SwipeToConfirmProps) {
     <Button
       ref={buttonRef}
       className={cn(
-        "relative overflow-hidden w-full max-w-sm h-14 text-white rounded-full",
+        "relative overflow-hidden w-full h-14 text-white rounded-full",
         "transition-all duration-300 ease-in-out",
         isComplete
           ? "bg-green-500 hover:bg-green-600"

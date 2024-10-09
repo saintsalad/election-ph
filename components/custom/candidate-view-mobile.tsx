@@ -8,24 +8,32 @@ import {
 } from "@/components/ui/carousel";
 import { useEffect, useState } from "react";
 import { Star, MessageCircleMore, ChevronLeft } from "lucide-react";
-import { useBrowserAndDevice } from "@/hooks/useBrowserAndDevice";
-
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { saveDocument } from "@/lib/firebase/functions";
 import { useAuthStore } from "@/lib/store";
 import Link from "next/link";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { LucideIcon } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { cn } from "@/lib/utils";
+
+interface CandidateViewMobileProps {
+  candidate: CandidateNext | undefined;
+  candidateRate: CandidateRating | undefined;
+  userRate: UserRating | undefined;
+  candidateRateRefetch: () => void;
+  userRateRefetch: () => void;
+}
 
 const CandidateViewMobile = ({
   candidate,
@@ -33,22 +41,16 @@ const CandidateViewMobile = ({
   candidateRateRefetch,
   userRate,
   userRateRefetch,
-}: {
-  candidate: CandidateNext | undefined;
-  candidateRate: CandidateRating | undefined;
-  userRate: UserRating | undefined;
-  candidateRateRefetch: () => void;
-  userRateRefetch: () => void;
-}) => {
+}: CandidateViewMobileProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [rating, setRating] = useState<number>(0);
-  const [tempRating, setTempRating] = useState<number>(0);
-  const [isEditRating, setIsEditRating] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [tempRating, setTempRating] = useState(0);
   const [openRateDrawer, setOpenRateDrawer] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<"rating" | "success" | "edit">(
+    "rating"
+  );
   const user = useAuthStore((state) => state.user);
-
-  const { browserType, deviceType } = useBrowserAndDevice();
+  const [daysUntilEdit, setDaysUntilEdit] = useState<number | null>(null);
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -59,281 +61,313 @@ const CandidateViewMobile = ({
 
     return () => {
       carouselApi.off("select", updateActiveIndex);
-      carouselApi.destroy();
     };
   }, [carouselApi]);
 
   useEffect(() => {
-    setRating(0);
-  }, []);
+    if (userRate?.rate) {
+      setTempRating(userRate.rate);
+      const { canEdit, daysLeft } = getEditStatus(userRate);
+      setDrawerMode(canEdit ? "edit" : "success");
+      setDaysUntilEdit(daysLeft);
+    } else {
+      setDrawerMode("rating");
+      setDaysUntilEdit(null);
+    }
+  }, [userRate]);
 
-  const renderDots = () => {
-    const totalSlides = 5;
-    const maxDots = 5;
-    const visibleDots = Math.min(totalSlides, maxDots);
-    const start =
-      activeIndex > 2 && totalSlides > maxDots
-        ? Math.min(activeIndex - 2, totalSlides - maxDots)
-        : 0;
-
-    return Array.from({ length: visibleDots }, (_, i) => (
-      <div
-        key={i + start}
-        className={`h-1.5 w-1.5 rounded-full ${
-          i + start === activeIndex ? "bg-yellow-400" : "bg-slate-300"
-        } dark:bg-gray-600`}
-      />
-    ));
+  const getEditStatus = (
+    rating: UserRating
+  ): { canEdit: boolean; daysLeft: number } => {
+    const ratingDate = new Date(rating.dateCreated);
+    const today = new Date();
+    const daysSinceRating = differenceInDays(today, ratingDate);
+    const daysLeft = Math.max(3 - daysSinceRating, 0);
+    return { canEdit: daysLeft === 0, daysLeft };
   };
 
-  const pageOneHeight = () => {
-    switch (browserType) {
-      case "safari":
-        return "h-[85%]";
-      case "chrome":
-        if (deviceType === "ios") return "h-[83%]";
-        if (deviceType === "android") return "h-[90%]";
-        break;
-      default:
-        return "h-[100%]";
+  const handleRateCandidate = (index: number) => {
+    if (drawerMode === "rating" || drawerMode === "edit") {
+      setTempRating(index + 1);
     }
   };
 
-  const handleRateCandidate = async (index: number) => {
-    const newStars = index + 1;
-    setTempRating(newStars);
-  };
-
-  // TODO: move inserting data to api route; api/candidate/rate
   const handleSubmitRating = async () => {
-    const _userId = user?.uid;
-    if (_userId === "" || !_userId) {
-      alert("userid is missing, please report to admin 😭");
-      return;
-    }
-
-    if (!candidate) {
-      alert("candidate id is missing, please try again 🥲");
+    if (!user?.uid || !candidate) {
+      alert("Missing user ID or candidate. Please try again.");
       return;
     }
 
     const rate = {
       rate: tempRating,
       candidateId: candidate.id,
-      userId: _userId,
-      dateCreated: new Date(),
+      userId: user.uid,
+      dateCreated: new Date().toISOString(),
     };
 
     const res = await saveDocument<UserRating>("candidateRate", rate);
     if (res.success) {
-      console.log("Successfully saved", res.data);
       candidateRateRefetch();
       userRateRefetch();
-      setTimeout(() => {
-        setOpenRateDrawer(true);
-      }, 1500);
+      setDrawerMode("success");
+      setDaysUntilEdit(3); // Reset to 3 days after new rating
     } else {
-      console.error("Error while saving rating", res.data);
+      alert("Error while saving rating. Please try again.");
     }
   };
 
-  const markedComponent = (text: string) => {
-    return (
-      <div className='relative px-5 pt-12 pb-[100px] mt-[44px] max-h-[100vh] overflow-scroll'>
-        <Markdown
-          remarkPlugins={[remarkGfm]}
-          className='markdown prose prose-slate text-slate-700 text-base'>
-          {text}
-        </Markdown>
-      </div>
-    );
+  const renderDots = () => {
+    const totalSlides = 5;
+    const maxDots = 5;
+    const visibleDots = Math.min(totalSlides, maxDots);
+    const start = Math.min(Math.max(activeIndex - 2, 0), totalSlides - maxDots);
+
+    return Array.from({ length: visibleDots }, (_, i) => (
+      <div
+        key={i + start}
+        className={`h-1 w-1 rounded-full transition-all duration-300 ${
+          i + start === activeIndex ? "bg-white w-3" : "bg-white/50"
+        }`}
+      />
+    ));
   };
 
+  const markedComponent = (text: string) => (
+    <div className='px-4 py-6 overflow-y-auto'>
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({ className, ...props }) => (
+            <h1
+              className={cn("text-2xl font-bold mb-4", className)}
+              {...props}
+            />
+          ),
+          h2: ({ className, ...props }) => (
+            <h2
+              className={cn("text-xl font-semibold mb-3", className)}
+              {...props}
+            />
+          ),
+          h3: ({ className, ...props }) => (
+            <h3
+              className={cn("text-lg font-medium mb-2", className)}
+              {...props}
+            />
+          ),
+          p: ({ className, ...props }) => (
+            <p className={cn("text-base mb-4", className)} {...props} />
+          ),
+          ul: ({ className, ...props }) => (
+            <ul className={cn("list-disc pl-5 mb-4", className)} {...props} />
+          ),
+          ol: ({ className, ...props }) => (
+            <ol
+              className={cn("list-decimal pl-5 mb-4", className)}
+              {...props}
+            />
+          ),
+          li: ({ className, ...props }) => (
+            <li className={cn("mb-1", className)} {...props} />
+          ),
+          a: ({ className, ...props }) => (
+            <a
+              className={cn("text-blue-500 underline", className)}
+              {...props}
+            />
+          ),
+          blockquote: ({ className, ...props }) => (
+            <blockquote
+              className={cn(
+                "border-l-4 border-gray-300 pl-4 italic my-4",
+                className
+              )}
+              {...props}
+            />
+          ),
+          code: ({ className, ...props }) => (
+            <code
+              className={cn("bg-gray-100 rounded px-1 py-0.5", className)}
+              {...props}
+            />
+          ),
+          pre: ({ className, ...props }) => (
+            <pre
+              className={cn(
+                "bg-gray-100 rounded p-3 overflow-x-auto my-4",
+                className
+              )}
+              {...props}
+            />
+          ),
+        }}
+        className='markdown text-gray-800'>
+        {text}
+      </Markdown>
+    </div>
+  );
+
+  if (!candidate) return null;
+
   return (
-    <>
-      {candidate && (
-        <div className='flex flex-1 w-full h-full'>
-          <Carousel
-            setApi={setCarouselApi}
-            className='w-full h-full -z-0 fixed'>
-            <CarouselContent>
-              {/* page1 */}
-              <CarouselItem>
-                <div className='h-[100vh] relative bg-black'>
-                  <div className={`relative ${pageOneHeight()} w-[100%]`}>
-                    <Image
-                      draggable={"false"}
-                      src={candidate.displayPhoto}
-                      alt={candidate.displayPhoto}
-                      fill
-                      className='object-cover relative'
-                    />
-                    <div className='h-[180px] absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent'>
-                      <div className='flex flex-1 h-full flex-col justify-end p-5 text-white'>
-                        <h2 className='text-2xl md:text-base font-bold'>
-                          {candidate.displayName}
-                        </h2>
-                        <div className='text-xs font-normal uppercase bg-green-500 self-start py-1 px-2 rounded-full mb-2'>
-                          {candidate.party}
-                        </div>
-                        <p className='text-xs font-light text-slate-200'>
-                          {candidate.shortDescription}
-                        </p>
-                      </div>
-                    </div>
+    <div className='flex flex-1 w-full h-full bg-black'>
+      <Carousel setApi={setCarouselApi} className='w-full h-full -z-0 fixed'>
+        <CarouselContent>
+          <CarouselItem>
+            <div className='h-screen relative'>
+              <div className='relative h-full w-full'>
+                <Image
+                  src={candidate.displayPhoto}
+                  alt={candidate.displayName}
+                  fill
+                  className='object-cover'
+                />
+                <div className='absolute inset-0 bg-gradient-to-t from-black/80 to-transparent' />
+                <div className='absolute bottom-16 left-0 right-0 p-6 text-white'>
+                  <h2 className='text-3xl font-bold mb-2'>
+                    {candidate.displayName}
+                  </h2>
+                  <div className='inline-block text-xs font-medium uppercase bg-green-500 py-1 px-3 rounded-full mb-3'>
+                    {candidate.party}
                   </div>
+                  <p className='text-sm font-light text-white/90'>
+                    {candidate.shortDescription}
+                  </p>
                 </div>
-              </CarouselItem>
+              </div>
+            </div>
+          </CarouselItem>
 
-              {/* biography ⭐ */}
-              <CarouselItem
-                style={{ overflowY: "scroll" }}
-                className='bg-transparent'>
-                {markedComponent(candidate.biography)}
-              </CarouselItem>
-
-              {/* education ⭐ */}
-              <CarouselItem
-                style={{ overflowY: "scroll" }}
-                className='bg-transparent'>
-                {markedComponent(candidate.educAttainment)}
-              </CarouselItem>
-
-              {/* achievements ⭐ */}
-              <CarouselItem
-                style={{ overflowY: "scroll" }}
-                className='bg-transparent'>
-                {markedComponent(candidate.achievements)}
-              </CarouselItem>
-
-              {/* platform & policy ⭐ */}
-              <CarouselItem
-                style={{ overflowY: "scroll" }}
-                className='bg-transparent'>
-                {markedComponent(candidate.platformAndPolicy)}
-              </CarouselItem>
-            </CarouselContent>
-          </Carousel>
-
-          <div className='fixed bottom-3 left-0 right-0 flex justify-center p-4 pointer-events-none'>
-            <div className='flex gap-x-1.5'>{renderDots()}</div>
-          </div>
-
-          <Link href={"/candidates"} className='fixed top-20 left-1'>
-            <ChevronLeft color='#FFF' className='h-8 w-8  drop-shadow-xl' />
-          </Link>
-
-          {/* actions section  */}
-          <div className='fixed pr-4 right-0 bottom-1/3'>
-            {/* Rate section */}
-            <Drawer open={openRateDrawer} onOpenChange={setOpenRateDrawer}>
-              <DrawerTrigger asChild>
-                <div className='cursor-pointer text-center mb-5'>
-                  <Star
-                    fill={rating || userRate?.rate ? "#facc15" : "none"}
-                    className='h-8 w-8 drop-shadow-xl'
-                    color={rating || userRate?.rate ? "#facc15" : "white"}
-                  />
-                  <div className='text-xs font-semibold text-white mt-0.5 drop-shadow-xl'>
-                    {/* {candRatingLoading && "..."} */}
-                    {candidateRate ? candidateRate.averageRating : 0}
-                  </div>
-                </div>
-              </DrawerTrigger>
-              <DrawerContent>
-                {!userRate?.rate && (
-                  <div className='mx-auto w-full max-w-sm'>
-                    <DrawerHeader className='pb-0'>
-                      <DrawerTitle>Rate Candidate (test mode)</DrawerTitle>
-                      <DrawerDescription>
-                        Click on the stars and submit.
-                      </DrawerDescription>
-                    </DrawerHeader>
-                    <DrawerFooter className='pb-5'>
-                      <div className='flex flex-1 flex-row w-full justify-center gap-x-4 mb-8'>
-                        {Array.from({ length: 5 }).map((_, index) => (
-                          <Star
-                            onClick={() => handleRateCandidate(index)}
-                            key={index}
-                            fill={index < tempRating ? "#facc15" : "#cbd5e1"}
-                            className='h-8 w-8'
-                            color={index < tempRating ? "#facc15" : "#cbd5e1"}
-                          />
-                        ))}
-                      </div>
-
-                      <DrawerClose asChild>
-                        <Button onClick={handleSubmitRating} size='lg'>
-                          Submit
-                        </Button>
-                      </DrawerClose>
-                    </DrawerFooter>
-                  </div>
+          {[
+            "biography",
+            "educAttainment",
+            "achievements",
+            "platformAndPolicy",
+          ].map((section) => (
+            <CarouselItem key={section} className='bg-white'>
+              <div className='h-screen overflow-y-auto'>
+                <h3 className='text-xl font-semibold mb-2 px-4 pt-4 sticky top-0 bg-white z-10'>
+                  {section === "educAttainment" ? "Education" : section}
+                </h3>
+                {markedComponent(
+                  candidate[section as keyof CandidateNext] as string
                 )}
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
 
-                {userRate && userRate.rate > 0 && (
-                  <div className='mx-auto w-full max-w-sm'>
-                    <DrawerHeader className='pb-0'>
-                      <DrawerTitle>Rating Submitted ✨</DrawerTitle>
-                      <DrawerDescription>
-                        Thank you! You can update your rating in 3 days if
-                        needed.
-                      </DrawerDescription>
-                    </DrawerHeader>
-                    <DrawerFooter className='pb-5'>
-                      <div className='flex flex-1 flex-row w-full justify-center gap-x-4 mb-8'>
-                        {Array.from({ length: 5 }).map((_, index) => (
-                          <Star
-                            onClick={() => handleRateCandidate(index)}
-                            key={index}
-                            fill={index < userRate.rate ? "#facc15" : "#cbd5e1"}
-                            className='h-8 w-8 '
-                            color={
-                              index < userRate.rate ? "#facc15" : "#cbd5e1"
-                            }
-                          />
-                        ))}
-                      </div>
-
-                      <DrawerClose asChild>
-                        <Button
-                          disabled={true}
-                          onClick={handleSubmitRating}
-                          size='lg'>
-                          Submit
-                        </Button>
-                      </DrawerClose>
-                    </DrawerFooter>
-                  </div>
-                )}
-              </DrawerContent>
-            </Drawer>
-
-            {/* TODO: comment section */}
-            <Drawer>
-              <DrawerTrigger asChild>
-                <div className='cursor-pointer text-center mb-5'>
-                  <MessageCircleMore
-                    className='h-8 w-8 drop-shadow-xl'
-                    color='white'
-                  />
-                  <div className='text-xs font-semibold text-white mt-0.5 drop-shadow-xl'>
-                    0
-                  </div>
-                </div>
-              </DrawerTrigger>
-              <DrawerContent className='min-h-[30vh]'>
-                <DrawerTitle hidden></DrawerTitle>
-                <DrawerDescription className='mx-auto w-full max-w-sm p-5 text-center'>
-                  Feature will be available soon 🔒
-                </DrawerDescription>
-              </DrawerContent>
-            </Drawer>
-          </div>
+      <div className='fixed bottom-6 left-0 right-0 flex justify-center'>
+        <div className='flex gap-x-1.5 bg-black/20 backdrop-blur-md px-2 py-1 rounded-full'>
+          {renderDots()}
         </div>
-      )}
-    </>
+      </div>
+
+      <Link
+        href='/candidates'
+        className='fixed top-[72px] left-4 bg-black/20 backdrop-blur-md p-2 rounded-full'>
+        <ChevronLeft color='#FFF' className='h-6 w-6' />
+      </Link>
+
+      <div className='fixed right-4 bottom-20 flex flex-col items-center gap-2'>
+        <ActionButton
+          Icon={Star}
+          count={candidateRate?.averageRating ?? 0}
+          active={!!userRate?.rate}
+          onClick={() => setOpenRateDrawer(true)}
+        />
+        <ActionButton
+          Icon={MessageCircleMore}
+          count={0}
+          onClick={() => {
+            /* TODO: Implement comment functionality */
+          }}
+        />
+      </div>
+
+      <Drawer open={openRateDrawer} onOpenChange={setOpenRateDrawer}>
+        <DrawerContent>
+          <div className='mx-auto w-full max-w-sm'>
+            <DrawerHeader className='pb-0'>
+              <DrawerTitle>Rate Candidate</DrawerTitle>
+              <DrawerDescription>
+                {drawerMode === "rating" &&
+                  "Click on the stars to rate the candidate."}
+                {drawerMode === "success" && "Thank you for rating!"}
+                {drawerMode === "edit" && "You can now update your rating."}
+              </DrawerDescription>
+            </DrawerHeader>
+            <DrawerFooter className='pb-5'>
+              <div className='flex flex-1 flex-row w-full justify-center gap-x-4 mb-8'>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Star
+                    key={index}
+                    onClick={() => handleRateCandidate(index)}
+                    fill={index < tempRating ? "#facc15" : "#cbd5e1"}
+                    className={`h-8 w-8 ${
+                      drawerMode !== "success" ? "cursor-pointer" : ""
+                    }`}
+                    color={index < tempRating ? "#facc15" : "#cbd5e1"}
+                  />
+                ))}
+              </div>
+
+              {drawerMode !== "success" && (
+                <Button
+                  onClick={handleSubmitRating}
+                  size='lg'
+                  disabled={!tempRating}>
+                  {drawerMode === "rating" ? "Submit" : "Update Rating"}
+                </Button>
+              )}
+
+              {drawerMode === "success" &&
+                daysUntilEdit !== null &&
+                daysUntilEdit > 0 && (
+                  <p className='text-center text-sm text-gray-500'>
+                    You can update your rating in {daysUntilEdit} day
+                    {daysUntilEdit !== 1 ? "s" : ""}.
+                  </p>
+                )}
+
+              {drawerMode === "success" && daysUntilEdit === 0 && (
+                <Button onClick={() => setDrawerMode("edit")} size='lg'>
+                  Edit Rating
+                </Button>
+              )}
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
   );
 };
+
+interface ActionButtonProps {
+  Icon: LucideIcon;
+  count: number;
+  active?: boolean;
+  onClick: () => void;
+}
+
+function ActionButton({
+  Icon,
+  count,
+  active = false,
+  onClick,
+}: ActionButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className='bg-black/20 backdrop-blur-md p-2 rounded-full flex flex-col items-center'>
+      <Icon
+        className={`h-5 w-5 ${active ? "text-yellow-400" : "text-white"}`}
+        fill={active ? "#facc15" : "none"}
+      />
+      <span className='text-[10px] font-semibold text-white'>{count}</span>
+    </button>
+  );
+}
 
 export default CandidateViewMobile;
