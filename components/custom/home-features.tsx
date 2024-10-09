@@ -10,6 +10,7 @@ import {
   Share2,
   User,
   Sparkles,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -89,8 +90,8 @@ const HomeFeatures = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className='mb-4 md:mb-6 flex items-center space-x-2 text-sm md:text-base font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-full'>
-          <Sparkles className='w-4 h-4 md:w-5 md:h-5 text-yellow-500' />
+          className='mb-3 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-full flex items-center space-x-2'>
+          <Rocket className='w-4 h-4 text-yellow-500' />
           <span>Empowering Your Voice</span>
         </motion.div>
         <motion.h1

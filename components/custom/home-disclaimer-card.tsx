@@ -14,7 +14,7 @@ function HomeDisclaimerCard() {
         onMouseLeave={() => {
           setAnimDuration(5);
         }}
-        className='max-w-5xl mx-auto w-full border rounded-lg overflow-hidden'>
+        className='max-w-6xl mx-auto w-full border rounded-lg overflow-hidden'>
         {/* @ts-ignore */}
         <AuroraBackgroundProvider
           style={{}}

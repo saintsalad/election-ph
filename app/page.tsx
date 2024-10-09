@@ -107,9 +107,9 @@ export default function Home() {
       <HomeDisclaimerCard />
 
       {/* Placeholder for additional content */}
-      <div className='relative flex flex-col w-full justify-center items-center py-28 px-5 mb-28 overflow-hidden'>
+      <div className='relative flex flex-col w-full justify-center items-center py-28 px-5 overflow-hidden bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-900'>
         <div className='mb-3 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-full'>
-          ABOUT US ✨
+          ✨ ABOUT US
         </div>
         <h1 className='text-center max-w-3xl text-xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 z-10 mb-6'>
           We are committed to offering a secure and transparent platform for
@@ -141,8 +141,8 @@ export default function Home() {
           y={-1}
           className={cn(
             "absolute inset-0 h-full w-full",
-            "opacity-50 dark:opacity-30",
-            "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]"
+            "opacity-30 dark:opacity-20",
+            "[mask-image:radial-gradient(ellipse_800px_400px_at_50%_50%,white,transparent)]"
           )}
         />
       </div>

@@ -20,6 +20,7 @@ import { useMutation } from "react-query";
 import axios from "axios";
 import { generateReferenceNumber } from "@/lib/functions";
 import { Loader2 } from "lucide-react"; // Add this import
+import { useTheme } from "next-themes";
 
 type MultipleVoteListViewProps = {
   election: ElectionNext;
@@ -34,6 +35,7 @@ function MultipleVoteListView({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   const voteMutation = useMutation({
     mutationFn: (voteData: VoteRequest) =>
@@ -119,12 +121,12 @@ function MultipleVoteListView({
   return (
     <div className='space-y-3 sm:space-y-6 pb-10 rounded-lg'>
       {/* Controls */}
-      <div className='flex flex-row justify-between items-center gap-4 sm:gap-0 sm:bg-white sm:p-4 rounded-md sm:border border-blue-100'>
+      <div className='flex flex-row justify-between items-center gap-4 sm:gap-0 sm:bg-white dark:sm:bg-gray-900 sm:p-4 rounded-md sm:border border-blue-100 dark:border-gray-800'>
         <p
           className={`text-sm font-medium ${
             selectedCandidates.length === election.numberOfVotes
-              ? "text-red-500"
-              : "text-blue-700"
+              ? "text-red-500 dark:text-red-400"
+              : "text-blue-700 dark:text-gray-300"
           }`}>
           Selected: {selectedCandidates.length} / {election.numberOfVotes}
         </p>
@@ -133,7 +135,7 @@ function MultipleVoteListView({
             onClick={handleReset}
             variant='outline'
             size='sm'
-            className='text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-300'>
+            className='text-blue-600 dark:text-gray-400 border-blue-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-700 dark:hover:text-gray-300 transition-colors duration-300'>
             <RefreshCcw className='w-4 h-4 mr-2' />
             Reset
           </Button>
@@ -141,7 +143,7 @@ function MultipleVoteListView({
             onClick={handleSubmit}
             disabled={selectedCandidates.length === 0}
             size='sm'
-            className='bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-300'>
+            className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-colors duration-300'>
             <CheckCircle className='w-4 h-4 mr-2' />
             Submit
           </Button>
@@ -157,11 +159,11 @@ function MultipleVoteListView({
               key={i}
               onClick={() => toggleCandidate(item.id)}
               className={cn(
-                "bg-white rounded-md overflow-hidden transition-all duration-300",
+                "bg-white dark:bg-gray-800 rounded-md overflow-hidden transition-all duration-300",
                 "relative border",
                 isSelected
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-blue-100 hover:border-blue-300"
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                  : "border-blue-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
               )}>
               <div className='flex items-center gap-4 w-full p-3 transition-all duration-300'>
                 <div className='relative h-[60px] w-[60px]'>
@@ -174,10 +176,10 @@ function MultipleVoteListView({
                   />
                 </div>
                 <div className='flex-grow'>
-                  <h3 className='text-base font-bold text-blue-900'>
+                  <h3 className='text-base font-bold text-blue-900 dark:text-blue-100'>
                     {item.ballotNumber}. {item.displayName}
                   </h3>
-                  <p className='text-blue-600 text-xs uppercase'>
+                  <p className='text-blue-600 dark:text-blue-400 text-xs uppercase'>
                     {item.party}
                   </p>
                 </div>
@@ -186,7 +188,7 @@ function MultipleVoteListView({
                     "w-6 h-6 rounded-full border-2 transition-all duration-300 flex items-center justify-center",
                     isSelected
                       ? "border-blue-500 bg-blue-500"
-                      : "border-gray-300"
+                      : "border-gray-300 dark:border-gray-600"
                   )}>
                   <CheckIcon
                     className={cn(
@@ -212,8 +214,8 @@ function MultipleVoteListView({
               className={cn(
                 "group relative overflow-hidden rounded-md cursor-pointer transition-all duration-300",
                 isSelected
-                  ? "ring-4 ring-blue-500 ring-opacity-30"
-                  : "border border-blue-100 hover:border-blue-300"
+                  ? "ring-4 ring-blue-500 ring-opacity-30 dark:ring-opacity-50"
+                  : "border border-blue-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
               )}>
               <div className='aspect-square relative'>
                 <Image
@@ -227,19 +229,21 @@ function MultipleVoteListView({
                 />
                 <div
                   className={cn(
-                    "absolute inset-0 bg-gradient-to-t  to-transparent flex flex-col justify-end p-3",
-                    isSelected ? "from-blue-900/80" : "from-blue-900/20"
+                    "absolute inset-0 bg-gradient-to-t to-transparent flex flex-col justify-end p-3",
+                    isSelected
+                      ? "from-blue-900/80 dark:from-blue-800/90"
+                      : "from-blue-900/20 dark:from-blue-900/40"
                   )}>
                   <div className='text-white text-sm font-semibold'>
                     {item.ballotNumber}. {item.displayName}
                   </div>
-                  <div className='text-blue-200 text-xs uppercase'>
+                  <div className='text-blue-200 dark:text-blue-300 text-xs uppercase'>
                     {item.party}
                   </div>
                 </div>
                 <div
                   className={cn(
-                    "absolute top-2 right-2 bg-blue-500 rounded-full p-1.5 transition-all duration-300",
+                    "absolute top-2 right-2 bg-blue-500 dark:bg-blue-600 rounded-full p-1.5 transition-all duration-300",
                     isSelected ? "opacity-100 scale-100" : "opacity-0 scale-0"
                   )}>
                   <CheckIcon className='w-5 h-5 text-white' />
@@ -250,30 +254,31 @@ function MultipleVoteListView({
         })}
       </div>
 
+      {/* Dialog content */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className='sm:max-w-[425px] w-[95vw] h-[70vh] max-h-[90vh] sm:h-auto flex flex-col p-3 sm:p-4'>
+        <DialogContent className='sm:max-w-[425px] w-[95vw] h-[70vh] max-h-[90vh] sm:h-auto flex flex-col p-3 sm:p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'>
           {voteMutation.isLoading ? (
             <div className='flex flex-col flex-1 items-center justify-center min-h-[300px]'>
-              <Loader2 className='w-12 h-12 text-blue-500 animate-spin' />
-              <p className='mt-4 text-sm text-blue-700'>
+              <Loader2 className='w-12 h-12 text-blue-500 dark:text-blue-400 animate-spin' />
+              <p className='mt-4 text-sm text-blue-700 dark:text-blue-300'>
                 Processing your vote submission...
               </p>
             </div>
           ) : (
             <>
               <DialogHeader className='pb-2 space-y-1'>
-                <DialogTitle className='text-base sm:text-lg font-bold text-blue-900'>
+                <DialogTitle className='text-base sm:text-lg font-bold text-blue-900 dark:text-blue-100'>
                   Confirm Your Vote
                 </DialogTitle>
-                <DialogDescription className='text-xs sm:text-sm text-blue-700'>
+                <DialogDescription className='text-xs sm:text-sm text-blue-700 dark:text-blue-300'>
                   {isMaxSelected
                     ? "You've made all your selections. Ready to submit your vote?"
                     : `You've selected ${selectedCandidates.length} out of ${election.numberOfVotes} possible votes.`}
                 </DialogDescription>
               </DialogHeader>
-              <Separator className='my-2' />
+              <Separator className='my-2 bg-gray-200 dark:bg-gray-700' />
               <div className='flex-grow overflow-hidden flex flex-col'>
-                <h3 className='font-semibold text-blue-900 text-xs sm:text-sm mb-2'>
+                <h3 className='font-semibold text-blue-900 dark:text-blue-100 text-xs sm:text-sm mb-2'>
                   Selected Candidates:
                 </h3>
                 <ScrollArea className='flex-grow pr-2 -mr-2'>
@@ -286,7 +291,7 @@ function MultipleVoteListView({
                     {selectedCandidateDetails.map((candidate) => (
                       <li
                         key={candidate.id}
-                        className='flex items-center space-x-2 bg-blue-50 px-2 py-1.5 rounded-md'>
+                        className='flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 px-2 py-1.5 rounded-md'>
                         <div className='relative h-8 w-8 flex-shrink-0'>
                           <Image
                             src={candidate.displayPhoto}
@@ -296,23 +301,23 @@ function MultipleVoteListView({
                           />
                         </div>
                         <div className='flex-grow min-w-0'>
-                          <p className='font-medium text-sm text-blue-900 truncate'>
+                          <p className='font-medium text-sm text-blue-900 dark:text-blue-100 truncate'>
                             {candidate.displayName}
                           </p>
-                          <p className='text-xs text-blue-600 truncate'>
+                          <p className='text-xs text-blue-600 dark:text-blue-400 truncate'>
                             {candidate.party}
                           </p>
                         </div>
                         <Check
                           size={16}
-                          className='text-green-500 flex-shrink-0'
+                          className='text-green-500 dark:text-green-400 flex-shrink-0'
                         />
                       </li>
                     ))}
                   </ul>
                 </ScrollArea>
                 {!isMaxSelected && (
-                  <p className='text-xs text-blue-600 mt-2'>
+                  <p className='text-xs text-blue-600 dark:text-blue-400 mt-2'>
                     You can select{" "}
                     {election.numberOfVotes - selectedCandidates.length} more
                     candidate(s).
