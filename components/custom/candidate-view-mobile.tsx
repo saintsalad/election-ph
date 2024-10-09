@@ -7,7 +7,13 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { useEffect, useState } from "react";
-import { Star, MessageCircleMore, ChevronLeft } from "lucide-react";
+import {
+  Star,
+  MessageCircleMore,
+  ChevronLeft,
+  MoreVertical,
+  MessageCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -51,6 +57,7 @@ const CandidateViewMobile = ({
   );
   const user = useAuthStore((state) => state.user);
   const [daysUntilEdit, setDaysUntilEdit] = useState<number | null>(null);
+  const [openCommentDrawer, setOpenCommentDrawer] = useState(false);
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -230,7 +237,7 @@ const CandidateViewMobile = ({
                   <div className='inline-block text-xs font-medium uppercase bg-green-500 py-1 px-3 rounded-full mb-3'>
                     {candidate.party}
                   </div>
-                  <p className='text-sm font-light text-white/90'>
+                  <p className='text-sm font-light text-white/90 min-h-[4.5em] line-clamp-3'>
                     {candidate.shortDescription}
                   </p>
                 </div>
@@ -245,10 +252,10 @@ const CandidateViewMobile = ({
             "platformAndPolicy",
           ].map((section) => (
             <CarouselItem key={section} className='bg-white'>
-              <div className='h-screen overflow-y-auto'>
-                <h3 className='text-xl font-semibold mb-2 px-4 pt-4 sticky top-0 bg-white z-10'>
+              <div className='h-screen overflow-y-auto pt-24'>
+                {/* <h3 className='text-xl font-semibold mb-2 px-4 pt-20 sticky top-0 bg-white z-10 w-full text-center capitalize'>
                   {section === "educAttainment" ? "Education" : section}
-                </h3>
+                </h3> */}
                 {markedComponent(
                   candidate[section as keyof CandidateNext] as string
                 )}
@@ -270,20 +277,26 @@ const CandidateViewMobile = ({
         <ChevronLeft color='#FFF' className='h-6 w-6' />
       </Link>
 
-      <div className='fixed right-4 bottom-20 flex flex-col items-center gap-2'>
-        <ActionButton
-          Icon={Star}
-          count={candidateRate?.averageRating ?? 0}
-          active={!!userRate?.rate}
-          onClick={() => setOpenRateDrawer(true)}
-        />
-        <ActionButton
-          Icon={MessageCircleMore}
-          count={0}
-          onClick={() => {
-            /* TODO: Implement comment functionality */
-          }}
-        />
+      <div className='fixed right-4 bottom-32'>
+        <div className='bg-black/30 rounded-full p-2 flex flex-col items-center gap-2 shadow-lg'>
+          <ActionButton
+            Icon={Star}
+            count={candidateRate?.averageRating ?? 0}
+            active={!!userRate?.rate}
+            onClick={() => setOpenRateDrawer(true)}
+          />
+          <ActionButton
+            Icon={MessageCircle}
+            count={0}
+            onClick={() => setOpenCommentDrawer(true)}
+          />
+          <ActionButton
+            Icon={MoreVertical}
+            onClick={() => {
+              /* TODO: Implement more options functionality */
+            }}
+          />
+        </div>
       </div>
 
       <Drawer open={openRateDrawer} onOpenChange={setOpenRateDrawer}>
@@ -340,13 +353,36 @@ const CandidateViewMobile = ({
           </div>
         </DrawerContent>
       </Drawer>
+
+      <Drawer open={openCommentDrawer} onOpenChange={setOpenCommentDrawer}>
+        <DrawerContent>
+          <div className='mx-auto w-full max-w-sm'>
+            <DrawerHeader>
+              <DrawerTitle>Comments</DrawerTitle>
+              <DrawerDescription>
+                This feature is currently under maintenance.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className='p-4 flex flex-col items-center justify-center h-40'>
+              <MessageCircle className='h-12 w-12 text-gray-400 mb-4' />
+              <p className='text-center text-gray-600'>
+                We&apos;re working on bringing comments to you soon. Check back
+                later!
+              </p>
+            </div>
+            <DrawerFooter>
+              <Button onClick={() => setOpenCommentDrawer(false)}>Close</Button>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
 
 interface ActionButtonProps {
   Icon: LucideIcon;
-  count: number;
+  count?: number;
   active?: boolean;
   onClick: () => void;
 }
@@ -360,12 +396,14 @@ function ActionButton({
   return (
     <button
       onClick={onClick}
-      className='bg-black/20 backdrop-blur-md p-2 rounded-full flex flex-col items-center'>
+      className='p-2 rounded-full flex flex-col items-center transition-all hover:bg-white/10'>
       <Icon
-        className={`h-5 w-5 ${active ? "text-yellow-400" : "text-white"}`}
+        className={`h-6 w-6 ${active ? "text-yellow-400" : "text-white"}`}
         fill={active ? "#facc15" : "none"}
       />
-      <span className='text-[10px] font-semibold text-white'>{count}</span>
+      {count !== undefined && (
+        <span className='text-xs font-semibold text-white mt-1'>{count}</span>
+      )}
     </button>
   );
 }
