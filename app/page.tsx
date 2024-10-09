@@ -12,8 +12,14 @@ import HomeDisclaimerCard from "@/components/custom/home-disclaimer-card";
 import Image from "next/image";
 import MainFooter from "@/components/custom/layout/main-footer";
 import FAQ from "@/components/custom/faq";
+import { useTheme } from "next-themes";
+import { Lock, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
+import HomeSecuritySection from "@/components/custom/home-security-section";
 
 export default function Home() {
+  const { theme } = useTheme();
+
   return (
     <main>
       {/* Hero Section */}
@@ -39,11 +45,12 @@ export default function Home() {
                   Take part in fair surveys, voice your thoughts, and help shape
                   tomorrow with <b>Election PH</b>.
                 </div>
-                <Link href='/signup'>
-                  <ShimmerButton className='h-10 mt-4 px-10'>
-                    Join Us
-                  </ShimmerButton>
-                </Link>
+                <ShimmerButton
+                  className='h-10 mt-4 px-10 text-white dark:text-white'
+                  background='rgba(0, 0, 1)'
+                  darkBackground='rgba(20, 20, 20)'>
+                  Join Us
+                </ShimmerButton>
               </div>
             </div>
           </div>
@@ -76,7 +83,14 @@ export default function Home() {
                   <b>Election PH</b>.
                 </div>
                 <Link href='/signup'>
-                  <ShimmerButton className='h-10 mt-4 px-10'>
+                  <ShimmerButton
+                    className='h-10 mt-4 px-10 text-white dark:text-white font-semibold'
+                    background={
+                      theme === "dark"
+                        ? "rgba(30, 41, 59, 0.8)"
+                        : "rgba(15, 23, 42, 0.8)"
+                    }
+                    darkBackground='rgba(30, 41, 59, 0.8)'>
                     Join Us
                   </ShimmerButton>
                 </Link>
@@ -93,25 +107,48 @@ export default function Home() {
       <HomeDisclaimerCard />
 
       {/* Placeholder for additional content */}
-      <div className='relative flex flex-col w-full justify-center items-center py-28 px-5 mb-28'>
-        <div className='mb-3 text-sm text-slate-500'>ABOUT US ✨</div>
-        <h1 className='text-center max-w-3xl text-xl sm:text-4xl font-bold  text-slate-800 z-10'>
+      <div className='relative flex flex-col w-full justify-center items-center py-28 px-5 mb-28 overflow-hidden'>
+        <div className='mb-3 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-full'>
+          ABOUT US ✨
+        </div>
+        <h1 className='text-center max-w-3xl text-xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 z-10 mb-6'>
           We are committed to offering a secure and transparent platform for
           Filipinos to voice their opinions and engage in meaningful community
           discussions.
         </h1>
+        <p className='text-center max-w-2xl text-slate-600 dark:text-slate-300 z-10 mb-8'>
+          Our mission is to empower every Filipino citizen with a platform to
+          express their views, participate in surveys, and contribute to the
+          democratic process.
+        </p>
+        <Link href='/about'>
+          <ShimmerButton
+            className='h-10 px-6 text-white dark:text-white font-semibold'
+            background={
+              theme === "dark"
+                ? "rgba(30, 41, 59, 0.8)"
+                : "rgba(15, 23, 42, 0.8)"
+            }
+            darkBackground='rgba(30, 41, 59, 0.8)'>
+            Learn More About Us
+          </ShimmerButton>
+        </Link>
 
         <GridPattern
-          width={50}
-          height={50}
+          width={40}
+          height={40}
           x={-1}
           y={-1}
-          // strokeDasharray={"4 2"}
           className={cn(
-            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]"
+            "absolute inset-0 h-full w-full",
+            "opacity-50 dark:opacity-30",
+            "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]"
           )}
         />
       </div>
+
+      {/* Improved Security Section */}
+      <HomeSecuritySection />
 
       <div className='mb-20'>
         <FAQ showItems={5} />

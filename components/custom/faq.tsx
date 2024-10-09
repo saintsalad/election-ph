@@ -19,7 +19,7 @@ const FAQ = ({ showItems }: FAQProps) => {
     : faqData.faqs.slice(0, showItems);
 
   return (
-    <div className='w-full max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='w-full max-w-5xl mx-auto py-28 px-4 sm:px-6 lg:px-8'>
       <h2 className='text-3xl sm:text-4xl font-bold text-left sm:text-center mb-8'>
         <span className='bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600'>
           Frequently Asked Questions

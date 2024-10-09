@@ -9,10 +9,13 @@ import {
   Newspaper,
   Share2,
   User,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -80,59 +83,65 @@ const HomeFeatures = () => {
   const SHOWN_FEATURES = 6;
 
   return (
-    <div className='relative flex flex-col w-full justify-center items-center py-28'>
-      <div className='max-w-5xl w-full flex flex-col items-center'>
-        <div className='mb-3 text-sm text-slate-500'>
-          WHAT WE&#39;RE COOKING🔥
-        </div>
-        <h1
-          className='text-center text-xl max-w-sm sm:text-4xl font-bold ${
-          theme === "dark" ? "text-white" : "text-slate-900"
-        } z-10 mb-5'>
-          Lit Features for Informed Citizens
-        </h1>
-        <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-5 lg:px-0'>
+    <div className='relative flex flex-col w-full justify-center items-center py-16 md:py-28 px-4 md:px-5 overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
+      <div className='max-w-6xl w-full flex flex-col items-center z-10'>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className='mb-4 md:mb-6 flex items-center space-x-2 text-sm md:text-base font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-full'>
+          <Sparkles className='w-4 h-4 md:w-5 md:h-5 text-yellow-500' />
+          <span>Empowering Your Voice</span>
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className='text-center text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 dark:text-slate-100 mb-4 md:mb-6'>
+          Key Features
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className='text-center text-sm md:text-base text-slate-600 dark:text-slate-400 mb-8 md:mb-12 max-w-2xl'>
+          Unleash your potential with our platform, designed to help you engage,
+          learn, and make well-informed choices in the community.
+        </motion.p>
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8'>
           {features
             .slice(0, isDesktop || showAll ? features.length : SHOWN_FEATURES)
             .map((feature, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`p-4 sm:p-5 rounded-lg border hover:shadow-lg transition-all duration-300 hover:scale-105 ${
-                  theme === "dark"
-                    ? "bg-gray-800 text-gray-300"
-                    : "bg-slate-100 text-slate-700"
-                }`}>
-                {feature.icon && (
-                  <feature.icon
-                    className={`h-5 w-5 ${
-                      theme === "dark" ? "text-gray-400" : "text-slate-700"
-                    }`}
-                  />
-                )}
-                <h2
-                  className={`font-bold mt-2 sm:mt-3 ${
-                    theme === "dark" ? "text-white" : "text-gray-800"
-                  }`}>
-                  {feature.title}
-                </h2>
-                <div
-                  className={`text-xs sm:text-sm ${
-                    theme === "dark" ? "text-gray-500" : "text-slate-600"
-                  }`}>
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className='p-4 md:p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-300'>
+                <div className='flex items-center mb-3 md:mb-4'>
+                  {feature.icon && (
+                    <feature.icon className='h-5 w-5 md:h-6 md:w-6 mr-3 text-blue-500 dark:text-blue-400' />
+                  )}
+                  <h2 className='font-bold text-base md:text-lg text-gray-800 dark:text-white'>
+                    {feature.title}
+                  </h2>
+                </div>
+                <div className='text-sm text-slate-600 dark:text-gray-400'>
                   {feature.description}
                 </div>
-              </div>
+              </motion.div>
             ))}
         </div>
         {!isDesktop && features.length > SHOWN_FEATURES && (
           <Button
-            size='sm'
+            size='lg'
             onClick={() => setShowAll(!showAll)}
-            className='mt-6 px-4 py-2  rounded-md text-sm font-medium  transition-colors'>
-            {showAll ? "See Less" : "See More"}
+            className='mt-8 px-6 py-3 rounded-full text-sm font-medium transition-colors bg-blue-500 hover:bg-blue-600 text-white'>
+            {showAll ? "Show Less" : "Explore More Features"}
           </Button>
         )}
       </div>
+      <div className='absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-slate-50 to-slate-100 dark:from-blue-900 dark:via-slate-900 dark:to-slate-800 opacity-50' />
     </div>
   );
 };

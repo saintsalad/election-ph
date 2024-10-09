@@ -5,7 +5,7 @@ function HomeDisclaimerCard() {
   const [animDuration, setAnimDuration] = useState(5);
 
   return (
-    <div className='relative flex flex-col w-full px-5 mb-28'>
+    <div className='relative flex flex-col w-full px-5 my-28'>
       <div
         // mouse hover effect
         onMouseEnter={() => {

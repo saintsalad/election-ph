@@ -32,6 +32,8 @@ import { LucideIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTheme } from "next-themes"; // If you're using a theme system
 
 interface CandidateViewMobileProps {
   candidate: CandidateNext | undefined;
@@ -58,6 +60,29 @@ const CandidateViewMobile = ({
   const user = useAuthStore((state) => state.user);
   const [daysUntilEdit, setDaysUntilEdit] = useState<number | null>(null);
   const [openCommentDrawer, setOpenCommentDrawer] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { theme } = useTheme(); // If using a theme system
+
+  // Determine background and text colors based on theme
+  const bgColor = theme === "dark" ? "bg-gray-900" : "bg-white";
+  const textColor = theme === "dark" ? "text-gray-100" : "text-gray-800";
+  const gradientOverlay =
+    theme === "dark"
+      ? "bg-gradient-to-t from-gray-900/90 via-gray-900/50 to-transparent"
+      : "bg-gradient-to-t from-black/80 to-transparent";
+
+  // Determine icon colors based on theme and active index
+  const getIconColor = (index: number) => {
+    if (index === 0) return "text-white";
+    return theme === "dark" ? "text-gray-200" : "text-gray-800";
+  };
+
+  useEffect(() => {
+    setIsLoading(true); // Set loading to true initially
+    if (candidate) {
+      setIsLoading(false);
+    }
+  }, [candidate]);
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -163,7 +188,14 @@ const CandidateViewMobile = ({
             />
           ),
           p: ({ className, ...props }) => (
-            <p className={cn("text-base mb-4", className)} {...props} />
+            <p
+              className={cn(
+                "text-base mb-4",
+                theme === "dark" ? "text-gray-300" : "text-gray-800",
+                className
+              )}
+              {...props}
+            />
           ),
           ul: ({ className, ...props }) => (
             <ul className={cn("list-disc pl-5 mb-4", className)} {...props} />
@@ -208,16 +240,44 @@ const CandidateViewMobile = ({
             />
           ),
         }}
-        className='markdown text-gray-800'>
+        className={`markdown ${textColor}`}>
         {text}
       </Markdown>
     </div>
   );
 
+  if (isLoading) {
+    return (
+      <div className={`flex flex-col w-full h-screen ${bgColor}`}>
+        <div className='relative h-2/3 w-full'>
+          <Skeleton className='h-full w-full' />
+          <div className='absolute bottom-16 left-0 right-0 p-6'>
+            <Skeleton className='h-8 w-3/4 mb-2' />
+            <Skeleton className='h-6 w-1/4 mb-3' />
+            <Skeleton className='h-4 w-full' />
+            <Skeleton className='h-4 w-full mt-2' />
+          </div>
+        </div>
+        <div className='flex-1 bg-white p-4'>
+          <Skeleton className='h-6 w-3/4 mb-4' />
+          <Skeleton className='h-4 w-full mb-2' />
+          <Skeleton className='h-4 w-full mb-2' />
+          <Skeleton className='h-4 w-5/6 mb-2' />
+        </div>
+        <div className='fixed right-4 bottom-24'>
+          <div className='bg-black/30 rounded-full p-2 flex flex-col items-center gap-2'>
+            <Skeleton className='h-10 w-10 rounded-full' />
+            <Skeleton className='h-10 w-10 rounded-full' />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!candidate) return null;
 
   return (
-    <div className='flex flex-1 w-full h-full bg-black'>
+    <div className={`flex flex-1 w-full h-full ${bgColor}`}>
       <Carousel setApi={setCarouselApi} className='w-full h-full -z-0 fixed'>
         <CarouselContent>
           <CarouselItem>
@@ -229,7 +289,7 @@ const CandidateViewMobile = ({
                   fill
                   className='object-cover'
                 />
-                <div className='absolute inset-0 bg-gradient-to-t from-black/80 to-transparent' />
+                <div className={`absolute inset-0 ${gradientOverlay}`} />
                 <div className='absolute bottom-16 left-0 right-0 p-6 text-white'>
                   <h2 className='text-3xl font-bold mb-2'>
                     {candidate.displayName}
@@ -251,11 +311,8 @@ const CandidateViewMobile = ({
             "achievements",
             "platformAndPolicy",
           ].map((section) => (
-            <CarouselItem key={section} className='bg-white'>
-              <div className='h-screen overflow-y-auto pt-24'>
-                {/* <h3 className='text-xl font-semibold mb-2 px-4 pt-20 sticky top-0 bg-white z-10 w-full text-center capitalize'>
-                  {section === "educAttainment" ? "Education" : section}
-                </h3> */}
+            <CarouselItem key={section} className={bgColor}>
+              <div className={`h-screen overflow-y-auto pt-24 ${textColor}`}>
                 {markedComponent(
                   candidate[section as keyof CandidateNext] as string
                 )}
@@ -271,13 +328,26 @@ const CandidateViewMobile = ({
         </div>
       </div>
 
-      <Link
-        href='/candidates'
-        className='fixed top-[72px] left-4 bg-black/20 backdrop-blur-md p-2 rounded-full'>
-        <ChevronLeft color='#FFF' className='h-6 w-6' />
-      </Link>
+      <div className='fixed top-[64px] left-0 right-0 flex justify-between items-center p-2'>
+        <Link
+          href='/candidates'
+          className={`p-2 rounded-full ${
+            activeIndex === 0 ? "bg-black/20" : "bg-white/20"
+          } backdrop-blur-md transition-all duration-300`}>
+          <ChevronLeft className={`h-6 w-6 ${getIconColor(activeIndex)}`} />
+        </Link>
+        <button
+          onClick={() => {
+            /* TODO: Implement more options functionality */
+          }}
+          className={`p-2 rounded-full ${
+            activeIndex === 0 ? "bg-black/20" : "bg-white/20"
+          } backdrop-blur-md transition-all duration-300`}>
+          <MoreVertical className={`h-6 w-6 ${getIconColor(activeIndex)}`} />
+        </button>
+      </div>
 
-      <div className='fixed right-4 bottom-32'>
+      <div className='fixed right-4 bottom-24'>
         <div className='bg-black/30 rounded-full p-2 flex flex-col items-center gap-2 shadow-lg'>
           <ActionButton
             Icon={Star}
@@ -290,21 +360,18 @@ const CandidateViewMobile = ({
             count={0}
             onClick={() => setOpenCommentDrawer(true)}
           />
-          <ActionButton
-            Icon={MoreVertical}
-            onClick={() => {
-              /* TODO: Implement more options functionality */
-            }}
-          />
         </div>
       </div>
 
       <Drawer open={openRateDrawer} onOpenChange={setOpenRateDrawer}>
-        <DrawerContent>
+        <DrawerContent className={bgColor}>
           <div className='mx-auto w-full max-w-sm'>
             <DrawerHeader className='pb-0'>
-              <DrawerTitle>Rate Candidate</DrawerTitle>
-              <DrawerDescription>
+              <DrawerTitle className={textColor}>Rate Candidate</DrawerTitle>
+              <DrawerDescription
+                className={
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }>
                 {drawerMode === "rating" &&
                   "Click on the stars to rate the candidate."}
                 {drawerMode === "success" && "Thank you for rating!"}
@@ -355,17 +422,27 @@ const CandidateViewMobile = ({
       </Drawer>
 
       <Drawer open={openCommentDrawer} onOpenChange={setOpenCommentDrawer}>
-        <DrawerContent>
+        <DrawerContent className={bgColor}>
           <div className='mx-auto w-full max-w-sm'>
             <DrawerHeader>
-              <DrawerTitle>Comments</DrawerTitle>
-              <DrawerDescription>
+              <DrawerTitle className={textColor}>Comments</DrawerTitle>
+              <DrawerDescription
+                className={
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }>
                 This feature is currently under maintenance.
               </DrawerDescription>
             </DrawerHeader>
             <div className='p-4 flex flex-col items-center justify-center h-40'>
-              <MessageCircle className='h-12 w-12 text-gray-400 mb-4' />
-              <p className='text-center text-gray-600'>
+              <MessageCircle
+                className={`h-12 w-12 ${
+                  theme === "dark" ? "text-gray-600" : "text-gray-400"
+                } mb-4`}
+              />
+              <p
+                className={`text-center ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}>
                 We&apos;re working on bringing comments to you soon. Check back
                 later!
               </p>

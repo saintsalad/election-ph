@@ -1,5 +1,6 @@
 import { Icons } from "@/components/custom/icons";
 import { FieldValue } from "firebase/firestore";
+import { Timestamp } from "firebase-admin/firestore";
 
 export type UserResponse = {
   displayName: string;
@@ -34,6 +35,7 @@ export type CandidateNext = {
   achievements: string; //markedjs
   platformAndPolicy: string; //markedjs
   socialLinks: SocialLinks[] | [];
+  election: ElectionNext;
 };
 
 export type SocialLinks = {

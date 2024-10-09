@@ -5,8 +5,10 @@ import { UserInfoDialog } from "@/components/custom/user-info-dialog";
 import type { ElectionWithVoteStatus, UserResponse } from "@/lib/definitions";
 import { useAuthStore } from "@/lib/store";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQuery } from "react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { VoteIcon } from "lucide-react";
 
 function useElections() {
   return useQuery<ElectionWithVoteStatus[]>(`elections`, async () => {
@@ -24,8 +26,6 @@ function useUserInfo() {
 
 export default function Vote() {
   const { user } = useAuthStore();
-  const [showUserInfoDialog, setShowUserInfoDialog] = useState(false);
-
   const { data: elections, isLoading: isElectionsLoading } = useElections();
   const {
     data: userInfo,
@@ -33,28 +33,37 @@ export default function Vote() {
     refetch: refetchUserInfo,
   } = useUserInfo();
 
+  const showUserInfoDialog =
+    !isUserInfoLoading && userInfo && !userInfo.dateUpdated;
+
   const handleUserInfoSubmit = () => {
     // TODO: Implement the logic to update user info
     refetchUserInfo();
   };
 
-  useEffect(() => {
-    if (!isUserInfoLoading && userInfo) {
-      setShowUserInfoDialog(!userInfo.dateUpdated);
-    }
-  }, [userInfo, isUserInfoLoading]);
-
   return (
-    <div className='w-full pt-20'>
+    <div className='container mx-auto px-4 pt-24 sm:px-6 lg:px-8'>
+      <header className='mb-12 text-center'>
+        <h1 className='flex items-center justify-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl'>
+          <VoteIcon className='mr-3 h-8 w-8 text-blue-600 dark:text-blue-400' />
+          <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400'>
+            Available Elections
+          </span>
+        </h1>
+        <p className='mt-3 text-lg text-gray-600 dark:text-gray-300'>
+          Cast your vote in the ongoing elections
+        </p>
+      </header>
+
       <UserInfoDialog
-        isOpen={showUserInfoDialog}
-        onClose={() => setShowUserInfoDialog(false)}
+        isOpen={showUserInfoDialog ?? false}
+        onClose={() => refetchUserInfo()}
         onSubmit={handleUserInfoSubmit}
       />
 
-      <div className='px-4 pt-5 grid grid-cols-1 gap-6 lg:px-0'>
+      <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
         {!isElectionsLoading &&
-          elections?.map((item, i) => (
+          elections?.map((item) => (
             <ElectionBanner
               key={item.id}
               userId={user?.uid || ""}
@@ -63,17 +72,23 @@ export default function Vote() {
           ))}
 
         {isElectionsLoading && (
-          <div className='grid grid-cols-1 gap-6'>
+          <>
             {[...Array(3)].map((_, index) => (
-              <div key={index} className='animate-pulse'>
-                <div className='bg-gray-200 h-32 rounded-lg mb-2' />
-                <div className='bg-gray-200 h-4 w-3/4 rounded mb-2' />
-                <div className='bg-gray-200 h-4 w-1/2 rounded' />
-              </div>
+              <ElectionSkeleton key={index} />
             ))}
-          </div>
+          </>
         )}
       </div>
+    </div>
+  );
+}
+
+function ElectionSkeleton() {
+  return (
+    <div className='rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-4 shadow-sm'>
+      <Skeleton className='h-32 w-full mb-4' />
+      <Skeleton className='h-4 w-3/4 mb-2' />
+      <Skeleton className='h-4 w-1/2' />
     </div>
   );
 }
