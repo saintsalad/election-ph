@@ -27,7 +27,6 @@ function useElection(electionId: string) {
 function VotingPage({ params }: { params: { id: string } }) {
   const { theme } = useTheme();
   const electionId = params.id;
-  const [showAlertBanner, setShowAlertBanner] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
   const queryClient = useQueryClient();
@@ -45,18 +44,18 @@ function VotingPage({ params }: { params: { id: string } }) {
   const handleIsVoted = () => {
     setIsSubmitted(true);
     invalidateElectionQuery();
-    refetch({ stale: true });
+    refetch();
     triggerConfettiFireworks();
   };
 
-  const ballotStyle = `
-    relative bg-white border-[12px] border-black border-dashed 
-    rounded-lg shadow-md p-6 md:p-12
-    before:content-[''] before:absolute before:top-[-24px] before:left-[-24px] before:w-12 before:h-12 before:bg-black
-    after:content-[''] after:absolute after:bottom-[-24px] after:right-[-24px] before:w-12 before:h-12 before:bg-black
-    [&>*:first-child]:before:content-[''] [&>*:first-child]:before:absolute [&>*:first-child]:before:top-[-24px] [&>*:first-child]:before:right-[-24px] [&>*:first-child]:before:w-12 [&>*:first-child]:before:h-12 [&>*:first-child]:before:bg-black
-    [&>*:last-child]:after:content-[''] [&>*:last-child]:after:absolute [&>*:last-child]:after:bottom-[-24px] [&>*:last-child]:after:left-[-24px] [&>*:last-child]:after:w-12 [&>*:last-child]:after:h-12 [&>*:last-child]:after:bg-black
-  `;
+  // const ballotStyle = `
+  //   relative bg-white border-[12px] border-black border-dashed
+  //   rounded-lg shadow-md p-6 md:p-12
+  //   before:content-[''] before:absolute before:top-[-24px] before:left-[-24px] before:w-12 before:h-12 before:bg-black
+  //   after:content-[''] after:absolute after:bottom-[-24px] after:right-[-24px] before:w-12 before:h-12 before:bg-black
+  //   [&>*:first-child]:before:content-[''] [&>*:first-child]:before:absolute [&>*:first-child]:before:top-[-24px] [&>*:first-child]:before:right-[-24px] [&>*:first-child]:before:w-12 [&>*:first-child]:before:h-12 [&>*:first-child]:before:bg-black
+  //   [&>*:last-child]:after:content-[''] [&>*:last-child]:after:absolute [&>*:last-child]:after:bottom-[-24px] [&>*:last-child]:after:left-[-24px] [&>*:last-child]:after:w-12 [&>*:last-child]:after:h-12 [&>*:last-child]:after:bg-black
+  // `;
 
   const contentStyle = "max-w-3xl mx-auto";
 

@@ -106,24 +106,23 @@ export default function Home() {
       {/* Disclaimer Section */}
       <HomeDisclaimerCard />
 
-      {/* Placeholder for additional content */}
-      <div className='relative flex flex-col w-full justify-center items-center py-28 px-5 overflow-hidden bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-900'>
-        <div className='mb-3 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-full'>
+      <div className='relative flex flex-col w-full justify-center items-center py-16 sm:py-28 px-4 sm:px-5 overflow-hidden bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-900'>
+        <div className='mb-4 sm:mb-3 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 sm:px-4 py-1 rounded-full'>
           ✨ ABOUT US
         </div>
-        <h1 className='text-center max-w-3xl text-xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100 z-10 mb-6'>
+        <h1 className='text-center max-w-3xl text-lg sm:text-xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 z-10 mb-4 sm:mb-6'>
           We are committed to offering a secure and transparent platform for
           Filipinos to voice their opinions and engage in meaningful community
           discussions.
         </h1>
-        <p className='text-center max-w-2xl text-slate-600 dark:text-slate-300 z-10 mb-8'>
+        <p className='text-center max-w-2xl text-sm sm:text-base text-slate-600 dark:text-slate-300 z-10 mb-6 sm:mb-8'>
           Our mission is to empower every Filipino citizen with a platform to
           express their views, participate in surveys, and contribute to the
           democratic process.
         </p>
         <Link href='/about'>
           <ShimmerButton
-            className='h-10 px-6 text-white dark:text-white font-semibold'
+            className='h-10 px-4 sm:px-6 text-sm sm:text-base text-white dark:text-white font-semibold'
             background={
               theme === "dark"
                 ? "rgba(30, 41, 59, 0.8)"

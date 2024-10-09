@@ -81,7 +81,8 @@ const HomeFeatures = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { theme } = useTheme();
 
-  const SHOWN_FEATURES = 6;
+  const SHOWN_FEATURES_MOBILE = 4;
+  const SHOWN_FEATURES_DESKTOP = 10;
 
   return (
     <div className='relative flex flex-col w-full justify-center items-center py-16 md:py-28 px-4 md:px-5 overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
@@ -92,7 +93,7 @@ const HomeFeatures = () => {
           transition={{ duration: 0.5 }}
           className='mb-3 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-full flex items-center space-x-2'>
           <Rocket className='w-4 h-4 text-yellow-500' />
-          <span>Empowering Your Voice</span>
+          <span>The Innovation</span>
         </motion.div>
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -109,31 +110,43 @@ const HomeFeatures = () => {
           Unleash your potential with our platform, designed to help you engage,
           learn, and make well-informed choices in the community.
         </motion.p>
-        <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 w-full'>
           {features
-            .slice(0, isDesktop || showAll ? features.length : SHOWN_FEATURES)
+            .slice(
+              0,
+              isDesktop
+                ? showAll
+                  ? features.length
+                  : SHOWN_FEATURES_DESKTOP
+                : showAll
+                ? features.length
+                : SHOWN_FEATURES_MOBILE
+            )
             .map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className='p-4 md:p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-300'>
-                <div className='flex items-center mb-3 md:mb-4'>
+                className='p-4 md:p-6 rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all duration-300 bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-300'>
+                <div className='flex items-start'>
                   {feature.icon && (
-                    <feature.icon className='h-5 w-5 md:h-6 md:w-6 mr-3 text-blue-500 dark:text-blue-400' />
+                    <feature.icon className='h-5 w-5 md:h-6 md:w-6 mr-3 text-blue-500 dark:text-blue-400 mt-1 flex-shrink-0' />
                   )}
-                  <h2 className='font-bold text-base md:text-lg text-gray-800 dark:text-white'>
-                    {feature.title}
-                  </h2>
-                </div>
-                <div className='text-sm text-slate-600 dark:text-gray-400'>
-                  {feature.description}
+                  <div>
+                    <h2 className='font-semibold text-base md:text-lg text-gray-800 dark:text-white mb-2'>
+                      {feature.title}
+                    </h2>
+                    <p className='text-sm text-slate-600 dark:text-gray-400'>
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             ))}
         </div>
-        {!isDesktop && features.length > SHOWN_FEATURES && (
+        {features.length >
+          (isDesktop ? SHOWN_FEATURES_DESKTOP : SHOWN_FEATURES_MOBILE) && (
           <Button
             size='lg'
             onClick={() => setShowAll(!showAll)}

@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     // Set cache age is 1 week and revalidate once a day
     response.headers.set(
       "Cache-Control",
-      "public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400"
+      "public, max-age=120, s-maxage=120, stale-while-revalidate=120"
     );
 
     return response;
