@@ -5,7 +5,6 @@ import { UserInfoDialog } from "@/components/custom/user-info-dialog";
 import type { ElectionWithVoteStatus, UserResponse } from "@/lib/definitions";
 import { useAuthStore } from "@/lib/store";
 import axios from "axios";
-import { useEffect } from "react";
 import { useQuery } from "react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VoteIcon } from "lucide-react";

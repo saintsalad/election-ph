@@ -22,7 +22,7 @@ function ElectionBanner({ election, userId }: ElectionBannerProps) {
   const buttonHref = isInactive
     ? "#"
     : election.isVoted
-    ? `/results/${election.id}`
+    ? `/results?electionId=${election.id}`
     : `/vote/${election.id}`;
 
   return (

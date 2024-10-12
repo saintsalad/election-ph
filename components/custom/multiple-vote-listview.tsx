@@ -21,6 +21,7 @@ import axios from "axios";
 import { generateReferenceNumber } from "@/lib/functions";
 import { Loader2 } from "lucide-react"; // Add this import
 import { useTheme } from "next-themes";
+import { encrypt } from "@/lib/light-encrypt";
 
 type MultipleVoteListViewProps = {
   election: ElectionNext;
@@ -103,7 +104,7 @@ function MultipleVoteListView({
     voteMutation.mutate({
       electionId: election.id,
       referenceId,
-      value: selectedCandidates, // Now passing the array directly
+      value: selectedCandidates.map((item) => encrypt(item)),
     });
   };
 

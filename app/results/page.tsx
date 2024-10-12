@@ -1,166 +1,81 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import {
-  Maximize2,
-  Minimize2,
-  Settings,
-  ChevronDown,
-  TrendingUp,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { useState, useCallback, useEffect } from "react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Bar,
-  BarChart,
-  Cell,
-  XAxis,
-  YAxis,
-  LabelList,
-  ResponsiveContainer,
-  Tooltip,
-  CartesianGrid,
-  Pie,
-  PieChart,
-} from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { TooltipProps } from "recharts";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import BaseCard, {
-  BaseCardProps,
-} from "@/components/custom/dashboard/base-card";
+import { ChartConfig } from "@/components/ui/chart";
 import MainCard from "@/components/custom/dashboard/main-card";
 import GenderCard from "@/components/custom/dashboard/gender-card";
 import { EducationCard } from "@/components/custom/dashboard/education-card";
 import CityCard from "@/components/custom/dashboard/city-card";
 import AgeCard from "@/components/custom/dashboard/age-card";
+import { sideCards } from "@/constants/data";
+import { Election, VoteResponse, VoteResult } from "@/lib/definitions";
+import useReactQueryNext from "@/hooks/useReactQueryNext";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { useSearchParams, useRouter } from "next/navigation";
+import { truncateText } from "@/lib/functions";
 
 const Page: React.FC = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const electionId = searchParams.get("electionId");
+
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [visibleCards, setVisibleCards] = useState<string[]>([
-    "Gender",
-    "Education",
-    "Age",
-    "Cities",
-  ]);
-  const [electionType, setElectionType] = useState("Presidential");
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const {
+    data: elections,
+    isLoading: isElectionsLoading,
+    refetch,
+    refetchWithoutCache,
+  } = useReactQueryNext<Election[]>("elections", "/api/election");
+
+  const {
+    data: mainCardData,
+    isLoading: isMainCardLoading,
+    refetchNext: refetchNextMainCard,
+  } = useReactQueryNext<VoteResult>("main-card", "/api/dashboard", {
+    manual: true,
+  });
+
+  const currentElection = elections?.find(
+    (election) => election.id === electionId
+  );
+
+  const fetchVoteData = useCallback((newElectionId: string) => {
+    refetchNextMainCard(`?electionId=${newElectionId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (elections && elections.length > 0 && !electionId) {
+      const firstElection = elections[0];
+      router.push(`/results?electionId=${firstElection.id}`);
+      setIsLoading(false);
+    } else if (electionId) {
+      fetchVoteData(electionId);
+      setIsLoading(false);
+    }
+  }, [elections, electionId, router, fetchVoteData]);
 
   const toggleExpand = (title: string) => {
     setExpandedCard((prev) => (prev === title ? null : title));
   };
-
-  // const toggleCardVisibility = (title: string) => {
-  //   setVisibleCards((prev) =>
-  //     prev.includes(title)
-  //       ? prev.filter((card) => card !== title)
-  //       : [...prev, title]
-  //   );
-  // };
-
-  const sideCards = [
-    {
-      title: "Gender",
-      description:
-        "Analysis of voting patterns and preferences based on gender demographics in the election.",
-    },
-    {
-      title: "Education",
-      description:
-        "Breakdown of voter turnout and political leanings across different educational backgrounds.",
-    },
-    {
-      title: "Age",
-      description:
-        "Examination of how age groups influence voting behavior and election outcomes.",
-    },
-    {
-      title: "Cities",
-      description:
-        "Comparison of election results and voter engagement across various urban centers.",
-    },
-  ];
-
-  const electionTypes = ["Presidential", "Congressional", "State", "Local"];
-
-  const candidateVotes = [
-    {
-      candidate: "Eren Yeager",
-      party: "Scout Regiment",
-      votes: 173000,
-      color: "#2C3E50",
-    },
-    {
-      candidate: "Mikasa Ackerman",
-      party: "Survey Corps",
-      votes: 186000,
-      color: "#E74C3C",
-    },
-    {
-      candidate: "Armin Arlert",
-      party: "Colossal Titan",
-      votes: 305000,
-      color: "#F1C40F",
-    },
-    {
-      candidate: "Levi Ackerman",
-      party: "Special Operations",
-      votes: 237000,
-      color: "#3498DB",
-    },
-    {
-      candidate: "Historia Reiss",
-      party: "Royal Government",
-      votes: 173000,
-      color: "#9B59B6",
-    },
-    {
-      candidate: "Reiner Braun",
-      party: "Warrior Unit",
-      votes: 30500,
-      color: "#D35400",
-    },
-    {
-      candidate: "Annie Leonhart",
-      party: "Military Police",
-      votes: 2222,
-      color: "#1ABC9C",
-    },
-    {
-      candidate: "Hange Zoë",
-      party: "Research Corps",
-      votes: 46465,
-      color: "#27AE60",
-    },
-  ];
-
-  const chartConfig = candidateVotes.reduce((config, candidate) => {
-    config[candidate.candidate] = {
-      label: candidate.candidate,
-      color: candidate.color,
-    };
-    return config as ChartConfig;
-  }, {} as ChartConfig);
 
   const renderCard = (cardType: string) => {
     const baseProps = {
@@ -177,12 +92,12 @@ const Page: React.FC = () => {
       case "Main":
         return (
           <MainCard
+            voteResult={mainCardData}
+            isLoading={isMainCardLoading}
             {...baseProps}
             title='Candidate Votes'
-            description={`${electionType} Election Results`}
-            electionType={electionType}
-            candidateVotes={candidateVotes}
-            chartConfig={chartConfig}
+            description={`${currentElection?.description || "Presidential"}`}
+            // electionType={currentElection?.description || "Presidential"}
           />
         );
       case "Gender":
@@ -206,43 +121,58 @@ const Page: React.FC = () => {
             Election Dashboard
           </h1>
           <div className='flex items-center space-x-4'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='outline' className='w-[200px] justify-between'>
-                  {electionType} Election{" "}
-                  <ChevronDown className='ml-2 h-4 w-4' />
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  title={currentElection?.description}
+                  variant='outline'
+                  role='combobox'
+                  aria-expanded={open}
+                  className='w-[250px] justify-between'
+                  disabled={isElectionsLoading || isLoading}>
+                  {isElectionsLoading || isLoading ? (
+                    <Loader2 className='mx-auto h-4 w-4 animate-spin text-gray-500' />
+                  ) : (
+                    <span className='truncate'>
+                      {currentElection
+                        ? truncateText(currentElection.description, 30)
+                        : "Select election..."}
+                    </span>
+                  )}
+                  <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-[200px]'>
-                {electionTypes.map((type) => (
-                  <DropdownMenuItem
-                    key={type}
-                    onSelect={() => setElectionType(type)}>
-                    {type} Election
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='outline' size='icon'>
-                  <Settings className='h-4 w-4' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuLabel>Customize View</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {sideCards.map((card) => (
-                  <DropdownMenuCheckboxItem
-                    key={card.title}
-                    checked={visibleCards.includes(card.title)}
-                    onCheckedChange={() => toggleCardVisibility(card.title)}>
-                    {card.title}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu> */}
+              </PopoverTrigger>
+              <PopoverContent className='w-[250px] p-0'>
+                <Command>
+                  <CommandInput placeholder='Search election...' />
+                  <CommandList>
+                    <CommandEmpty>No election found.</CommandEmpty>
+                    <CommandGroup>
+                      {elections?.map((election) => (
+                        <CommandItem
+                          key={election.id}
+                          value={election.description}
+                          onSelect={() => {
+                            router.push(`/results?electionId=${election.id}`);
+                            setOpen(false);
+                          }}
+                          className='flex items-center justify-between'>
+                          {election.description}
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4 shrink-0",
+                              election.id === electionId
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </header>
@@ -255,13 +185,11 @@ const Page: React.FC = () => {
               {renderCard("Main")}
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-5 lg:col-span-1 xl:col-span-2 lg:h-full lg:overflow-y-auto'>
-              {sideCards
-                .filter((card) => visibleCards.includes(card.title))
-                .map((card) => (
-                  <div key={card.title} className='w-full'>
-                    {renderCard(card.title)}
-                  </div>
-                ))}
+              {sideCards.map((card) => (
+                <div key={card.title} className='w-full'>
+                  {renderCard(card.title)}
+                </div>
+              ))}
             </div>
           </div>
         )}

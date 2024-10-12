@@ -138,3 +138,26 @@ export const faqData = {
     },
   ],
 };
+
+export const sideCards = [
+  {
+    title: "Gender",
+    description:
+      "Analysis of voting patterns and preferences based on gender demographics in the election.",
+  },
+  {
+    title: "Education",
+    description:
+      "Breakdown of voter turnout and political leanings across different educational backgrounds.",
+  },
+  {
+    title: "Age",
+    description:
+      "Examination of how age groups influence voting behavior and election outcomes.",
+  },
+  {
+    title: "Cities",
+    description:
+      "Comparison of election results and voter engagement across various urban centers.",
+  },
+];

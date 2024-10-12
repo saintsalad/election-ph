@@ -89,7 +89,7 @@ export type Vote = {
 export type VoteRequest = {
   electionId: string;
   referenceId: string;
-  value: string | string[]; //candidateId
+  value: string[]; //candidateId
 };
 
 export type VoteResponse = {
@@ -97,12 +97,13 @@ export type VoteResponse = {
   electionId: string;
   referenceId: string;
   userId: string;
-  type: "single" | "multiple";
-};
-
-export type UserVotes = {
-  electionId: string;
-  candidate: string | string[];
+  userInfo: {
+    age: number;
+    gender: string;
+    education: string;
+    city: string;
+  };
+  value: string[];
 };
 
 export interface NavItem {
@@ -155,4 +156,18 @@ export type CandidateRating = {
   candidateId: string;
   averageRating: number;
   numberOfRatings: number;
+};
+
+export type VoteResult = {
+  startDate: string;
+  endDate: string;
+  totalVotes: number;
+  voteResults: [CandidateVoteResult];
+};
+
+export type CandidateVoteResult = {
+  candidate: string;
+  party: string;
+  votes: number;
+  color: string;
 };

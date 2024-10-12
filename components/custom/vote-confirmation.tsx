@@ -79,13 +79,12 @@ const VoteConfirmation: React.FC<VoteConfirmationProps> = ({
   });
 
   const handleSubmitVote = async () => {
-    const referenceId = generateReferenceNumber();
-
-    voteMutation.mutate({
-      electionId,
-      referenceId,
-      value: candidate.id,
-    });
+    // const referenceId = generateReferenceNumber();
+    // voteMutation.mutate({
+    //   electionId,
+    //   referenceId,
+    //   value: candidate.id,
+    // });
   };
 
   if (isDesktop) {
