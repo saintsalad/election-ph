@@ -3,14 +3,13 @@
 import { useState, useCallback, useEffect } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ChartConfig } from "@/components/ui/chart";
 import MainCard from "@/components/custom/dashboard/main-card";
 import GenderCard from "@/components/custom/dashboard/gender-card";
 import { EducationCard } from "@/components/custom/dashboard/education-card";
 import CityCard from "@/components/custom/dashboard/city-card";
 import AgeCard from "@/components/custom/dashboard/age-card";
 import { sideCards } from "@/constants/data";
-import { Election, VoteResponse, VoteResult } from "@/lib/definitions";
+import type { Election, VoteResult } from "@/lib/definitions";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
 import {
   Popover,
@@ -28,8 +27,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { truncateText } from "@/lib/functions";
+import { Suspense } from "react";
 
-const Page: React.FC = () => {
+const ResultsContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const electionId = searchParams.get("electionId");
@@ -195,6 +195,15 @@ const Page: React.FC = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Modify the main Page component
+const Page: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResultsContent />
+    </Suspense>
   );
 };
 
