@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TrendingUp } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { TooltipProps } from "recharts";
@@ -6,65 +6,53 @@ import { useTheme } from "next-themes";
 import BaseCard, {
   BaseCardProps,
 } from "@/components/custom/dashboard/base-card";
+import { GenderData, GenderVoteResult } from "@/lib/definitions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { analyzeGenderVotes } from "@/lib/functions";
 
-interface GenderData {
-  gender: string;
-  voters: number;
-  color: string;
+interface GenderCardProps extends BaseCardProps {
+  genderData: GenderVoteResult | undefined;
+  isLoading: boolean;
 }
 
-const GenderCard: React.FC<BaseCardProps> = (props) => {
-  const [chartDimensions, setChartDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
+const GenderCard: React.FC<GenderCardProps> = ({
+  genderData,
+  isLoading,
+  ...props
+}) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>();
-  const chartContainerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
-    const updateDimensions = () => {
-      if (chartContainerRef.current) {
-        const { width, height } =
-          chartContainerRef.current.getBoundingClientRect();
-        setChartDimensions({ width, height });
-      }
-    };
+    const root = document.documentElement;
+    root.style.setProperty(
+      "--chart-height",
+      props.expanded ? "450px" : "230px"
+    );
+  }, [props.expanded]);
 
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (chartContainerRef.current) {
-      resizeObserver.observe(chartContainerRef.current);
-    }
+  const totalVoters = useMemo(
+    () =>
+      genderData?.voteResult.reduce(
+        (sum: number, item: GenderData) => sum + item.votes,
+        0
+      ) || 0,
+    [genderData]
+  );
 
-    window.addEventListener("resize", updateDimensions);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateDimensions);
-    };
-  }, []);
-
-  const genderData: GenderData[] = [
-    { gender: "Male", voters: 450000, color: "#3B82F6" },
-    { gender: "Female", voters: 420000, color: "#EC4899" },
-    { gender: "Others", voters: 30000, color: "#10B981" },
-  ];
-
-  const totalVoters = genderData.reduce((sum, item) => sum + item.voters, 0);
+  const analysis = useMemo(() => analyzeGenderVotes(genderData), [genderData]);
 
   const footerContent = (
-    <div className='w-full flex flex-col items-end justify-end text-sm text-muted-foreground'>
-      <span className='inline-flex items-center space-x-1'>
-        <TrendingUp className='h-4 w-4 text-green-500 mr-1' />
-        <strong>Female </strong> voters increased by <strong>3.5%</strong> this
-        election
-      </span>
-      <div className='mt-1'>
-        Total of <strong>{totalVoters.toLocaleString()}</strong> voters
+    <div className='ml-auto text-right'>
+      <div className='flex items-center justify-end space-x-2'>
+        {analysis.icon}
+        <span className='text-sm font-medium'>{analysis.message}</span>
+      </div>
+      <div className='mt-1 text-xs text-gray-500'>
+        Total votes: {genderData?.totalVotes.toLocaleString() ?? 0}
       </div>
     </div>
   );
-
   const renderCustomizedLabel = (props: any) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, percent, index } =
       props;
@@ -77,7 +65,7 @@ const GenderCard: React.FC<BaseCardProps> = (props) => {
         x={x}
         y={y}
         fill={theme === "dark" ? "#FFFFFF" : "#111827"}
-        fontSize={13}
+        fontSize={props.expanded ? 14 : 12}
         fontWeight='bold'
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline='central'>
@@ -99,14 +87,12 @@ const GenderCard: React.FC<BaseCardProps> = (props) => {
           </p>
           <p className='text-gray-700 dark:text-gray-300 text-sm mb-1'>
             Voters:{" "}
-            <span className='font-semibold'>
-              {data.voters.toLocaleString()}
-            </span>
+            <span className='font-semibold'>{data.votes.toLocaleString()}</span>
           </p>
           <p className='text-gray-700 dark:text-gray-300 text-sm'>
             Percentage:{" "}
             <span className='font-semibold'>
-              {((data.voters / totalVoters) * 100).toFixed(2)}%
+              {((data.votes / totalVoters) * 100).toFixed(2)}%
             </span>
           </p>
         </div>
@@ -119,44 +105,58 @@ const GenderCard: React.FC<BaseCardProps> = (props) => {
     setActiveIndex(index);
   };
 
-  return (
-    <BaseCard {...props} footerContent={footerContent}>
-      <div className='main w-full h-full flex flex-col'>
-        <div ref={chartContainerRef} className='w-full flex-grow min-h-[230px]'>
-          {chartDimensions.width > 0 && chartDimensions.height > 0 && (
-            <ResponsiveContainer width='100%' height='100%' minHeight={230}>
-              <PieChart>
-                <Tooltip content={<CustomTooltip />} />
-                <Pie
-                  data={genderData}
-                  dataKey='voters'
-                  nameKey='gender'
-                  cx='50%'
-                  cy='50%'
-                  outerRadius={
-                    Math.min(chartDimensions.width, chartDimensions.height) *
-                    0.35
-                  }
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                  onMouseEnter={onPieEnter}
-                  strokeWidth={2} // Increased stroke width
-                  stroke={theme === "dark" ? "#1F2937" : "#F3F4F6"} // Matching background color
-                >
-                  {genderData.map((entry, index) => (
+  const renderSkeleton = () => (
+    <div className='space-y-4'>
+      <Skeleton className='h-[200px] w-[200px] rounded-full mx-auto' />
+      <div className='flex justify-center space-x-4'>
+        <Skeleton className='h-4 w-16' />
+        <Skeleton className='h-4 w-16' />
+        <Skeleton className='h-4 w-16' />
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    if (isLoading || !genderData) {
+      return renderSkeleton();
+    }
+
+    return (
+      <div className='w-full flex flex-col items-center'>
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            props.expanded ? "w-full h-[450px]" : "w-[230px] h-[230px]"
+          }`}>
+          <ResponsiveContainer width='100%' height='100%'>
+            <PieChart>
+              <Tooltip content={<CustomTooltip />} />
+              <Pie
+                data={genderData.voteResult}
+                dataKey='votes'
+                nameKey='gender'
+                cx='50%'
+                cy='50%'
+                outerRadius={props.expanded ? "90%" : "85%"}
+                labelLine={false}
+                label={renderCustomizedLabel}
+                onMouseEnter={onPieEnter}
+                strokeWidth={2}
+                stroke={theme === "dark" ? "#1F2937" : "#F3F4F6"}>
+                {genderData.voteResult.map(
+                  (entry: { color: string }, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
                       opacity={activeIndex === index ? 1 : 0.75}
                     />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          )}
+                  )
+                )}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
         </div>
         <div className='flex justify-center mt-4'>
-          {genderData.map((entry, index) => (
+          {genderData.voteResult.map((entry, index: number) => (
             <div key={`legend-${index}`} className='flex items-center mx-2'>
               <div
                 className='w-3 h-3 mr-1 rounded-sm'
@@ -167,6 +167,12 @@ const GenderCard: React.FC<BaseCardProps> = (props) => {
           ))}
         </div>
       </div>
+    );
+  };
+
+  return (
+    <BaseCard {...props} footerContent={footerContent}>
+      {renderContent()}
     </BaseCard>
   );
 };

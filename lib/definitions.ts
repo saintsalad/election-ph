@@ -171,3 +171,16 @@ export type CandidateVoteResult = {
   votes: number;
   color: string;
 };
+
+export type GenderData = {
+  gender: string;
+  votes: number;
+  color: string;
+};
+
+export type GenderVoteResult = {
+  voteResult: GenderData[];
+  totalVotes: number;
+  electionStart: string;
+  electionEnd: string;
+};

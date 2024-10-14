@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { TrendingUp } from "lucide-react";
+import React, { useEffect, useMemo } from "react";
+import { TrendingUp, Loader2, FileX2, Loader } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -17,12 +17,20 @@ import { useTheme } from "next-themes";
 import BaseCard, {
   BaseCardProps,
 } from "@/components/custom/dashboard/base-card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EducationData {
   level: string;
   voters: number;
   color: string;
-  percentage?: number; // We'll calculate this
+  percentage?: number;
+}
+
+interface EducationResult {
+  educationData: EducationData[];
+  totalVoters: number;
+  highestEducationLevel: string;
+  collegeTurnoutChange: number;
 }
 
 const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
@@ -50,130 +58,147 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
   return null;
 };
 
-export const EducationCard: React.FC<BaseCardProps> = (props) => {
-  const [chartDimensions, setChartDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const chartContainerRef = useRef<HTMLDivElement>(null);
+interface EducationCardProps extends BaseCardProps {
+  educationResult: EducationResult | undefined;
+  isLoading: boolean;
+}
+
+export const EducationCard: React.FC<EducationCardProps> = ({
+  isLoading = false,
+  educationResult,
+  ...props
+}) => {
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const { theme } = useTheme();
 
-  const educationData: EducationData[] = [
-    { level: "High School or Less", voters: 150000, color: "#60A5FA" },
-    { level: "Some College", voters: 75000, color: "#8B5CF6" },
-    { level: "College Degree", voters: 200000, color: "#34D399" },
-    { level: "Advanced Degree", voters: 150000, color: "#F59E0B" },
-  ];
+  const educationData = useMemo(() => {
+    if (!educationResult) return [];
+    return educationResult.educationData.map((item) => ({
+      ...item,
+      percentage: (item.voters / educationResult.totalVoters) * 100,
+    }));
+  }, [educationResult]);
 
-  // Calculate total voters and percentages
-  const totalVoters = educationData.reduce((sum, item) => sum + item.voters, 0);
-  educationData.forEach((item) => {
-    item.percentage = (item.voters / totalVoters) * 100;
-  });
-
-  useEffect(() => {
-    function updateDimensions() {
-      if (chartContainerRef.current) {
-        const { width, height } =
-          chartContainerRef.current.getBoundingClientRect();
-        setChartDimensions({ width, height });
-      }
-    }
-
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (chartContainerRef.current) {
-      resizeObserver.observe(chartContainerRef.current);
-    }
-
-    window.addEventListener("resize", updateDimensions);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateDimensions);
-    };
-  }, []);
-
-  const footerContent = (
-    <div className='ml-auto text-right'>
-      <div className='flex items-center justify-end space-x-2'>
-        <TrendingUp className='h-4 w-4 text-green-500' />
-        <span>College graduates&apos; turnout up by 4.2%</span>
+  const footerContent = useMemo(() => {
+    if (!educationResult) return null;
+    return (
+      <div className='ml-auto text-right'>
+        <div className='flex items-center justify-end space-x-2'>
+          <TrendingUp className='h-4 w-4 text-green-500' />
+          <span>
+            College graduates&apos; turnout{" "}
+            {educationResult.collegeTurnoutChange > 0 ? "up" : "down"} by{" "}
+            {Math.abs(educationResult.collegeTurnoutChange).toFixed(1)}%
+          </span>
+        </div>
+        <div className='mt-1'>
+          Highest education level: {educationResult.highestEducationLevel}
+        </div>
       </div>
-      <div className='mt-1'>
-        Highest education level: Bachelor&apos;s degree
+    );
+  }, [educationResult]);
+
+  const renderSkeleton = () => (
+    <div className='space-y-4'>
+      <Skeleton className='h-8 w-1/3' />
+      <div className='space-y-2'>
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className='flex items-center space-x-2'>
+            <Skeleton className='h-6 w-1/4' />
+            <Skeleton className='h-6 flex-grow' />
+          </div>
+        ))}
       </div>
     </div>
   );
 
-  const getGradientId = (level: string) =>
-    `education-gradient-${level.replace(/\s+/g, "-").toLowerCase()}`;
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className='flex flex-col items-center justify-center h-full'>
+          <Loader className='w-8 h-8 text-gray-400 dark:text-gray-600 animate-spin mb-2' />
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
+            Loading education data...
+          </p>
+        </div>
+      );
+    }
 
-  const getBarSize = () => (isMobile ? 20 : isTablet ? 30 : 40);
+    if (!educationResult) {
+      return (
+        <div className='flex flex-col items-center justify-center h-full'>
+          <FileX2 className='w-8 h-8 mb-2 text-gray-400 dark:text-gray-600' />
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
+            No education data available
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className='w-full h-full flex-grow min-h-[250px]'>
+        <ResponsiveContainer width='100%' height='100%' minHeight={250}>
+          <BarChart
+            data={educationData}
+            layout='vertical'
+            margin={{ top: 20, right: 50, left: 20, bottom: 20 }}>
+            <CartesianGrid
+              strokeDasharray='3 3'
+              horizontal={false}
+              vertical={true}
+            />
+            <XAxis
+              type='number'
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: theme === "dark" ? "#D1D5DB" : "#111827",
+                fontSize: isMobile ? 12 : 10,
+              }}
+              tickFormatter={(value) => `${value}%`}
+            />
+            <YAxis
+              dataKey='level'
+              type='category'
+              axisLine={false}
+              tickLine={false}
+              tick={false}
+              width={1}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey='percentage' radius={[0, 4, 4, 0]}>
+              {educationData.map((entry) => (
+                <Cell key={`cell-${entry.level}`} fill={entry.color} />
+              ))}
+              <LabelList
+                dataKey='level'
+                position='insideLeft'
+                fill={theme === "dark" ? "#FFFFFF" : "#111827"}
+                fontSize={isMobile ? 10 : 10}
+                fontWeight='bold'
+                formatter={(value: string) =>
+                  isMobile ? value.split(" ")[0] : value
+                }
+              />
+              <LabelList
+                dataKey='percentage'
+                position='right'
+                fill={theme === "dark" ? "#D1D5DB" : "#111827"}
+                fontSize={isMobile ? 10 : 10}
+                fontWeight='bold'
+                formatter={(value: number) => `${value.toFixed(1)}%`}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  };
 
   return (
     <BaseCard {...props} footerContent={footerContent}>
-      <div
-        ref={chartContainerRef}
-        className='w-full h-full flex-grow min-h-[250px]'>
-        {chartDimensions.width > 0 && chartDimensions.height > 0 && (
-          <ResponsiveContainer width='100%' height='100%' minHeight={250}>
-            <BarChart
-              data={educationData}
-              layout='vertical'
-              margin={{ top: 20, right: 50, left: 20, bottom: 20 }}>
-              <CartesianGrid
-                strokeDasharray='3 3'
-                horizontal={false}
-                vertical={true}
-              />
-              <XAxis
-                type='number'
-                axisLine={false}
-                tickLine={false}
-                tick={{
-                  fill: theme === "dark" ? "#D1D5DB" : "#111827",
-                  fontSize: isMobile ? 12 : 10,
-                }}
-                tickFormatter={(value) => `${value}%`}
-              />
-              <YAxis
-                dataKey='level'
-                type='category'
-                axisLine={false}
-                tickLine={false}
-                tick={false}
-                width={1}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey='percentage' radius={[0, 4, 4, 0]}>
-                {educationData.map((entry) => (
-                  <Cell key={`cell-${entry.level}`} fill={entry.color} />
-                ))}
-                <LabelList
-                  dataKey='level'
-                  position='insideLeft'
-                  fill={theme === "dark" ? "#FFFFFF" : "#111827"}
-                  fontSize={isMobile ? 10 : 10}
-                  fontWeight='bold'
-                  formatter={(value: string) =>
-                    isMobile ? value.split(" ")[0] : value
-                  }
-                />
-                <LabelList
-                  dataKey='percentage'
-                  position='right'
-                  fill={theme === "dark" ? "#D1D5DB" : "#111827"}
-                  fontSize={isMobile ? 10 : 10}
-                  fontWeight='bold'
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+      {renderContent()}
     </BaseCard>
   );
 };

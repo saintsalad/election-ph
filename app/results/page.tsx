@@ -9,7 +9,7 @@ import { EducationCard } from "@/components/custom/dashboard/education-card";
 import CityCard from "@/components/custom/dashboard/city-card";
 import AgeCard from "@/components/custom/dashboard/age-card";
 import { sideCards } from "@/constants/data";
-import type { Election, VoteResult } from "@/lib/definitions";
+import type { Election, GenderVoteResult, VoteResult } from "@/lib/definitions";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
 import {
   Popover,
@@ -53,12 +53,24 @@ const ResultsContent: React.FC = () => {
     manual: true,
   });
 
+  const {
+    data: genderData,
+    isLoading: isGenderCardLoading,
+    refetchNext: refetchNextGenderCard,
+  } = useReactQueryNext<GenderVoteResult>(
+    "gender-card",
+    "/api/dashboard/gender",
+    { manual: true } // Add manual option to control when to fetch
+  );
+
   const currentElection = elections?.find(
     (election) => election.id === electionId
   );
 
   const fetchVoteData = useCallback((newElectionId: string) => {
-    refetchNextMainCard(`?electionId=${newElectionId}`);
+    const params = `?electionId=${newElectionId}`;
+    refetchNextMainCard(params);
+    refetchNextGenderCard(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -101,7 +113,13 @@ const ResultsContent: React.FC = () => {
           />
         );
       case "Gender":
-        return <GenderCard {...baseProps} />;
+        return (
+          <GenderCard
+            genderData={genderData}
+            isLoading={isGenderCardLoading}
+            {...baseProps}
+          />
+        );
       case "Education":
         return <EducationCard {...baseProps} />;
       case "Age":

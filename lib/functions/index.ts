@@ -1,6 +1,7 @@
 import { VoteResult } from "@/lib/definitions";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import React from "react";
+import { GenderVoteResult } from "@/lib/definitions";
 
 export function generateReferenceNumber() {
   // Get the current date
@@ -63,6 +64,51 @@ export function analyzeVotes(voteResult: VoteResult | undefined): {
   } else {
     return {
       message: `${first.candidate} leads by ${margin.toFixed(1)}%`,
+      icon: React.createElement(TrendingUp, {
+        className: "h-4 w-4 text-blue-500",
+      }),
+    };
+  }
+}
+
+export function analyzeGenderVotes(genderData: GenderVoteResult | undefined): {
+  message: string;
+  icon: React.ReactNode;
+} {
+  if (!genderData || !genderData.voteResult.length) {
+    return {
+      message: "No gender data available",
+      icon: React.createElement(Minus, { className: "h-4 w-4 text-gray-500" }),
+    };
+  }
+
+  const totalVotes = genderData.totalVotes;
+  const sortedResults = genderData.voteResult.sort((a, b) => b.votes - a.votes);
+  const [first, second] = sortedResults;
+
+  const firstPercentage = (first.votes / totalVotes) * 100;
+  const secondPercentage = (second.votes / totalVotes) * 100;
+  const difference = firstPercentage - secondPercentage;
+
+  if (difference > 10) {
+    return {
+      message: `${
+        first.gender
+      }: Significant majority (${firstPercentage.toFixed(1)}%)`,
+      icon: React.createElement(TrendingUp, {
+        className: "h-4 w-4 text-green-500",
+      }),
+    };
+  } else if (difference < 2) {
+    return {
+      message: `Balanced distribution: ${first.gender} vs ${second.gender}`,
+      icon: React.createElement(Minus, {
+        className: "h-4 w-4 text-yellow-500",
+      }),
+    };
+  } else {
+    return {
+      message: `${first.gender} leads by ${difference.toFixed(1)}%`,
       icon: React.createElement(TrendingUp, {
         className: "h-4 w-4 text-blue-500",
       }),
