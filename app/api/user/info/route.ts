@@ -33,10 +33,15 @@ export async function GET(req: NextRequest) {
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: "User data not found" },
-        { status: 404 }
+        { status: 200 }
       );
+      response.headers.set(
+        "Cache-Control",
+        "max-age=86400, s-maxage=86400, stale-while-revalidate=172800"
+      );
+      return response;
     }
 
     const userData = userDoc.data() as UserInfo;

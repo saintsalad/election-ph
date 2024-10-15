@@ -8,19 +8,20 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VoteIcon } from "lucide-react";
+import useReactQueryNext from "@/hooks/useReactQueryNext";
 
 function useElections() {
-  return useQuery<ElectionWithVoteStatus[]>(`elections`, async () => {
-    const { data } = await axios.get<ElectionWithVoteStatus[]>(`/api/election`);
-    return data;
-  });
+  return useReactQueryNext<ElectionWithVoteStatus[]>(
+    "elections",
+    "/api/election"
+  );
 }
 
-function useUserInfo() {
-  return useQuery<UserResponse>(`userInfo`, async () => {
-    const { data } = await axios.get<UserResponse>(`/api/user/info`);
-    return data;
-  });
+function useUserInfo(userId: string) {
+  return useReactQueryNext<UserResponse>(
+    `user-info-${userId}`,
+    "/api/user/info"
+  );
 }
 
 export default function Vote() {
@@ -29,15 +30,15 @@ export default function Vote() {
   const {
     data: userInfo,
     isLoading: isUserInfoLoading,
-    refetch: refetchUserInfo,
-  } = useUserInfo();
+    refetchWithoutCache: refetchUserInfo,
+  } = useUserInfo(user?.uid || "");
 
   const showUserInfoDialog =
     !isUserInfoLoading && userInfo && !userInfo.dateUpdated;
 
   const handleUserInfoSubmit = () => {
     // TODO: Implement the logic to update user info
-    refetchUserInfo();
+    // refetchUserInfo();
   };
 
   return (

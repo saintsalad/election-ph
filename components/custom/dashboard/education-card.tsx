@@ -18,6 +18,8 @@ import BaseCard, {
   BaseCardProps,
 } from "@/components/custom/dashboard/base-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EducationVoteResult } from "@/lib/definitions";
+import { analyzeEducationVotes } from "@/lib/functions";
 
 interface EducationData {
   level: string;
@@ -59,45 +61,43 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 };
 
 interface EducationCardProps extends BaseCardProps {
-  educationResult: EducationResult | undefined;
+  educationData: EducationVoteResult | undefined;
   isLoading: boolean;
 }
 
 export const EducationCard: React.FC<EducationCardProps> = ({
+  educationData,
   isLoading = false,
-  educationResult,
   ...props
 }) => {
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const { theme } = useTheme();
 
-  const educationData = useMemo(() => {
-    if (!educationResult) return [];
-    return educationResult.educationData.map((item) => ({
+  const processedEducationData = useMemo(() => {
+    if (!educationData) return [];
+    return educationData.voteResult.map((item) => ({
       ...item,
-      percentage: (item.voters / educationResult.totalVoters) * 100,
+      percentage: (item.voters / educationData.totalVoters) * 100,
     }));
-  }, [educationResult]);
+  }, [educationData]);
 
-  const footerContent = useMemo(() => {
-    if (!educationResult) return null;
-    return (
-      <div className='ml-auto text-right'>
-        <div className='flex items-center justify-end space-x-2'>
-          <TrendingUp className='h-4 w-4 text-green-500' />
-          <span>
-            College graduates&apos; turnout{" "}
-            {educationResult.collegeTurnoutChange > 0 ? "up" : "down"} by{" "}
-            {Math.abs(educationResult.collegeTurnoutChange).toFixed(1)}%
-          </span>
-        </div>
-        <div className='mt-1'>
-          Highest education level: {educationResult.highestEducationLevel}
-        </div>
+  const analysis = useMemo(
+    () => analyzeEducationVotes(educationData),
+    [educationData]
+  );
+
+  const footerContent = (
+    <div className='ml-auto text-right'>
+      <div className='flex items-center justify-end space-x-2'>
+        {analysis.icon}
+        <span className='text-sm font-medium'>{analysis.message}</span>
       </div>
-    );
-  }, [educationResult]);
+      <div className='mt-1 text-xs text-gray-500'>
+        Total voters: {educationData?.totalVoters.toLocaleString() ?? 0}
+      </div>
+    </div>
+  );
 
   const renderSkeleton = () => (
     <div className='space-y-4'>
@@ -116,7 +116,7 @@ export const EducationCard: React.FC<EducationCardProps> = ({
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className='flex flex-col items-center justify-center h-full'>
+        <div className='flex flex-col items-center justify-center h-full min-h-[250px]'>
           <Loader className='w-8 h-8 text-gray-400 dark:text-gray-600 animate-spin mb-2' />
           <p className='text-sm text-gray-500 dark:text-gray-400'>
             Loading education data...
@@ -125,9 +125,9 @@ export const EducationCard: React.FC<EducationCardProps> = ({
       );
     }
 
-    if (!educationResult) {
+    if (!educationData) {
       return (
-        <div className='flex flex-col items-center justify-center h-full'>
+        <div className='flex flex-col items-center justify-center h-full min-h-[250px]'>
           <FileX2 className='w-8 h-8 mb-2 text-gray-400 dark:text-gray-600' />
           <p className='text-sm text-gray-500 dark:text-gray-400'>
             No education data available
@@ -135,12 +135,11 @@ export const EducationCard: React.FC<EducationCardProps> = ({
         </div>
       );
     }
-
     return (
       <div className='w-full h-full flex-grow min-h-[250px]'>
         <ResponsiveContainer width='100%' height='100%' minHeight={250}>
           <BarChart
-            data={educationData}
+            data={processedEducationData}
             layout='vertical'
             margin={{ top: 20, right: 50, left: 20, bottom: 20 }}>
             <CartesianGrid
@@ -168,7 +167,7 @@ export const EducationCard: React.FC<EducationCardProps> = ({
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey='percentage' radius={[0, 4, 4, 0]}>
-              {educationData.map((entry) => (
+              {processedEducationData.map((entry) => (
                 <Cell key={`cell-${entry.level}`} fill={entry.color} />
               ))}
               <LabelList
@@ -180,6 +179,7 @@ export const EducationCard: React.FC<EducationCardProps> = ({
                 formatter={(value: string) =>
                   isMobile ? value.split(" ")[0] : value
                 }
+                offset={5}
               />
               <LabelList
                 dataKey='percentage'
@@ -187,7 +187,11 @@ export const EducationCard: React.FC<EducationCardProps> = ({
                 fill={theme === "dark" ? "#D1D5DB" : "#111827"}
                 fontSize={isMobile ? 10 : 10}
                 fontWeight='bold'
-                formatter={(value: number) => `${value.toFixed(1)}%`}
+                formatter={(value: number, entry: EducationData) => {
+                  if (value === 0) return "";
+                  return `${value.toFixed(1)}%`;
+                }}
+                offset={5}
               />
             </Bar>
           </BarChart>
@@ -202,3 +206,5 @@ export const EducationCard: React.FC<EducationCardProps> = ({
     </BaseCard>
   );
 };
+
+export default EducationCard;

@@ -9,7 +9,12 @@ import { EducationCard } from "@/components/custom/dashboard/education-card";
 import CityCard from "@/components/custom/dashboard/city-card";
 import AgeCard from "@/components/custom/dashboard/age-card";
 import { sideCards } from "@/constants/data";
-import type { Election, GenderVoteResult, VoteResult } from "@/lib/definitions";
+import type {
+  Election,
+  GenderVoteResult,
+  VoteResult,
+  EducationVoteResult,
+} from "@/lib/definitions";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
 import {
   Popover,
@@ -63,6 +68,16 @@ const ResultsContent: React.FC = () => {
     { manual: true } // Add manual option to control when to fetch
   );
 
+  const {
+    data: educationData,
+    isLoading: isEducationCardLoading,
+    refetchNext: refetchNextEducationCard,
+  } = useReactQueryNext<EducationVoteResult>(
+    "education-card",
+    "/api/dashboard/education",
+    { manual: true }
+  );
+
   const currentElection = elections?.find(
     (election) => election.id === electionId
   );
@@ -71,6 +86,7 @@ const ResultsContent: React.FC = () => {
     const params = `?electionId=${newElectionId}`;
     refetchNextMainCard(params);
     refetchNextGenderCard(params);
+    refetchNextEducationCard(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -121,7 +137,13 @@ const ResultsContent: React.FC = () => {
           />
         );
       case "Education":
-        return <EducationCard {...baseProps} />;
+        return (
+          <EducationCard
+            educationData={educationData}
+            isLoading={isEducationCardLoading}
+            {...baseProps}
+          />
+        );
       case "Age":
         return <AgeCard {...baseProps} />;
       case "Cities":

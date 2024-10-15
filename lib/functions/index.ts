@@ -1,7 +1,10 @@
-import { VoteResult } from "@/lib/definitions";
+import {
+  VoteResult,
+  GenderVoteResult,
+  EducationVoteResult,
+} from "@/lib/definitions";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import React from "react";
-import { GenderVoteResult } from "@/lib/definitions";
 
 export function generateReferenceNumber() {
   // Get the current date
@@ -114,4 +117,61 @@ export function analyzeGenderVotes(genderData: GenderVoteResult | undefined): {
       }),
     };
   }
+}
+
+export function analyzeEducationVotes(
+  educationData: EducationVoteResult | undefined
+): {
+  message: string;
+  icon: React.ReactNode;
+} {
+  if (!educationData || !educationData.voteResult.length) {
+    return {
+      message: "No education data available",
+      icon: React.createElement(Minus, { className: "h-4 w-4 text-gray-500" }),
+    };
+  }
+
+  const totalVotes = educationData.totalVoters;
+  const sortedResults = educationData.voteResult.sort(
+    (a, b) => b.voters - a.voters
+  );
+  const [topLevel, secondLevel] = sortedResults;
+
+  const topLevelPercentage = (topLevel.voters / totalVotes) * 100;
+  const difference =
+    topLevelPercentage - ((secondLevel?.voters || 0) / totalVotes) * 100;
+
+  const getMessage = () => {
+    if (topLevelPercentage > 50) {
+      return `${topLevel.level} majority: ${topLevelPercentage.toFixed(1)}%`;
+    } else if (difference > 20) {
+      return `${topLevel.level} leads: ${topLevelPercentage.toFixed(1)}%`;
+    } else if (difference > 10) {
+      return `${topLevel.level} ahead: ${topLevelPercentage.toFixed(1)}%`;
+    } else {
+      return `Diverse education levels`;
+    }
+  };
+
+  const getIcon = () => {
+    if (topLevelPercentage > 50) {
+      return React.createElement(TrendingUp, {
+        className: "h-4 w-4 text-blue-500",
+      });
+    } else if (difference > 10) {
+      return React.createElement(TrendingUp, {
+        className: "h-4 w-4 text-green-500",
+      });
+    } else {
+      return React.createElement(Minus, {
+        className: "h-4 w-4 text-yellow-500",
+      });
+    }
+  };
+
+  return {
+    message: getMessage(),
+    icon: getIcon(),
+  };
 }

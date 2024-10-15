@@ -184,3 +184,17 @@ export type GenderVoteResult = {
   electionStart: string;
   electionEnd: string;
 };
+
+export type EducationData = {
+  level: string;
+  voters: number;
+  color: string;
+  percentage?: number;
+};
+
+export type EducationVoteResult = {
+  voteResult: EducationData[];
+  totalVoters: number;
+  electionStart: string;
+  electionEnd: string;
+};
