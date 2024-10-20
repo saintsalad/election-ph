@@ -21,7 +21,7 @@ function useElections() {
 function useUserInfo(userId: string) {
   return useReactQueryNext<UserResponse>(
     `user-info-${userId}`,
-    "/api/user/info"
+    `/api/user/info?userId=${userId}`
   );
 }
 
