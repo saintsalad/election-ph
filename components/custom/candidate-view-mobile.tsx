@@ -37,6 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes"; // If you're using a theme system
 import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
+import CommentSectionMobile from "./comment-section-mobile";
 
 interface CandidateViewMobileProps {
   candidate: CandidateNext | undefined;
@@ -445,34 +446,14 @@ const CandidateViewMobile = ({
       </Drawer>
 
       <Drawer open={openCommentDrawer} onOpenChange={setOpenCommentDrawer}>
-        <DrawerContent className={bgColor}>
-          <div className='mx-auto w-full max-w-sm'>
-            <DrawerHeader>
-              <DrawerTitle className={textColor}>Comments</DrawerTitle>
-              <DrawerDescription
-                className={
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }>
-                This feature is currently under maintenance.
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className='p-4 flex flex-col items-center justify-center h-40'>
-              <MessageCircle
-                className={`h-12 w-12 ${
-                  theme === "dark" ? "text-gray-600" : "text-gray-400"
-                } mb-4`}
-              />
-              <p
-                className={`text-center ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-600"
-                }`}>
-                We&apos;re working on bringing comments to you soon. Check back
-                later!
-              </p>
-            </div>
-            <DrawerFooter>
-              <Button onClick={() => setOpenCommentDrawer(false)}>Close</Button>
-            </DrawerFooter>
+        <DrawerContent
+          className={`${bgColor} h-[80vh] max-h-[80vh] min-h-[300px] overflow-hidden flex flex-col`}>
+          <DrawerHeader className='sr-only'>
+            <DrawerTitle>Comments</DrawerTitle>
+            <DrawerDescription>View and add comments</DrawerDescription>
+          </DrawerHeader>
+          <div className='flex-1 overflow-hidden'>
+            <CommentSectionMobile />
           </div>
         </DrawerContent>
       </Drawer>
