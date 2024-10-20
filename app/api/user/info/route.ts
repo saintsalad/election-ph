@@ -14,16 +14,25 @@ interface UserInfo {
 
 export async function GET(req: NextRequest) {
   try {
-    const isAllowed = await isUserAuthenticated();
-    if (!isAllowed) {
-      return NextResponse.json(
-        { message: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    const { searchParams } = new URL(req.url);
+    const requestedUserId = searchParams.get("userId");
 
-    const user = await getCurrentUser();
-    const userId = user?.uid;
+    let userId: string | undefined;
+
+    if (requestedUserId) {
+      userId = requestedUserId;
+    } else {
+      const isAllowed = await isUserAuthenticated();
+      if (!isAllowed) {
+        return NextResponse.json(
+          { message: "Unauthorized access" },
+          { status: 401 }
+        );
+      }
+
+      const user = await getCurrentUser();
+      userId = user?.uid;
+    }
 
     if (!userId) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -63,32 +72,38 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  console.log("POST request received for user info update");
   const userInfo: Partial<UserInfo> = await req.json();
+  console.log("Received user info:", userInfo);
 
   try {
-    const isAllow = await isUserAuthenticated();
-    if (!isAllow) {
+    console.log("Checking user authentication");
+    const isAllowed = await isUserAuthenticated();
+    if (!isAllowed) {
+      console.log("Unauthorized access attempt");
       return NextResponse.json(
         { message: "Unauthorized access" },
         { status: 401 }
       );
     }
 
+    console.log("User authenticated, fetching current user");
     const user = await getCurrentUser();
     const userId = user?.uid;
 
     if (!userId) {
+      console.log("User not found");
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
+    console.log(`Updating info for user: ${userId}`);
     const userRef = db.collection("users").doc(userId);
-    const dateUpdated = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Singapore" })
-    );
+    const dateUpdated = new Date();
     await userRef.update({
       ...userInfo,
       dateUpdated,
     });
+    console.log("User info updated successfully");
 
     return NextResponse.json(
       { message: "User info updated successfully" },
@@ -96,6 +111,9 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Error updating user info:", error);
+    if (error instanceof Error) {
+      console.error("Error details:", error.message);
+    }
     return NextResponse.json(
       { message: "Failed to update user info" },
       { status: 500 }

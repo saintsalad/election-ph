@@ -83,7 +83,7 @@ function Candidates() {
         </div>
       </div>
 
-      <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4'>
         {!isLoading ? (
           filteredCandidates && filteredCandidates.length > 0 ? (
             filteredCandidates.map((item) => (
@@ -111,30 +111,33 @@ type CandidateCardProps = {
 function CandidateCard({ candidate }: CandidateCardProps) {
   return (
     <Link href={`/candidates/${candidate.id}`} passHref>
-      <Card className='relative overflow-hidden aspect-square group cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg'>
+      <Card className='relative overflow-hidden aspect-[3/4] sm:aspect-square group cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg'>
         <Image
           src={candidate.displayPhoto || defaultImage}
           alt={candidate.displayName || "Candidate"}
-          layout='fill'
-          objectFit='cover'
-          className='transition-transform duration-300 group-hover:scale-105'
+          fill
+          sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
+          className='object-cover transition-transform duration-300 group-hover:scale-105'
+          priority
         />
         <div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-90 transition-opacity duration-300' />
 
         {/* Ballot Number */}
-        <div className='absolute top-3 left-3 bg-white/90 text-blue-600 font-bold rounded-full w-8 h-8 flex items-center justify-center shadow-md text-sm'>
+        <div className='absolute top-1 left-1 sm:top-2 sm:left-2 bg-white/90 text-blue-600 font-bold rounded-full w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center shadow-md text-xs'>
           {candidate.ballotNumber}
         </div>
 
-        <div className='absolute inset-x-0 bottom-0 p-4 flex flex-col justify-end'>
-          <div className='space-y-1'>
-            <h2 className='text-lg font-semibold text-white leading-tight line-clamp-2'>
+        <div className='absolute inset-x-0 bottom-0 p-2 sm:p-3 flex flex-col justify-end'>
+          <div className='space-y-0.5'>
+            <h2 className='text-sm sm:text-base font-semibold text-white leading-tight line-clamp-2'>
               {candidate.displayName}
             </h2>
             <div className='flex items-center justify-between'>
-              <p className='text-xs text-gray-300'>{candidate.party}</p>
+              <p className='text-[10px] sm:text-xs text-gray-300'>
+                {candidate.party}
+              </p>
               {candidate.election && candidate.election.electionType && (
-                <span className='text-xs text-gray-400 uppercase tracking-wider'>
+                <span className='text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider'>
                   {candidate.election.electionType}
                 </span>
               )}
@@ -148,13 +151,13 @@ function CandidateCard({ candidate }: CandidateCardProps) {
 
 function CandidateCardSkeleton() {
   return (
-    <Card className='relative overflow-hidden aspect-square'>
+    <Card className='relative overflow-hidden aspect-[3/4] sm:aspect-square'>
       <div className='absolute inset-0 bg-gray-200 dark:bg-gray-700' />
-      <div className='absolute top-3 right-3 bg-gray-300 dark:bg-gray-600 rounded-full w-10 h-10' />
-      <div className='absolute inset-x-0 bottom-0 p-4'>
-        <Skeleton className='h-6 w-3/4 mb-2' />
-        <Skeleton className='h-4 w-1/2 mb-2' />
-        <Skeleton className='h-5 w-1/3' />
+      <div className='absolute top-1 right-1 sm:top-2 sm:right-2 bg-gray-300 dark:bg-gray-600 rounded-full w-6 h-6 sm:w-8 sm:h-8' />
+      <div className='absolute inset-x-0 bottom-0 p-2 sm:p-3'>
+        <Skeleton className='h-4 sm:h-5 w-3/4 mb-1 sm:mb-2' />
+        <Skeleton className='h-3 sm:h-4 w-1/2 mb-1' />
+        <Skeleton className='h-3 sm:h-4 w-1/3' />
       </div>
     </Card>
   );

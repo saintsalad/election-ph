@@ -9,21 +9,37 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { CalendarIcon, BarChart2Icon } from "lucide-react";
 
 type ElectionBannerProps = {
   election: ElectionWithVoteStatus;
   userId: string;
+  hasUserInfo: boolean;
+  openUserInfoDialog: () => void;
 };
 
-function ElectionBanner({ election, userId }: ElectionBannerProps) {
+function ElectionBanner({
+  election,
+  userId,
+  hasUserInfo,
+  openUserInfoDialog,
+}: ElectionBannerProps) {
   const isInactive = election.status === "inactive";
   const buttonHref = isInactive
     ? "#"
     : election.isVoted
     ? `/results?electionId=${election.id}`
     : `/vote/${election.id}`;
+
+  const handleButtonClick = () => {
+    if (isInactive) return;
+
+    if (!hasUserInfo && !election.isVoted) {
+      openUserInfoDialog();
+    } else {
+      window.location.href = buttonHref;
+    }
+  };
 
   return (
     <Card className='w-full overflow-hidden relative flex flex-col h-full bg-gradient-to-br from-background to-background dark:from-gray-800 dark:to-gray-900'>
@@ -55,29 +71,28 @@ function ElectionBanner({ election, userId }: ElectionBannerProps) {
         <p className='text-sm text-foreground/80'>{election.description}</p>
       </CardContent>
       <CardFooter className='relative mt-auto'>
-        <Link href={buttonHref} className='w-full'>
-          <Button
-            disabled={isInactive}
-            className='w-full'
-            variant={
-              election.isVoted
-                ? "secondary"
-                : isInactive
-                ? "secondary"
-                : "default"
-            }>
-            {isInactive ? (
-              "Election Inactive"
-            ) : election.isVoted ? (
-              <>
-                <BarChart2Icon className='mr-2 h-4 w-4' />
-                View Results
-              </>
-            ) : (
-              "Get Started"
-            )}
-          </Button>
-        </Link>
+        <Button
+          disabled={isInactive}
+          className='w-full'
+          variant={
+            election.isVoted
+              ? "secondary"
+              : isInactive
+              ? "secondary"
+              : "default"
+          }
+          onClick={handleButtonClick}>
+          {isInactive ? (
+            "Election Inactive"
+          ) : election.isVoted ? (
+            <>
+              <BarChart2Icon className='mr-2 h-4 w-4' />
+              View Results
+            </>
+          ) : (
+            "Get Started"
+          )}
+        </Button>
       </CardFooter>
     </Card>
   );

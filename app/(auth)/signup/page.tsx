@@ -2,8 +2,7 @@
 
 import Google from "@/components/custom/icon/google";
 import { Button } from "@/components/ui/button";
-import { auth, db, signInWithGooglePopup } from "@/lib/firebase";
-import { useAuthStore } from "@/lib/store";
+import { signInWithGooglePopup } from "@/lib/firebase";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -17,20 +16,17 @@ import {
 } from "@/components/ui/form";
 import banner from "@/public/images/banner.jpg";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, LoaderCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { FirebaseError } from "firebase/app";
-import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { handleLogin, isUnique } from "@/lib/firebase/functions";
+import { handleLogin } from "@/lib/firebase/functions";
+import { useMutation } from "react-query";
+import axios from "axios";
+import Link from "next/link";
 
 // Validation functions
 const isValidUsername = (str: string) => /^(?!.*[_.]{3})[\w.]*$/.test(str);
@@ -60,10 +56,9 @@ const FormSchema = z
 
 const SignUp = () => {
   const [toggle, setToggle] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const setUser = useAuthStore((state) => state.setUser);
-
   const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -73,85 +68,103 @@ const SignUp = () => {
     },
   });
 
-  const router = useRouter();
-
-  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    try {
-      setIsSubmitting(true);
-      const result = await isUnique("users", "username", data.username);
-      if (!result) {
-        form.setError("username", {
-          type: "manual",
-          message: "Username is already taken.",
-        });
-        return;
-      }
-
-      await registerUser(data.username, data.email, data.password);
-    } catch {
+  const signUpMutation = useMutation({
+    mutationFn: (data: z.infer<typeof FormSchema>) =>
+      axios.post("/api/signup", data),
+    onSuccess: (res) => {
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Error occurred, try again later.",
+        title: "Account created successfully",
+        description: "You can now sign in with your new account.",
       });
-    } finally {
-      setIsSubmitting(false);
-    }
+      router.push(`/signin`);
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response) {
+        const { code, details } = error.response.data;
+
+        switch (code) {
+          case "VALIDATION_FAILED":
+            if (Array.isArray(details)) {
+              details.forEach((detail) => {
+                const [field, message] = detail.split(": ");
+                form.setError(field as "username" | "email" | "password", {
+                  type: "manual",
+                  message,
+                });
+              });
+            }
+            break;
+          case "USERNAME_EXISTS":
+            form.setError("username", {
+              type: "manual",
+              message: "This username is already taken.",
+            });
+            break;
+          case "AUTH_FAILED":
+            toast({
+              variant: "destructive",
+              title: "Sign up failed",
+              description:
+                details || "Authentication failed. Please try again.",
+            });
+            break;
+          default:
+            toast({
+              variant: "destructive",
+              title: "Sign up failed",
+              description: "An unexpected error occurred. Please try again.",
+            });
+        }
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Sign up failed",
+          description: "An unexpected error occurred. Please try again.",
+        });
+      }
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    signUpMutation.mutate(data);
   };
 
   const handleGoogleSignup = async () => {
+    const userCredential = await signInWithGooglePopup();
     try {
-      setIsSubmitting(true);
-      const userCredential = await signInWithGooglePopup();
-      const { uid, email } = userCredential.user;
-      const random4DigitNumber = Math.floor(1000 + Math.random() * 9000);
-      const username = `${email?.split("@")[0]}${random4DigitNumber}`;
-      await setDoc(doc(db, "users", uid), { username, email });
+      if (userCredential.user) {
+        const userId = userCredential.user.uid;
+        const response = await axios.post(
+          `/api/signup?userId=${userId}`,
+          null,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      // set session cookies
-      await handleLogin(userCredential.user).then((res) => {
-        if (!res.success) console.log("SIGN UP, SETTING SESSION ❌❌❌");
-        router.push("/");
-      });
-    } catch (error) {
-      console.log("SIGN UP ❌❌❌", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const registerUser = async (
-    username: string,
-    email: string,
-    password: string
-  ) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      if (!user) {
-        throw new Error("Error occurred, try again later.");
-      }
-
-      await setDoc(doc(db, "users", user.uid), { username, email });
-    } catch (error) {
-      if (error instanceof FirebaseError) {
-        if (error.code === "auth/email-already-in-use") {
-          form.setError("email", {
-            type: "manual",
-            message: "Email is already in use, try another one.",
-          });
-        } else {
+        if (response.data.code === "SIGNUP_SUCCESS") {
           toast({
-            variant: "destructive",
-            title: "Uh oh! Something went wrong.",
-            description: "Error occurred, try again later.",
+            title: "Account created successfully",
+            description: "You can now sign in with your Google account.",
           });
+          router.push("/");
+        } else {
+          throw new Error("Signup failed");
         }
+      }
+    } catch (error: any) {
+      const { code } = error.response.data;
+      if (code === "EMAIL_EXISTS") {
+        await handleLogin(userCredential.user);
+        router.push("/");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Google sign up failed",
+          description: "An error occurred during Google sign up",
+        });
       }
     }
   };
@@ -193,12 +206,12 @@ const SignUp = () => {
               {!toggle ? (
                 <>
                   <Button
-                    disabled={isSubmitting}
+                    disabled={signUpMutation.isLoading}
                     onClick={handleGoogleSignup}
                     type='button'
                     className='rounded-full h-14 text-sm w-full flex flex-1 gap-x-4 mb-8'
                     variant='default'>
-                    {isSubmitting ? (
+                    {signUpMutation.isLoading ? (
                       <LoaderCircle size={20} className='animate-spin' />
                     ) : (
                       <Google />
@@ -213,7 +226,7 @@ const SignUp = () => {
                   </div>
 
                   <Button
-                    disabled={isSubmitting}
+                    disabled={signUpMutation.isLoading}
                     onClick={() => setToggle(true)}
                     variant='outline'
                     type='button'
@@ -313,27 +326,13 @@ const SignUp = () => {
                     )}
                   />
 
-                  <div className='flex space-x-2 mb-6'>
-                    <Checkbox id='terms' required />
-                    <label
-                      htmlFor='terms'
-                      className='text-sm relative bottom-1 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
-                      By creating an account you agree with our
-                      <Link className='underline text-sm ml-1' href='#'>
-                        Terms of Service
-                      </Link>
-                      , Privacy Policy, and our default
-                      <Link className='underline text-sm ml-1' href='#'>
-                        Notification Settings.
-                      </Link>
-                    </label>
-                  </div>
+                  {/* ... (checkbox for terms) ... */}
 
                   <Button
                     type='submit'
-                    disabled={isSubmitting}
+                    disabled={signUpMutation.isLoading}
                     className='rounded-full w-full h-14 text-sm mb-12'>
-                    {isSubmitting && (
+                    {signUpMutation.isLoading && (
                       <LoaderCircle size={20} className='mr-2 animate-spin' />
                     )}
                     Create Account

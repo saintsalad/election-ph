@@ -7,50 +7,75 @@ import { useQuery } from "react-query";
 import axios from "axios";
 import CandidateViewDeskTop from "@/components/custom/candidate-view-desktop";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import useReactQueryNext from "@/hooks/useReactQueryNext";
 
 function useCandidate(candidateId: string) {
-  return useQuery<CandidateNext>(`candidate-${candidateId}`, async () => {
-    const { data } = await axios.get<CandidateNext>(
-      `/api/candidate?candidateId=${candidateId}`
-    );
-    return data;
-  });
+  return useReactQueryNext<CandidateNext>(
+    [`candidate-${candidateId}`],
+    `/api/candidate?candidateId=${candidateId}`,
+    {
+      retry: false,
+      onError: (error) => {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          throw new Error("Candidate not found");
+        }
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
 }
 
 function useCandidateRate(candidateId: string) {
-  return useQuery<CandidateRating>(`candidateRate-${candidateId}`, async () => {
-    const { data } = await axios.get<CandidateRating>(
-      `/api/candidate/rate?candidateId=${candidateId}`
-    );
-    return data;
-  });
+  return useReactQueryNext<CandidateRating>(
+    [`candidate-rate-${candidateId}`],
+    `/api/candidate/rate?candidateId=${candidateId}`,
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 }
 
 function useUserRating(candidateId: string) {
-  return useQuery<UserRating>(`user-rating-${candidateId}`, async () => {
-    const { data } = await axios.get<UserRating>(
-      `/api/user/rate?candidateId=${candidateId}`
-    );
-    return data;
-  });
+  return useReactQueryNext<UserRating>(
+    [`user-rating-${candidateId}`],
+    `/api/user/rate?candidateId=${candidateId}`,
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 }
 
 function CandidateViewPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const {
     status,
     data: candidate,
     isError,
+    error,
     isLoading,
+
     isFetching,
-    refetch,
   } = useCandidate(params.id);
 
-  const { data: candidateRate, refetch: candidateRateRefetch } =
+  const { data: candidateRate, refetchWithoutCache: candidateRateRefetch } =
     useCandidateRate(params.id || "");
 
-  const { data: userRate, refetch: userRateRefetch } = useUserRating(params.id);
+  const { data: userRate, refetchWithoutCache: userRateRefetch } =
+    useUserRating(params.id);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  useEffect(() => {
+    if (
+      isError &&
+      error instanceof Error &&
+      error.message === "Request failed with status code 404"
+    ) {
+      router.replace("/not-found");
+    }
+  }, [isError, error, router]);
 
   return (
     <>
@@ -64,7 +89,7 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
         </ScrollArea>
       )}
 
-      {!isDesktop && !isFetching && (
+      {!isDesktop && (
         <div className='absolute top-0 left-0 w-full min-h-[100vh]'>
           <CandidateViewMobile
             userRateRefetch={() => userRateRefetch()}

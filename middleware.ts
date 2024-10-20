@@ -19,6 +19,8 @@ export async function middleware(request: NextRequest) {
     "/signup",
     "/signup/success",
     "/api/signin",
+    "/api/signup",
+    "/api/user/info",
   ];
 
   // If the request URL matches one of the public routes, bypass authentication
@@ -40,16 +42,16 @@ export async function middleware(request: NextRequest) {
   //return NextResponse.next();
 
   if (!sessionCookie) {
-    console.log("Cookie not found");
+    console.log("⚠️⚠️⚠️ Cookie not found ⚠️⚠️⚠️");
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
   let origin = request.nextUrl.origin;
   if (request.nextUrl.hostname === "localhost") {
-    console.log("Running on localhost");
+    console.log("Running on localhost 🏡");
     origin = process.env.NEXT_PUBLIC_SITE_URL || "";
   } else {
-    console.log("Running on deployed environment");
+    console.log("Running on deployed environment 🚀");
   }
 
   try {

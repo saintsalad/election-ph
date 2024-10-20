@@ -51,23 +51,11 @@ export async function GET(req: NextRequest) {
 
       if (!docSnapshot.exists) {
         console.log(`No document found for candidateId: ${candidateId}`);
-        return NextResponse.json<CandidateNextResponse>(
+        return NextResponse.json(
           {
-            id: candidateId,
-            displayName: "",
-            party: "",
-            displayPhoto: "",
-            shortDescription: "",
-            ballotNumber: 0,
-            coverPhoto: "",
-            biography: "",
-            educAttainment: "",
-            achievements: "",
-            platformAndPolicy: "",
-            socialLinks: [],
-            election: null,
+            message: "Candidate not found",
           },
-          { status: 200 }
+          { status: 404 }
         );
       }
 

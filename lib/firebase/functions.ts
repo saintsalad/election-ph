@@ -57,7 +57,7 @@ export const checkAccountExists = async (email: string): Promise<boolean> => {
 };
 
 export const handleLogin = async (user: User): Promise<customAuthEndpoint> => {
-  const idToken = await user.getIdToken();
+  const idToken = await user.getIdToken(true);
 
   const response = await axios.post<APIResponse<string>>(
     "/api/signin",

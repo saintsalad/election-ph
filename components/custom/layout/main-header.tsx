@@ -401,7 +401,7 @@ function MainHeader() {
                     shadow-lg hover:shadow-xl
                     group
                   `}>
-                  <Link href='/login' className='flex items-center'>
+                  <Link href='/signin' className='flex items-center'>
                     <span className='relative z-10 mr-2'>Login</span>
                     <LogIn className='relative z-10 h-5 w-5' />
                     <span className='absolute inset-0 h-full w-full scale-0 rounded-full bg-white opacity-10 transition-all duration-500 group-hover:scale-100'></span>

@@ -167,16 +167,13 @@ export function UserInfoDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        onClick={(e) => e.stopPropagation()}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        className='sm:max-w-[550px] w-full max-w-[95vw] p-4 sm:p-6 rounded-md'>
+      <DialogContent className='sm:max-w-[550px] w-full max-w-[95vw] p-4 sm:p-6 rounded-md'>
         <DialogHeader className='space-y-3 sm:space-y-4'>
           <div className='flex items-center justify-center'>
             <UserCircle2 className='w-12 h-12 sm:w-16 sm:h-16 text-blue-600' />
           </div>
           <DialogTitle className='text-xl sm:text-2xl font-bold text-center text-slate-800'>
-            Know You Better Before Voting
+            Know You Better Before Voting {isOpen ? "isOpen" : "isClosed"}
           </DialogTitle>
           <DialogDescription className='text-sm sm:text-base text-center text-slate-600 max-w-[400px] mx-auto'>
             Your anonymous insights will enhance our understanding of voter

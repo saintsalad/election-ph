@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   MoreVertical,
   MessageCircle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,8 @@ import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes"; // If you're using a theme system
+import { useMutation, useQueryClient } from "react-query";
+import axios from "axios";
 
 interface CandidateViewMobileProps {
   candidate: CandidateNext | undefined;
@@ -57,11 +60,11 @@ const CandidateViewMobile = ({
   const [drawerMode, setDrawerMode] = useState<"rating" | "success" | "edit">(
     "rating"
   );
-  const user = useAuthStore((state) => state.user);
   const [daysUntilEdit, setDaysUntilEdit] = useState<number | null>(null);
   const [openCommentDrawer, setOpenCommentDrawer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { theme } = useTheme(); // If using a theme system
+  const queryClient = useQueryClient();
 
   // Determine background and text colors based on theme
   const bgColor = theme === "dark" ? "bg-gray-900" : "bg-white";
@@ -124,28 +127,37 @@ const CandidateViewMobile = ({
     }
   };
 
-  const handleSubmitRating = async () => {
-    if (!user?.uid || !candidate) {
-      alert("Missing user ID or candidate. Please try again.");
+  const saveRatingMutation = useMutation({
+    mutationFn: async (ratingData: { rate: number; candidateId: string }) => {
+      const { data } = await axios.post("/api/candidate/rate", ratingData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["candidateRate", candidate?.id]);
+      queryClient.invalidateQueries(["userRate", candidate?.id]);
+      setDrawerMode("success");
+      setDaysUntilEdit(3);
+      userRateRefetch(); // Add this line to refetch user rate
+      candidateRateRefetch(); // Optionally, also refetch candidate rate
+    },
+    onError: (error) => {
+      console.error("Error submitting rating:", error);
+      alert("An unexpected error occurred. Please try again.");
+    },
+  });
+
+  const handleSubmitRating = () => {
+    if (!candidate) {
+      alert("Missing candidate. Please try again.");
       return;
     }
 
-    const rate = {
+    saveRatingMutation.mutate({
       rate: tempRating,
       candidateId: candidate.id,
-      userId: user.uid,
-      dateCreated: new Date().toISOString(),
-    };
-
-    const res = await saveDocument<UserRating>("candidateRate", rate);
-    if (res.success) {
-      candidateRateRefetch();
-      userRateRefetch();
-      setDrawerMode("success");
-      setDaysUntilEdit(3); // Reset to 3 days after new rating
-    } else {
-      alert("Error while saving rating. Please try again.");
-    }
+    });
   };
 
   const renderDots = () => {
@@ -287,7 +299,9 @@ const CandidateViewMobile = ({
                   src={candidate.displayPhoto}
                   alt={candidate.displayName}
                   fill
-                  className='object-cover'
+                  sizes='100vw'
+                  style={{ objectFit: "cover" }}
+                  priority
                 />
                 <div className={`absolute inset-0 ${gradientOverlay}`} />
                 <div className='absolute bottom-16 left-0 right-0 p-6 text-white'>
@@ -397,8 +411,17 @@ const CandidateViewMobile = ({
                 <Button
                   onClick={handleSubmitRating}
                   size='lg'
-                  disabled={!tempRating}>
-                  {drawerMode === "rating" ? "Submit" : "Update Rating"}
+                  disabled={!tempRating || saveRatingMutation.isLoading}>
+                  {saveRatingMutation.isLoading ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Submitting...
+                    </>
+                  ) : drawerMode === "rating" ? (
+                    "Submit"
+                  ) : (
+                    "Update Rating"
+                  )}
                 </Button>
               )}
 

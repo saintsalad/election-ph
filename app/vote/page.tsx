@@ -9,6 +9,7 @@ import { useQuery } from "react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VoteIcon } from "lucide-react";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
+import { useState } from "react";
 
 function useElections() {
   return useReactQueryNext<ElectionWithVoteStatus[]>(
@@ -26,19 +27,25 @@ function useUserInfo(userId: string) {
 
 export default function Vote() {
   const { user } = useAuthStore();
-  const { data: elections, isLoading: isElectionsLoading } = useElections();
+  const {
+    data: elections,
+    refetchWithoutCache: refetchElections,
+    isLoading: isElectionsLoading,
+  } = useElections();
   const {
     data: userInfo,
     isLoading: isUserInfoLoading,
     refetchWithoutCache: refetchUserInfo,
   } = useUserInfo(user?.uid || "");
+  const [showUserInfoDialog, setShowUserInfoDialog] = useState(false);
 
-  const showUserInfoDialog =
-    !isUserInfoLoading && userInfo && !userInfo.dateUpdated;
+  // const showUserInfoDialog =
+  //   !isUserInfoLoading && userInfo && !userInfo.dateUpdated;
 
   const handleUserInfoSubmit = () => {
     // TODO: Implement the logic to update user info
-    // refetchUserInfo();
+    refetchUserInfo();
+    refetchElections();
   };
 
   return (
@@ -56,8 +63,8 @@ export default function Vote() {
       </header>
 
       <UserInfoDialog
-        isOpen={showUserInfoDialog ?? false}
-        onClose={() => refetchUserInfo()}
+        isOpen={showUserInfoDialog}
+        onClose={() => setShowUserInfoDialog(false)}
         onSubmit={handleUserInfoSubmit}
       />
 
@@ -68,6 +75,8 @@ export default function Vote() {
               key={item.id}
               userId={user?.uid || ""}
               election={item}
+              hasUserInfo={!!userInfo?.dateUpdated}
+              openUserInfoDialog={() => setShowUserInfoDialog(true)}
             />
           ))}
 
