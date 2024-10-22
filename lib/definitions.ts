@@ -198,3 +198,14 @@ export type EducationVoteResult = {
   electionStart: string;
   electionEnd: string;
 };
+
+export interface Comment {
+  id: string;
+  userId: string;
+  author: string;
+  avatar: string;
+  content: string;
+  createdAt: string;
+  userInteractions: Record<string, "like" | "dislike">;
+  replies?: Comment[];
+}

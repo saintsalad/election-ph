@@ -20,3 +20,10 @@ export function formatCount(count: number): string {
     return count.toString();
   }
 }
+
+export function countInteractions(
+  userInteractions: Record<string, "like" | "dislike">,
+  type: "like" | "dislike"
+): number {
+  return Object.values(userInteractions).filter((v) => v === type).length;
+}

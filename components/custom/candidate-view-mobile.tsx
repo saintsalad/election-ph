@@ -38,6 +38,8 @@ import { useTheme } from "next-themes"; // If you're using a theme system
 import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
 import CommentSectionMobile from "./comment-section-mobile";
+import useReactQueryNext from "@/hooks/useReactQueryNext";
+import { Comment } from "@/lib/definitions"; // Make sure to import the Comment type
 
 interface CandidateViewMobileProps {
   candidate: CandidateNext | undefined;
@@ -64,6 +66,7 @@ const CandidateViewMobile = ({
   const [daysUntilEdit, setDaysUntilEdit] = useState<number | null>(null);
   const [openCommentDrawer, setOpenCommentDrawer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
   const { theme } = useTheme(); // If using a theme system
   const queryClient = useQueryClient();
 
@@ -160,6 +163,20 @@ const CandidateViewMobile = ({
       candidateId: candidate.id,
     });
   };
+
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    error,
+    refetchWithoutCache: refetchComments,
+  } = useReactQueryNext<Comment[]>(
+    `comments=${candidate?.id}`,
+    `/api/candidate/comments?candidateId=${candidate?.id}`,
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    }
+  );
 
   const renderDots = () => {
     const totalSlides = 5;
@@ -366,13 +383,15 @@ const CandidateViewMobile = ({
         <div className='bg-black/30 rounded-full p-2 flex flex-col items-center gap-2 shadow-lg'>
           <ActionButton
             Icon={Star}
-            count={candidateRate?.averageRating ?? 0}
+            count={`${candidateRate?.averageRating ?? 0} (${
+              candidateRate?.numberOfRatings ?? 0
+            })`}
             active={!!userRate?.rate}
             onClick={() => setOpenRateDrawer(true)}
           />
           <ActionButton
             Icon={MessageCircle}
-            count={0}
+            count={commentsData?.length.toString() ?? "0"}
             onClick={() => setOpenCommentDrawer(true)}
           />
         </div>
@@ -453,7 +472,13 @@ const CandidateViewMobile = ({
             <DrawerDescription>View and add comments</DrawerDescription>
           </DrawerHeader>
           <div className='flex-1 overflow-hidden'>
-            <CommentSectionMobile />
+            <CommentSectionMobile
+              candidateId={candidate.id}
+              commentsData={commentsData ?? []}
+              isLoading={isLoadingComments}
+              error={error}
+              refetchComments={refetchComments}
+            />
           </div>
         </DrawerContent>
       </Drawer>
@@ -463,7 +488,7 @@ const CandidateViewMobile = ({
 
 interface ActionButtonProps {
   Icon: LucideIcon;
-  count?: number;
+  count: string;
   active?: boolean;
   onClick: () => void;
 }

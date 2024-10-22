@@ -3,6 +3,7 @@ import {
   GenderVoteResult,
   EducationVoteResult,
 } from "@/lib/definitions";
+import { format, isThisYear } from "date-fns";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import React from "react";
 
@@ -175,3 +176,27 @@ export function analyzeEducationVotes(
     icon: getIcon(),
   };
 }
+
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60)
+  );
+
+  if (diffInMinutes < 1) {
+    return "now";
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  } else if (diffInMinutes < 1440) {
+    // less than 24 hours
+    return `${Math.floor(diffInMinutes / 60)}h`;
+  } else if (diffInMinutes < 10080) {
+    // less than 7 days
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  } else if (isThisYear(date)) {
+    return format(date, "MMM d");
+  } else {
+    return format(date, "MMM d, yyyy");
+  }
+};
