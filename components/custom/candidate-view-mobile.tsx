@@ -173,8 +173,8 @@ const CandidateViewMobile = ({
     `comments=${candidate?.id}`,
     `/api/candidate/comments?candidateId=${candidate?.id}`,
     {
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+      // refetchOnWindowFocus: false,
+      // refetchOnReconnect: false,
     }
   );
 
@@ -391,7 +391,17 @@ const CandidateViewMobile = ({
           />
           <ActionButton
             Icon={MessageCircle}
-            count={commentsData?.length.toString() ?? "0"}
+            count={
+              commentsData
+                ? commentsData
+                    .reduce(
+                      (acc, comment) =>
+                        acc + 1 + (comment.replies?.length || 0),
+                      0
+                    )
+                    .toString()
+                : "0"
+            }
             onClick={() => setOpenCommentDrawer(true)}
           />
         </div>

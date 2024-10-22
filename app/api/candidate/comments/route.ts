@@ -21,6 +21,7 @@ function createNewComment(user: any, content: string): Omit<Comment, "id"> {
     content,
     createdAt: Timestamp.now().toDate().toISOString(),
     userInteractions: {},
+    isAuthor: true,
   };
 }
 
@@ -141,6 +142,9 @@ async function fetchComments(candidateId: string): Promise<Comment[]> {
     .orderBy("createdAt", "desc")
     .get();
 
+  const currentUser = await getCurrentUser();
+  const currentUserId = currentUser?.uid;
+
   return commentsSnapshot.docs.map((doc) => {
     const data = doc.data();
     return {
@@ -151,9 +155,11 @@ async function fetchComments(candidateId: string): Promise<Comment[]> {
       content: data.content,
       createdAt: data.createdAt,
       userInteractions: data.userInteractions || {},
+      isAuthor: data.userId === currentUserId,
       replies: (data.replies || []).map((reply: any) => ({
         ...reply,
         userInteractions: reply.userInteractions || {},
+        isAuthor: reply.userId === currentUserId,
       })),
     } as Comment;
   });

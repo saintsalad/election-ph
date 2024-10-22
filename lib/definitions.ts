@@ -208,4 +208,5 @@ export interface Comment {
   createdAt: string;
   userInteractions: Record<string, "like" | "dislike">;
   replies?: Comment[];
+  isAuthor: boolean;
 }

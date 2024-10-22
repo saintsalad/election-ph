@@ -11,10 +11,11 @@ import {
   ChevronDown,
   ChevronUp,
   MoreVertical,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Comment } from "@/lib/definitions";
-import useReactQueryNext from "@/hooks/useReactQueryNext";
+import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
 import {
   DropdownMenu,
@@ -24,6 +25,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatDate } from "@/lib/functions";
+import { toast } from "@/components/ui/use-toast";
+import { useAuthStore } from "@/lib/store"; // Import the useAuth hook
 
 function CommentSectionMobile({
   candidateId,
@@ -38,6 +41,11 @@ function CommentSectionMobile({
   isLoading: boolean;
   error: Error | null;
 }) {
+  const { user } = useAuthStore(); // Use the useAuth hook to get the user
+  const userAvatar =
+    user?.photoURL ||
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=DefaultUser";
+
   const [newComment, setNewComment] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<string>>(
     new Set()
@@ -45,6 +53,7 @@ function CommentSectionMobile({
   const [replyingTo, setReplyingTo] = useState<{
     id: string;
     author: string;
+    parentId: string | null;
   } | null>(null);
   const [deletingComments, setDeletingComments] = useState<Set<string>>(
     new Set()
@@ -52,6 +61,7 @@ function CommentSectionMobile({
   const [newCommentId, setNewCommentId] = useState<string | null>(null);
   const deletionTimeoutsRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
   const [comments, setComments] = useState<Comment[]>([]);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setComments(commentsData || []);
@@ -76,54 +86,109 @@ function CommentSectionMobile({
     // Implement like/dislike logic here
   };
 
-  const handleReply = (id: string, author: string) => {
-    setReplyingTo({ id, author });
+  const handleReply = (
+    id: string,
+    author: string,
+    isAuthor: boolean,
+    parentId: string | null = null
+  ) => {
+    setReplyingTo({
+      id,
+      author: isAuthor ? "my comment" : author,
+      parentId: parentId || id, // If it's a reply to a reply, use the original parent ID
+    });
   };
 
-  const handleSubmitComment = async () => {
+  const createCommentMutation = useMutation({
+    mutationFn: async ({
+      content,
+      parentCommentId,
+    }: {
+      content: string;
+      parentCommentId?: string;
+    }) => {
+      const response = await axios.post("/api/candidate/comments", {
+        candidateId,
+        content,
+        parentCommentId,
+      });
+      return response.data.comment;
+    },
+    onSuccess: (newCommentData, variables) => {
+      setComments((prevComments) => {
+        if (variables.parentCommentId) {
+          return prevComments.map((comment) => {
+            if (comment.id === variables.parentCommentId) {
+              return {
+                ...comment,
+                replies: [...(comment.replies || []), newCommentData],
+              };
+            }
+            return comment;
+          });
+        } else {
+          return [newCommentData, ...prevComments];
+        }
+      });
+      setNewCommentId(newCommentData.id);
+      setTimeout(() => setNewCommentId(null), 500);
+      setNewComment("");
+      setReplyingTo(null);
+      queryClient.invalidateQueries(["comments", candidateId]);
+      refetchComments();
+      // Remove success toast
+    },
+    onError: (error) => {
+      console.error("Error posting comment:", error);
+      toast({
+        title: "Error",
+        description: "Failed to post comment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: async ({
+      commentId,
+      parentCommentId,
+    }: {
+      commentId: string;
+      parentCommentId?: string;
+    }) => {
+      const url = parentCommentId
+        ? `/api/candidate/comments?commentId=${commentId}&parentCommentId=${parentCommentId}`
+        : `/api/candidate/comments?commentId=${commentId}`;
+      await axios.delete(url);
+    },
+    onMutate: ({ commentId, parentCommentId }) => {
+      removeCommentLocally(commentId, parentCommentId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["comments", candidateId]);
+      refetchComments();
+      // Remove success toast
+    },
+    onError: (error) => {
+      console.error("Error deleting comment:", error);
+      refetchComments();
+      toast({
+        title: "Error",
+        description: "Failed to delete comment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmitComment = () => {
     if (newComment.trim()) {
-      try {
-        const parentCommentId = replyingTo?.id;
-
-        const response = await axios.post("/api/candidate/comments", {
-          candidateId,
-          content: replyingTo
-            ? `@${replyingTo.author} ${newComment}`
-            : newComment,
-          parentCommentId,
-        });
-
-        const newCommentData = response.data.comment;
-
-        setComments((prevComments) => {
-          if (parentCommentId) {
-            // If it's a reply, find the parent comment and add the reply
-            return prevComments.map((comment) => {
-              if (comment.id === parentCommentId) {
-                return {
-                  ...comment,
-                  replies: [...(comment.replies || []), newCommentData],
-                };
-              }
-              return comment;
-            });
-          } else {
-            // If it's a new top-level comment, add it to the beginning of the list
-            return [newCommentData, ...prevComments];
-          }
-        });
-
-        setNewCommentId(newCommentData.id);
-        setTimeout(() => setNewCommentId(null), 500); // Reset after animation
-
-        setNewComment("");
-        setReplyingTo(null);
-
-        // Refetch comments in the background
-        refetchComments();
-      } catch (error) {
-        console.error("Error posting comment:", error);
-      }
+      const content = replyingTo
+        ? `@${replyingTo.author} ${newComment}`
+        : newComment;
+      createCommentMutation.mutate({
+        content,
+        parentCommentId: replyingTo?.parentId || replyingTo?.id,
+      });
     }
   };
 
@@ -150,43 +215,8 @@ function CommentSectionMobile({
     []
   );
 
-  const handleDeleteComment = async (
-    commentId: string,
-    parentCommentId?: string
-  ) => {
-    setDeletingComments((prev) => new Set(prev).add(commentId));
-
-    // Immediately remove the comment from local state
-    removeCommentLocally(commentId, parentCommentId);
-
-    // Clear any existing timeout for this comment
-    if (deletionTimeoutsRef.current[commentId]) {
-      clearTimeout(deletionTimeoutsRef.current[commentId]);
-    }
-
-    // Set a new timeout for the API call
-    deletionTimeoutsRef.current[commentId] = setTimeout(async () => {
-      try {
-        const url = parentCommentId
-          ? `/api/candidate/comments?commentId=${commentId}&parentCommentId=${parentCommentId}`
-          : `/api/candidate/comments?commentId=${commentId}`;
-        await axios.delete(url);
-
-        // Call refetchComments after successful deletion
-        refetchComments();
-      } catch (error) {
-        console.error("Error deleting comment:", error);
-        // If the API call fails, we should add the comment back
-        refetchComments();
-      } finally {
-        setDeletingComments((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(commentId);
-          return newSet;
-        });
-        delete deletionTimeoutsRef.current[commentId];
-      }
-    }, 500); // Delay API call until after the animation
+  const handleDeleteComment = (commentId: string, parentCommentId?: string) => {
+    deleteCommentMutation.mutate({ commentId, parentCommentId });
   };
 
   const handleReportComment = (commentId: string) => {
@@ -206,45 +236,40 @@ function CommentSectionMobile({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`mb-4 ${isReply ? "ml-8" : ""} relative overflow-hidden`}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}>
-        {isReply && (
-          <div className='absolute left-0 top-0 bottom-0 w-px bg-gray-300 -ml-4' />
-        )}
-        <div className='flex items-start space-x-2'>
-          <div className='w-8 h-8 relative flex-shrink-0'>
-            <Image
-              src={comment.avatar}
-              alt={comment.author}
-              width={32}
-              height={32}
-              className='rounded-full'
-              unoptimized
-            />
-          </div>
-          <div className='flex-1 min-w-0'>
-            {" "}
-            {/* Added min-w-0 here */}
-            <div className='flex justify-between items-start'>
-              <span className='font-semibold text-sm'>{comment.author}</span>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size='sm'
-                    variant='ghost'
-                    className='text-gray-500 p-1 h-auto'>
-                    <MoreVertical className='w-4 h-4' />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align='end'>
-                  <DropdownMenuItem
-                    onClick={() => handleReportComment(comment.id)}
-                    className='text-yellow-600'>
-                    Report
-                  </DropdownMenuItem>
+      className={`pb-4 ${isReply ? "ml-7 pl-4" : ""} relative`}>
+      {isReply && (
+        <div className='absolute left-0 top-0 bottom-0 w-px bg-gray-300' />
+      )}
+      <div className='flex items-start space-x-3'>
+        <Image
+          src={comment.avatar}
+          alt={comment.author}
+          width={28}
+          height={28}
+          className='rounded-full flex-shrink-0'
+          unoptimized
+        />
+        <div className='flex-1 min-w-0'>
+          <div className='flex justify-between items-center'>
+            <span
+              className={`text-sm font-semibold ${
+                comment.isAuthor ? "text-blue-600" : ""
+              }`}>
+              {comment.isAuthor ? "Me" : comment.author}
+            </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size='sm' variant='ghost' className='h-8 w-8 p-0'>
+                  <MoreVertical className='w-4 h-4' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem
+                  onClick={() => handleReportComment(comment.id)}
+                  className='text-yellow-600'>
+                  Report
+                </DropdownMenuItem>
+                {comment.isAuthor && (
                   <DropdownMenuItem
                     onClick={() =>
                       handleDeleteComment(
@@ -255,107 +280,116 @@ function CommentSectionMobile({
                     className='text-red-600'>
                     Delete
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className='text-sm mt-1 break-words whitespace-pre-wrap overflow-hidden'>
-              {comment.content.split(" ").map((word, index) =>
-                word.startsWith("@") ? (
-                  <span key={index} className='text-blue-500 font-semibold'>
-                    {word}{" "}
-                  </span>
-                ) : (
-                  <React.Fragment key={index}>{word} </React.Fragment>
-                )
-              )}
-            </div>
-            <div className='flex items-center mt-2 gap-x-5'>
-              <div className='flex items-center space-x-4 w-3/6'>
-                <span className='text-xs text-gray-500'>
-                  {formatDate(comment.createdAt)}
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <p className='text-sm mt-1 break-words whitespace-pre-wrap'>
+            {comment.content.split(" ").map((word, index) =>
+              word.startsWith("@") ? (
+                <span key={index} className='text-blue-500 font-semibold'>
+                  {word}{" "}
                 </span>
-                <button
-                  onClick={() => handleReply(comment.id, comment.author)}
-                  className='flex items-center space-x-1 text-xs text-gray-500'>
-                  <MessageCircle className='w-4 h-4 cursor-pointer' />
-                  <span>Reply</span>
-                </button>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <button
-                  onClick={() => handleLikeDislike(comment.id, "like")}
-                  className={cn(
-                    "flex items-center space-x-1 text-xs transition-colors duration-200 w-16 group",
-                    {
-                      "text-blue-500": comment.userInteractions["like"],
-                    }
-                  )}>
-                  <ThumbsUp className='w-4 h-4 cursor-pointer flex-shrink-0 transition-transform duration-200 ease-in-out' />
-                  <span className='truncate'>
-                    {
-                      Object.values(comment.userInteractions).filter(
-                        (v) => v === "like"
-                      ).length
-                    }
-                  </span>
-                </button>
-                <button
-                  onClick={() => handleLikeDislike(comment.id, "dislike")}
-                  className={cn(
-                    "flex items-center space-x-1 text-xs transition-colors duration-200 w-16 group",
-                    {
-                      "text-red-500": comment.userInteractions["dislike"],
-                    }
-                  )}>
-                  <ThumbsDown className='w-4 h-4 cursor-pointer flex-shrink-0 transition-transform duration-200 ease-in-out' />
-                  <span className='truncate'>
-                    {
-                      Object.values(comment.userInteractions).filter(
-                        (v) => v === "dislike"
-                      ).length
-                    }
-                  </span>
-                </button>
-              </div>
+              ) : (
+                <React.Fragment key={index}>{word} </React.Fragment>
+              )
+            )}
+          </p>
+          <div className='flex items-center mt-2 text-xs text-gray-500 space-x-4'>
+            <span>{formatDate(comment.createdAt)}</span>
+            <button
+              onClick={() =>
+                handleReply(
+                  comment.id,
+                  comment.author,
+                  comment.isAuthor,
+                  parentCommentId
+                )
+              }
+              className='flex items-center'>
+              <MessageCircle className='w-4 h-4 mr-1' />
+              Reply
+            </button>
+            <div className='flex items-center space-x-3'>
+              <button
+                onClick={() => handleLikeDislike(comment.id, "like")}
+                className={cn("flex items-center", {
+                  "text-blue-500": comment.userInteractions["like"],
+                })}>
+                <ThumbsUp className='w-4 h-4 mr-1' />
+                {
+                  Object.values(comment.userInteractions).filter(
+                    (v) => v === "like"
+                  ).length
+                }
+              </button>
+              <button
+                onClick={() => handleLikeDislike(comment.id, "dislike")}
+                className={cn("flex items-center", {
+                  "text-red-500": comment.userInteractions["dislike"],
+                })}>
+                <ThumbsDown className='w-4 h-4 mr-1' />
+                {
+                  Object.values(comment.userInteractions).filter(
+                    (v) => v === "dislike"
+                  ).length
+                }
+              </button>
             </div>
           </div>
         </div>
-        {comment.replies && comment.replies.length > 0 && (
-          <div className='mt-2'>
-            <button
-              onClick={() => toggleReplies(comment.id)}
-              className='text-sm text-blue-500 flex items-center'>
-              {expandedComments.has(comment.id) ? (
-                <>
-                  <ChevronUp className='w-4 h-4 mr-1' />
-                  Hide Replies
-                </>
-              ) : (
-                <>
-                  <ChevronDown className='w-4 h-4 mr-1' />
-                  Show Replies ({comment.replies.length})
-                </>
-              )}
-            </button>
+      </div>
+      {comment.replies && comment.replies.length > 0 && (
+        <div className='mt-2'>
+          <button
+            onClick={() => toggleReplies(comment.id)}
+            className='text-xs text-gray-500 flex items-center hover:text-blue-500 transition-colors duration-200'>
+            {expandedComments.has(comment.id) ? (
+              <>
+                <ChevronUp className='w-3 h-3 mr-1' />
+                <span className='font-medium'>Hide</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className='w-3 h-3 mr-1' />
+                <span className='font-medium'>
+                  {comment.replies.length}{" "}
+                  {comment.replies.length === 1 ? "reply" : "replies"}
+                </span>
+              </>
+            )}
+          </button>
+          <AnimatePresence>
             {expandedComments.has(comment.id) && (
-              <div className='mt-2'>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className='mt-2 overflow-hidden'>
                 {comment.replies.map((reply) =>
                   renderComment(reply, true, comment.id)
                 )}
-              </div>
+              </motion.div>
             )}
-          </div>
-        )}
-      </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
     </motion.div>
   );
 
-  if (isLoading) return <div>Loading comments...</div>;
-  if (error) return <div>Error loading comments: {error.message}</div>;
+  if (isLoading)
+    return <div className='p-4 text-center'>Loading comments...</div>;
+  if (error)
+    return (
+      <div className='p-4 text-center text-red-500'>
+        Error loading comments: {error.message}
+      </div>
+    );
 
   return (
     <div className='flex flex-col h-full'>
-      <div className='px-4 py-1.5 border-b flex justify-between items-center bg-white'>
+      <div className='px-4 py-2 border-b flex justify-between items-center bg-white'>
         <h2 className='text-base font-semibold'>Comments</h2>
         <span className='text-sm font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full'>
           {comments.length}
@@ -378,35 +412,66 @@ function CommentSectionMobile({
           ))}
         </AnimatePresence>
       </ScrollArea>
-      <div className='py-3 px-2 border-t bg-gray-50'>
-        <div className='flex items-center space-x-2'>
-          <div className='w-10 h-10 relative'>
+      <div className='py-3 px-4 border-t bg-gray-50'>
+        <div className='flex flex-col space-y-2'>
+          {replyingTo && (
+            <div className='flex items-center justify-between bg-blue-50 p-2 rounded-md'>
+              <span className='text-sm text-blue-600'>
+                Replying to{" "}
+                {replyingTo.author === "my comment"
+                  ? "my comment"
+                  : `@${replyingTo.author}`}
+              </span>
+              <Button
+                size='sm'
+                variant='ghost'
+                onClick={() => setReplyingTo(null)}
+                className='text-blue-600 hover:text-blue-800'>
+                Cancel
+              </Button>
+            </div>
+          )}
+          <div className='flex items-center space-x-3'>
             <Image
-              src='https://api.dicebear.com/7.x/avataaars/svg?seed=CurrentUser'
+              src={userAvatar}
               alt='Your avatar'
-              layout='fill'
+              width={36}
+              height={36}
               className='rounded-full bg-gray-200'
               unoptimized
             />
-          </div>
-          <div className='flex-1 flex items-center bg-white rounded-full border border-gray-300 px-2 py-0'>
-            <Input
-              placeholder={
-                replyingTo
-                  ? `Reply to ${replyingTo.author}...`
-                  : "Add a comment..."
-              }
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className='flex-1 border-none focus:ring-0 bg-transparent shadow-none'
-            />
-            <Button
-              onClick={handleSubmitComment}
-              size='icon'
-              variant='ghost'
-              className='rounded-full'>
-              <Send className='w-5 h-5 text-blue-500' />
-            </Button>
+            <div className='flex-1 flex items-center bg-white rounded-full border border-gray-300 px-3 py-1'>
+              <Input
+                placeholder={
+                  replyingTo
+                    ? `Reply to ${replyingTo.author}...`
+                    : "Add a comment..."
+                }
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className='flex-1 border-none focus:ring-0 bg-transparent shadow-none text-sm'
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmitComment();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleSubmitComment}
+                size='sm'
+                variant='ghost'
+                className='rounded-full'
+                disabled={
+                  createCommentMutation.isLoading || !newComment.trim()
+                }>
+                {createCommentMutation.isLoading ? (
+                  <Loader2 className='w-5 h-5 text-blue-500 animate-spin' />
+                ) : (
+                  <Send className='w-5 h-5 text-blue-500' />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
