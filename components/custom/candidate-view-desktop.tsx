@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes";
 import CommentSectionMobile from "./comment-section-mobile";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
+import { Comment } from "@/lib/definitions"; // Make sure this import is correct
 
 const CandidateViewDeskTop = ({
   candidate,
