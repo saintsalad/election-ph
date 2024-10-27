@@ -29,6 +29,8 @@ import { candidateViewTabs } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes";
+import CommentSectionMobile from "./comment-section-mobile";
+import useReactQueryNext from "@/hooks/useReactQueryNext";
 
 const CandidateViewDeskTop = ({
   candidate,
@@ -41,6 +43,20 @@ const CandidateViewDeskTop = ({
 }) => {
   const [activeTab, setActiveTab] = useState("bio");
   const { theme } = useTheme();
+
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    error,
+    refetchWithoutCache: refetchComments,
+  } = useReactQueryNext<Comment[]>(
+    `comments=${candidate?.id}`,
+    `/api/candidate/comments?candidateId=${candidate?.id}`,
+    {
+      // refetchOnWindowFocus: false,
+      // refetchOnReconnect: false,
+    }
+  );
 
   if (isLoading || !candidate) {
     return <CandidateViewSkeleton />;
@@ -104,8 +120,8 @@ const CandidateViewDeskTop = ({
                 <div className='flex flex-wrap items-center gap-3 mb-3'>
                   <Badge
                     variant='secondary'
-                    className='rounded-full px-2 py-0.5 text-xs font-medium'>
-                    REPUBLICAN
+                    className='rounded-full px-2 py-0.5 text-xs font-medium capitalize'>
+                    {candidate.party}
                   </Badge>
 
                   <div
@@ -173,9 +189,14 @@ const CandidateViewDeskTop = ({
                   <RenderTabContents candidate={candidate} />
                   <TabsContent value='rating'>
                     <div className='!max-w-none p-5 text-foreground bg-card rounded-md min-h-52 shadow-sm'>
-                      <p className='text-sm text-muted-foreground italic'>
-                        Rating feature is currently only available in the mobile
-                        version. 📱
+                      <p className='text-sm text-muted-foreground'>
+                        <CommentSectionMobile
+                          candidateId={candidate.id}
+                          commentsData={commentsData ?? []}
+                          isLoading={isLoadingComments}
+                          refetchComments={refetchComments}
+                          error={error}
+                        />
                       </p>
                     </div>
                   </TabsContent>
