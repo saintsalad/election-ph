@@ -1,28 +1,92 @@
+import {
+  AlertTriangle,
+  Users,
+  MessageSquare,
+  PieChart,
+  Bell,
+} from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+
 function Community() {
   return (
-    // Add a container div with padding
-    <div className='container mx-auto px-4 py-11 lg:py-16'>
-      <div className='pt-5'>
-        <div
-          className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6'
-          role='alert'>
-          <p className='font-bold'>Maintenance Notice</p>
-          <p>
-            This page is currently under maintenance. Some features may be
-            unavailable.
+    <div className='container mx-auto px-4 pt-24'>
+      <div className='max-w-4xl mx-auto space-y-10'>
+        <Alert
+          variant='default'
+          className='bg-gray-100 dark:bg-gray-800 border-none rounded-2xl'>
+          <AlertTriangle className='h-5 w-5 text-gray-500 dark:text-gray-400' />
+          <AlertTitle className='text-base font-semibold'>
+            Maintenance Notice
+          </AlertTitle>
+          <AlertDescription className='text-gray-600 dark:text-gray-300'>
+            Community features are currently under maintenance.
+          </AlertDescription>
+        </Alert>
+
+        <div className='text-center space-y-3'>
+          <h1 className='text-4xl sm:text-5xl font-bold tracking-tight dark:text-white'>
+            Community Hub
+          </h1>
+          <p className='text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto'>
+            A space for connection, discussion, and shared insights.
           </p>
         </div>
 
-        {/* Add a heading for the welcome message */}
-        <h1 className='text-3xl font-bold mb-4'>Welcome to Our Community</h1>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
+          <FeatureCard
+            icon={<MessageSquare className='h-8 w-8 text-blue-500' />}
+            title='Share Opinions'
+            description='Express your thoughts on various topics'
+          />
+          <FeatureCard
+            icon={<Users className='h-8 w-8 text-green-500' />}
+            title='Connect'
+            description='Engage with like-minded individuals'
+          />
+          <FeatureCard
+            icon={<PieChart className='h-8 w-8 text-purple-500' />}
+            title='Participate'
+            description='Join community polls and surveys'
+          />
+          <FeatureCard
+            icon={<Bell className='h-8 w-8 text-yellow-500' />}
+            title='Stay Updated'
+            description='Receive notifications on hot topics'
+          />
+        </div>
 
-        {/* Add a brief description */}
-        <p className='mb-6'>
-          Join our vibrant community and connect with like-minded individuals.
-        </p>
+        <div className='text-center'>
+          <Button
+            disabled
+            className='mt-6 px-6 py-3 text-base rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'>
+            Start a Discussion (Coming Soon)
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Placeholder for community content */}
-        <div>Community content goes here</div>
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
+  return (
+    <div className='bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl transition-all duration-300 hover:shadow-md'>
+      <div className='flex items-center space-x-4'>
+        <div className='bg-white dark:bg-gray-700 p-3 rounded-full shadow-sm'>
+          {icon}
+        </div>
+        <div className='flex-1'>
+          <h3 className='text-xl font-semibold dark:text-white'>{title}</h3>
+          <p className='mt-2 text-sm text-gray-600 dark:text-gray-300'>
+            {description}
+          </p>
+        </div>
       </div>
     </div>
   );
