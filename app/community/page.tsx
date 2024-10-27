@@ -10,22 +10,22 @@ import { Button } from "@/components/ui/button";
 
 function Community() {
   return (
-    <div className='container mx-auto px-4 pt-24'>
+    <div className='min-h-screen px-4 sm:px-6 lg:px-8 pt-28 dark:bg-gray-900'>
       <div className='max-w-4xl mx-auto space-y-10'>
         <Alert
           variant='default'
           className='bg-gray-100 dark:bg-gray-800 border-none rounded-2xl'>
           <AlertTriangle className='h-5 w-5 text-gray-500 dark:text-gray-400' />
           <AlertTitle className='text-base font-semibold'>
-            Maintenance Notice
+            Feature Notice
           </AlertTitle>
           <AlertDescription className='text-gray-600 dark:text-gray-300'>
-            Community features are currently under maintenance.
+            Community features are soon to be available.
           </AlertDescription>
         </Alert>
 
         <div className='text-center space-y-3'>
-          <h1 className='text-4xl sm:text-5xl font-bold tracking-tight dark:text-white'>
+          <h1 className='text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-cyan-400 dark:to-blue-500'>
             Community Hub
           </h1>
           <p className='text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto'>
@@ -82,7 +82,9 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
           {icon}
         </div>
         <div className='flex-1'>
-          <h3 className='text-xl font-semibold dark:text-white'>{title}</h3>
+          <h3 className='text-xl font-semibold text-gray-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-cyan-400 dark:to-blue-500'>
+            {title}
+          </h3>
           <p className='mt-2 text-sm text-gray-600 dark:text-gray-300'>
             {description}
           </p>
