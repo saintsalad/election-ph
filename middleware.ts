@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
     } else {
       console.log(`❌ Unauthorized access: ${response.status}`);
       if (response.data?.code === "auth/session-cookie-expired") {
-        console.log("Session cookie expired");
+        console.log("🍪🍪🍪❌ Session cookie expired ❌🍪🍪🍪");
       }
       return NextResponse.redirect(new URL("/signin", request.url));
     }

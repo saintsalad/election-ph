@@ -85,6 +85,9 @@ function CandidateViewPage({ params }: { params: { id: string } }) {
             isLoading={isLoading}
             candidate={candidate}
             candidateRate={candidateRate}
+            userRate={userRate}
+            candidateRateRefetch={() => candidateRateRefetch()}
+            userRateRefetch={() => userRateRefetch()}
           />
         </ScrollArea>
       )}

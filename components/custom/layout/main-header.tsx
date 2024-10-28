@@ -75,7 +75,13 @@ const MobileNav: React.FC<{
         <SheetDescription hidden></SheetDescription>
         <div className='flex flex-col gap-y-4'>
           {navigation
-            .filter((item) => !item.isHidden && item.route !== "/logout")
+            .filter((item) => {
+              // Hide account-related items when user is not authenticated
+              if (!user && item.label === "Account") {
+                return false;
+              }
+              return !item.isHidden && item.route !== "/logout";
+            })
             .map((item, i) => (
               <div key={i}>
                 {item.label === "Account" && (

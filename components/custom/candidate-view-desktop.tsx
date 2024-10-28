@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import hero from "@/public/images/hero.jpg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, EllipsisVertical, MoreHorizontal } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,7 +22,7 @@ import remarkGfm from "remark-gfm";
 import { SocialIcon } from "react-social-icons";
 import { Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
-import { CandidateNext, CandidateRating } from "@/lib/definitions";
+import { CandidateNext, CandidateRating, UserRating } from "@/lib/definitions";
 import "react-social-icons/x";
 import "react-social-icons/facebook";
 import { candidateViewTabs } from "@/constants/data";
@@ -32,15 +32,27 @@ import { useTheme } from "next-themes";
 import CommentSectionMobile from "./comment-section-mobile";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
 import { Comment } from "@/lib/definitions"; // Make sure this import is correct
+import { useQueryClient } from "react-query";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import axios from "axios";
+import { differenceInDays } from "date-fns";
+import { useMutation } from "react-query";
 
 const CandidateViewDeskTop = ({
   candidate,
   candidateRate,
   isLoading,
+  candidateRateRefetch,
+  userRate,
+  userRateRefetch,
 }: {
   candidate: CandidateNext | undefined;
   candidateRate: CandidateRating | undefined;
   isLoading: boolean;
+  userRate: UserRating | undefined;
+  candidateRateRefetch: () => void;
+  userRateRefetch: () => void;
 }) => {
   const [activeTab, setActiveTab] = useState("bio");
   const { theme } = useTheme();
@@ -187,20 +199,16 @@ const CandidateViewDeskTop = ({
                 </div>
 
                 <div className='mt-4'>
-                  <RenderTabContents candidate={candidate} />
-                  <TabsContent value='rating'>
-                    <div className='!max-w-none p-5 text-foreground bg-card rounded-md min-h-52 shadow-sm'>
-                      <p className='text-sm text-muted-foreground'>
-                        <CommentSectionMobile
-                          candidateId={candidate.id}
-                          commentsData={commentsData ?? []}
-                          isLoading={isLoadingComments}
-                          refetchComments={refetchComments}
-                          error={error}
-                        />
-                      </p>
-                    </div>
-                  </TabsContent>
+                  <RenderTabContents
+                    candidate={candidate}
+                    userRate={userRate}
+                    userRateRefetch={userRateRefetch}
+                    candidateRateRefetch={candidateRateRefetch}
+                    commentsData={commentsData ?? []}
+                    isLoadingComments={isLoadingComments}
+                    refetchComments={refetchComments}
+                    error={error}
+                  />
                 </div>
               </Tabs>
             </div>
@@ -224,7 +232,25 @@ const RenderTabTriggers = () => {
   ));
 };
 
-const RenderTabContents = ({ candidate }: { candidate: CandidateNext }) => {
+const RenderTabContents = ({
+  candidate,
+  userRate,
+  userRateRefetch,
+  candidateRateRefetch,
+  commentsData,
+  isLoadingComments,
+  refetchComments,
+  error,
+}: {
+  candidate: CandidateNext;
+  userRate: UserRating | undefined;
+  userRateRefetch: () => void;
+  candidateRateRefetch: () => void;
+  commentsData: Comment[];
+  isLoadingComments: boolean;
+  refetchComments: () => void;
+  error: unknown;
+}) => {
   const markedComponent = (text: string | undefined) => {
     return (
       <div className='!max-w-none p-5 text-foreground bg-card rounded-md min-h-52 shadow-sm'>
@@ -245,10 +271,44 @@ const RenderTabContents = ({ candidate }: { candidate: CandidateNext }) => {
 
   return candidateViewTabs.map((item) => (
     <TabsContent key={item.value} value={item.value}>
-      {item.id &&
+      {item.value === "rating" ? (
+        <div className='space-y-4'>
+          <CandidateRatingSection
+            candidate={candidate}
+            userRate={userRate}
+            userRateRefetch={userRateRefetch}
+            candidateRateRefetch={candidateRateRefetch}
+          />
+
+          <div className='bg-gradient-to-b from-card/50 to-card rounded-xl border border-border/5 shadow-sm backdrop-blur-sm'>
+            <div className='p-4'>
+              <div className='flex items-center justify-between mb-4'>
+                <div className='space-y-0.5'>
+                  <h3 className='text-base font-medium tracking-tight'>
+                    Comments
+                  </h3>
+                  <p className='text-sm text-muted-foreground/80'>
+                    {commentsData.length} comment
+                    {commentsData.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+              <CommentSectionMobile
+                candidateId={candidate.id}
+                commentsData={commentsData}
+                isLoading={isLoadingComments}
+                refetchComments={refetchComments}
+                error={error as Error | null}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        item.id &&
         markedComponent(
           candidate[item.id as keyof CandidateNext] as string | undefined
-        )}
+        )
+      )}
     </TabsContent>
   ));
 };
@@ -282,6 +342,168 @@ const CandidateViewSkeleton = () => {
         <div className='mt-6'>
           <Skeleton className='h-10 w-full mb-4 rounded-full' />
           <Skeleton className='h-64 w-full rounded-md' />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Add this new component for the rating section
+const CandidateRatingSection = ({
+  candidate,
+  userRate,
+  userRateRefetch,
+  candidateRateRefetch,
+}: {
+  candidate: CandidateNext;
+  userRate: UserRating | undefined;
+  userRateRefetch: () => void;
+  candidateRateRefetch: () => void;
+}) => {
+  const [tempRating, setTempRating] = useState(userRate?.rate || 0);
+  const queryClient = useQueryClient();
+  const [mode, setMode] = useState<"rating" | "success" | "edit">("rating");
+  const [daysUntilEdit, setDaysUntilEdit] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (userRate?.rate) {
+      setTempRating(userRate.rate);
+      const { canEdit, daysLeft } = getEditStatus(userRate);
+      setMode(canEdit ? "edit" : "success");
+      setDaysUntilEdit(daysLeft);
+    } else {
+      setMode("rating");
+      setDaysUntilEdit(null);
+    }
+  }, [userRate]);
+
+  const getEditStatus = (
+    rating: UserRating
+  ): { canEdit: boolean; daysLeft: number } => {
+    const ratingDate = new Date(rating.dateCreated);
+    const today = new Date();
+    const daysSinceRating = differenceInDays(today, ratingDate);
+    const daysLeft = Math.max(3 - daysSinceRating, 0);
+    return { canEdit: daysLeft === 0, daysLeft };
+  };
+
+  // Add the mutation
+  const saveRatingMutation = useMutation({
+    mutationFn: async (ratingData: { rate: number; candidateId: string }) => {
+      const { data } = await axios.post("/api/candidate/rate", ratingData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["candidateRate", candidate?.id]);
+      queryClient.invalidateQueries(["userRate", candidate?.id]);
+      setMode("success");
+      setDaysUntilEdit(3);
+      userRateRefetch();
+      candidateRateRefetch();
+    },
+    onError: (error) => {
+      console.error("Error submitting rating:", error);
+      alert("An unexpected error occurred. Please try again.");
+    },
+  });
+
+  // Add the submit handler
+  const handleSubmitRating = () => {
+    if (!candidate) {
+      alert("Missing candidate. Please try again.");
+      return;
+    }
+
+    saveRatingMutation.mutate({
+      rate: tempRating,
+      candidateId: candidate.id,
+    });
+  };
+
+  return (
+    <div className='bg-gradient-to-b from-card/50 to-card rounded-xl border border-border/5 shadow-sm backdrop-blur-sm'>
+      <div className='p-4'>
+        <div className='flex items-center justify-between mb-4'>
+          <div className='space-y-0.5'>
+            <h3 className='text-base font-medium tracking-tight'>
+              {mode === "rating" && "Rate this Candidate"}
+              {mode === "success" && "Your Rating"}
+              {mode === "edit" && "Update Rating"}
+            </h3>
+            <p className='text-sm text-muted-foreground/80'>
+              {mode === "rating" && "How would you rate this candidate?"}
+              {mode === "success" && (
+                <>
+                  You rated this candidate{" "}
+                  <span className='font-medium text-foreground'>
+                    {tempRating} out of 5
+                  </span>
+                </>
+              )}
+              {mode === "edit" && "Select new rating"}
+            </p>
+          </div>
+
+          {mode === "success" &&
+            daysUntilEdit !== null &&
+            daysUntilEdit > 0 && (
+              <div className='px-2.5 py-0.5 rounded-full bg-muted/50 border border-border/50'>
+                <span className='text-xs font-medium text-muted-foreground'>
+                  Edit in {daysUntilEdit}d
+                </span>
+              </div>
+            )}
+        </div>
+
+        <div className='flex items-center gap-6'>
+          <div className='flex items-center gap-2'>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star
+                key={index}
+                onClick={() => mode !== "success" && setTempRating(index + 1)}
+                className={cn(
+                  "h-6 w-6 transition-all duration-200",
+                  mode !== "success" && "cursor-pointer hover:scale-110"
+                )}
+                fill={index < tempRating ? "#facc15" : "#cbd5e1"}
+                color={index < tempRating ? "#facc15" : "#cbd5e1"}
+              />
+            ))}
+          </div>
+
+          <div className='flex items-center gap-2'>
+            {mode !== "success" && (
+              <Button
+                onClick={handleSubmitRating}
+                className={cn(
+                  "min-w-[100px] h-8 text-sm transition-all",
+                  mode === "rating" ? "bg-primary" : "bg-primary/90"
+                )}
+                disabled={!tempRating || saveRatingMutation.isLoading}>
+                {saveRatingMutation.isLoading ? (
+                  <>
+                    <Loader2 className='mr-1.5 h-3 w-3 animate-spin' />
+                    Submitting...
+                  </>
+                ) : mode === "rating" ? (
+                  "Submit"
+                ) : (
+                  "Update"
+                )}
+              </Button>
+            )}
+
+            {mode === "success" && daysUntilEdit === 0 && (
+              <Button
+                onClick={() => setMode("edit")}
+                variant='outline'
+                className='min-w-[100px] h-8 text-sm border-border/50 hover:bg-muted/50'>
+                Edit Rating
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

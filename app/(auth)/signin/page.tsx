@@ -5,10 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, signInWithGooglePopup } from "@/lib/firebase";
 import Google from "@/components/custom/icon/google";
 import { Button } from "@/components/ui/button";
-import { signInWithGooglePopup } from "@/lib/firebase";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import banner from "@/public/images/banner2.jpg";
@@ -24,6 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -49,15 +50,35 @@ function SignIn() {
     try {
       setIsLoading(true);
       const userCredential = await signInWithGooglePopup();
-      const response = await handleLogin(userCredential.user);
+      const email = userCredential.user.email;
 
-      if (response.success) {
+      if (!email) {
+        throw new Error("User email not found");
+      }
+
+      // Check if email exists in Firestore users collection
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        // Email doesn't exist in Firestore - redirect to signup
+        setError("Account not found. Please sign up first.");
+        router.push("/signup");
+        return;
+      }
+
+      // Email exists, proceed with login
+      const loginResponse = await handleLogin(userCredential.user);
+      if (loginResponse.success) {
         router.push("/");
       } else {
         console.error("Google sign-in failed");
+        setError("Google sign-in failed. Please try again.");
       }
     } catch (error) {
       console.error("Error during Google sign-in:", error);
+      setError("An error occurred during Google sign-in. Please try again.");
     } finally {
       setIsLoading(false);
     }
