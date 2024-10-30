@@ -16,9 +16,10 @@ import {
   Copy,
   Flag,
   Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { truncateText } from "@/lib/functions";
+import { truncateText, formatDate } from "@/lib/functions";
 import { Comment } from "@/lib/definitions";
 import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
@@ -29,9 +30,72 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AnimatePresence, motion } from "framer-motion";
-import { formatDate } from "@/lib/functions";
 import { toast } from "@/components/ui/use-toast";
 import { useAuthStore } from "@/lib/store"; // Import the useAuth hook
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+function checkUrlSafety(url: string): { isSafe: boolean; warning?: string } {
+  const trustedDomains = [
+    "facebook.com",
+    "www.facebook.com",
+    "twitter.com",
+    "www.twitter.com",
+    "linkedin.com",
+    "www.linkedin.com",
+    "instagram.com",
+    "www.instagram.com",
+    "github.com",
+    "www.github.com",
+  ];
+
+  try {
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname;
+
+    if (trustedDomains.includes(domain)) return { isSafe: true };
+
+    const hasHTTPS = url.startsWith("https://");
+    const hasUncommonTLD = !url.match(/\.(com|org|net|edu|gov|io|dev)$/i);
+    const hasSpecialChars = /[<>{}\\]/.test(url);
+
+    if (!hasHTTPS) {
+      return {
+        isSafe: false,
+        warning:
+          "This link uses an insecure connection (HTTP). Proceed with caution.",
+      };
+    }
+
+    if (hasUncommonTLD) {
+      return {
+        isSafe: false,
+        warning:
+          "This link uses an uncommon domain extension. Verify the source before proceeding.",
+      };
+    }
+
+    if (hasSpecialChars) {
+      return {
+        isSafe: false,
+        warning: "This link contains suspicious characters. Exercise caution.",
+      };
+    }
+
+    return { isSafe: true };
+  } catch {
+    return {
+      isSafe: false,
+      warning: "This link appears to be malformed. Exercise caution.",
+    };
+  }
+}
 
 function CommentSectionMobile({
   candidateId,
@@ -74,6 +138,9 @@ function CommentSectionMobile({
   const newCommentRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [charCount, setCharCount] = useState(0);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+  const [hasSpecialCharacters, setHasSpecialCharacters] = useState(false);
 
   useEffect(() => {
     setComments(commentsData || []);
@@ -207,19 +274,20 @@ function CommentSectionMobile({
   });
 
   const handleSubmitComment = () => {
-    if (newComment.trim()) {
-      let content = newComment;
-      if (replyingTo) {
-        content =
-          replyingTo.author === "my comment"
-            ? newComment
-            : `@${replyingTo.author} ${newComment}`;
-      }
-      createCommentMutation.mutate({
-        content,
-        parentCommentId: replyingTo?.parentId || replyingTo?.id,
-      });
+    if (!newComment.trim()) return;
+
+    let content = newComment;
+    if (replyingTo) {
+      content =
+        replyingTo.author === "my comment"
+          ? content
+          : `@${replyingTo.author} ${content}`;
     }
+
+    createCommentMutation.mutate({
+      content,
+      parentCommentId: replyingTo?.parentId || replyingTo?.id,
+    });
   };
 
   const removeCommentLocally = useCallback(
@@ -286,6 +354,26 @@ function CommentSectionMobile({
       });
   };
 
+  const handleUrlClick = (url: string) => {
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        toast({
+          title: "URL Copied",
+          description: "Link has been copied to clipboard",
+          duration: 2000,
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to copy URL: ", err);
+        toast({
+          title: "Error",
+          description: "Failed to copy URL",
+          variant: "destructive",
+        });
+      });
+  };
+
   const renderComment = (
     comment: Comment,
     isReply = false,
@@ -315,9 +403,7 @@ function CommentSectionMobile({
         <div className='flex-1 min-w-0'>
           <div className='flex justify-between items-center'>
             <span
-              className={`text-sm font-semibold ${
-                comment.isAuthor ? "text-blue-600" : ""
-              }`}>
+              className={`text-sm font-semibold text-slate-700 dark:text-slate-200`}>
               {comment.isAuthor ? "Me" : comment.author}
             </span>
             <DropdownMenu>
@@ -356,15 +442,59 @@ function CommentSectionMobile({
             </DropdownMenu>
           </div>
           <p className='text-sm mt-1 break-words whitespace-pre-wrap'>
-            {comment.content.split(" ").map((word, index) =>
-              word.startsWith("@") ? (
-                <span key={index} className='text-blue-500 font-semibold'>
-                  {word}{" "}
-                </span>
-              ) : (
-                <React.Fragment key={index}>{word} </React.Fragment>
-              )
-            )}
+            {(() => {
+              const words = comment.content.split(" ");
+              const result = [];
+              let i = 0;
+
+              while (i < words.length) {
+                let word = words[i];
+
+                // Check for mentions
+                if (word.startsWith("@")) {
+                  // If this is a reply, check against parent author
+                  if (isReply && comment.author) {
+                    const parentAuthorMention = `@${comment.author}`;
+                    if (comment.content.includes(parentAuthorMention)) {
+                      word = parentAuthorMention;
+                      i += parentAuthorMention.split(" ").length - 1;
+                    }
+                  }
+
+                  result.push(
+                    <span
+                      key={i}
+                      className='text-slate-700 dark:text-slate-200 font-semibold'>
+                      {word}{" "}
+                    </span>
+                  );
+                }
+                // Check for URLs
+                else if (word.match(/^(https?:\/\/[^\s]+)/)) {
+                  const displayUrl = truncateText(word, 30);
+                  result.push(
+                    <span
+                      key={i}
+                      className='text-blue-500 dark:text-blue-400 hover:text-blue-600 
+                        dark:hover:text-blue-300 cursor-pointer transition-colors duration-200'
+                      onClick={() => {
+                        setSelectedUrl(word);
+                        setIsUrlDialogOpen(true);
+                      }}>
+                      {displayUrl}{" "}
+                    </span>
+                  );
+                }
+                // Regular word
+                else {
+                  result.push(<React.Fragment key={i}>{word} </React.Fragment>);
+                }
+
+                i++;
+              }
+
+              return result;
+            })()}
           </p>
           <div className='flex items-center mt-2 text-xs text-gray-500 space-x-4'>
             <span>{formatDate(comment.createdAt)}</span>
@@ -594,6 +724,109 @@ function CommentSectionMobile({
           </div>
         </div>
       </div>
+
+      <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>External Link</DialogTitle>
+            <DialogDescription>
+              You&apos;re about to visit this external link:
+            </DialogDescription>
+          </DialogHeader>
+          <div className='my-4 space-y-3'>
+            <p className='text-sm font-medium break-all bg-muted p-3 rounded-md'>
+              {selectedUrl}
+            </p>
+            {selectedUrl && !checkUrlSafety(selectedUrl).isSafe && (
+              <div className='flex items-start space-x-2 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md'>
+                <AlertTriangle className='w-5 h-5 flex-shrink-0 mt-0.5' />
+                <div className='space-y-1'>
+                  <p className='font-medium'>Security Warning</p>
+                  <p className='text-sm opacity-90'>
+                    {checkUrlSafety(selectedUrl).warning}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter className='flex gap-2'>
+            <Button variant='outline' onClick={() => setIsUrlDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant={
+                checkUrlSafety(selectedUrl!).isSafe ? "default" : "destructive"
+              }
+              onClick={() => {
+                window.open(selectedUrl!, "_blank", "noopener,noreferrer");
+                setIsUrlDialogOpen(false);
+              }}>
+              {checkUrlSafety(selectedUrl!).isSafe
+                ? "Open Link"
+                : "Proceed Anyway"}
+            </Button>
+            <Button
+              variant='secondary'
+              onClick={() => {
+                navigator.clipboard.writeText(selectedUrl!);
+                toast({
+                  title: "Copied",
+                  description: "Link copied to clipboard",
+                  duration: 2000,
+                });
+              }}>
+              Copy Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={hasSpecialCharacters}
+        onOpenChange={setHasSpecialCharacters}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Warning: Special Characters Detected</DialogTitle>
+            <DialogDescription>
+              Your comment contains special characters or formatting that might
+              be hard to read. Would you like to:
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4 mt-4'>
+            <Button
+              variant='outline'
+              onClick={() => {
+                const cleanText = newComment
+                  .normalize("NFKD")
+                  .replace(/[\u0300-\u036f]/g, "");
+                setNewComment(cleanText);
+                setHasSpecialCharacters(false);
+              }}
+              className='w-full'>
+              Clean up special characters
+            </Button>
+            <Button
+              variant='default'
+              onClick={() => {
+                setHasSpecialCharacters(false);
+                // Proceed with original comment
+                createCommentMutation.mutate({
+                  content: newComment,
+                  parentCommentId: replyingTo?.parentId || replyingTo?.id,
+                });
+              }}
+              className='w-full'>
+              Post anyway
+            </Button>
+            <Button
+              variant='ghost'
+              onClick={() => setHasSpecialCharacters(false)}
+              className='w-full'>
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

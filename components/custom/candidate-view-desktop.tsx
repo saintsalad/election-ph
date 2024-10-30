@@ -29,7 +29,7 @@ import { candidateViewTabs } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes";
-import CommentSectionMobile from "./comment-section-mobile";
+import CommentSectionMobile from "@/components/custom/comment-section-mobile";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
 import { Comment } from "@/lib/definitions"; // Make sure this import is correct
 import { useQueryClient } from "react-query";
@@ -282,24 +282,15 @@ const RenderTabContents = ({
 
           <div className='bg-gradient-to-b from-card/50 to-card rounded-xl border border-border/5 shadow-sm backdrop-blur-sm'>
             <div className='p-4'>
-              <div className='flex items-center justify-between mb-4'>
-                <div className='space-y-0.5'>
-                  <h3 className='text-base font-medium tracking-tight'>
-                    Comments
-                  </h3>
-                  <p className='text-sm text-muted-foreground/80'>
-                    {commentsData.length} comment
-                    {commentsData.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
+              <div className='text-sm text-muted-foreground'>
+                <CommentSectionMobile
+                  candidateId={candidate.id}
+                  commentsData={commentsData}
+                  isLoading={isLoadingComments}
+                  refetchComments={refetchComments}
+                  error={error as Error | null}
+                />
               </div>
-              <CommentSectionMobile
-                candidateId={candidate.id}
-                commentsData={commentsData}
-                isLoading={isLoadingComments}
-                refetchComments={refetchComments}
-                error={error as Error | null}
-              />
             </div>
           </div>
         </div>
