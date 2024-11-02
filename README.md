@@ -4,11 +4,10 @@
   <p>An independent, non-official online survey platform for gathering public opinion.</p>
 
   <p>
-    <a href="#features">Features</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#getting-started">Getting Started</a> •
-    <a href="#roadmap">Roadmap</a> •
-    <a href="#contributing">Contributing</a>
+    <a href="#-features">Features</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#️-roadmap">Roadmap</a> •
+    <a href="#-contributing">Contributing</a>
   </p>
 </div>
 
@@ -34,10 +33,6 @@ Election PH is a platform designed to empower Filipino voters through accessible
 - **Database**: Prisma with PostgreSQL
 - **Deployment**: Vercel
 - **Icons**: Lucide Icons
-
-## 🛠️ Getting Started
-
-1. Clone the repository
 
 ## 🗺️ Roadmap
 
