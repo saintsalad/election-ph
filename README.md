@@ -1,10 +1,4 @@
 <div align="center">
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-  </style>
-  
   <img src="public/images/logo.png" alt="Election PH Logo" width="80" height="80" style="border-radius: 50%;">
   <h1>Election PH</h1>
   <p>An independent, non-official online survey platform for gathering public opinion.</p>
