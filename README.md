@@ -4,11 +4,11 @@
   <p>An independent, non-official online survey platform for gathering public opinion.</p>
 
   <p>
-    <a href="#features">Features</a> •
-    <a href="#roadmap">Roadmap</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#getting-started">Getting Started</a> •
-    <a href="#contributing">Contributing</a>
+    <a href="#-features">Features</a> •
+    <a href="#-roadmap">Roadmap</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#-getting-started">Getting Started</a> •
+    <a href="#-contributing">Contributing</a>
   </p>
 </div>
 
@@ -41,123 +41,94 @@ Election PH is a platform designed to empower Filipino voters through accessible
 
 ## 🗺️ Roadmap
 
+### Current Phase: Foundation Building (Q1 2024)
+
 <details>
-<summary>🎯 Current Focus</summary>
+<summary>🎯 Q1 2024 (January - March)</summary>
 
-### Q1 2024 Priorities
+#### Core Infrastructure
 
-- Implement core privacy features
-- Add survey result context
-- Improve non-official status indicators
-- Enhance user interface
+- [ ] Initial project setup and architecture
+- [ ] Basic authentication system
+- [ ] Database schema design
+- [ ] Core API endpoints
+
+#### Privacy & Security Foundation
+
+- [ ] Data anonymization implementation
+- [ ] Privacy notice system
+- [ ] Basic rate limiting
+- [ ] Initial security measures
 </details>
 
 <details>
-<summary>📊 Survey Result Context</summary>
+<summary>🚀 Q2 2024 (April - June)</summary>
 
-- [ ] Add sample size display
-- [ ] Show margin of error
-- [ ] Display data collection period
-- [ ] Add methodology explanation
-- [ ] Implement statistical confidence level
+#### Survey System Development
+
+- [ ] Basic survey creation interface
+- [ ] Survey response collection
+- [ ] Real-time results display
+- [ ] Survey templates
+
+#### User Experience
+
+- [ ] Responsive design implementation
+- [ ] Dark mode support
+- [ ] Basic analytics dashboard
+- [ ] Mobile optimization
 </details>
 
 <details>
-<summary>🏢 Non-Official Status Indicators</summary>
+<summary>💫 Q3 2024 (July - September)</summary>
 
-- [ ] Add "Unofficial Survey" watermark on results
-- [ ] Include COMELEC non-affiliation notice
-- [ ] Add disclaimer banner on homepage
-- [ ] Modify branding to avoid official appearance
-- [ ] Add disclaimers to shareable content
+#### Advanced Features
+
+- [ ] Advanced analytics
+- [ ] Data visualization tools
+- [ ] Export functionality
+- [ ] Batch processing system
+
+#### Localization & Accessibility
+
+- [ ] Filipino language support
+- [ ] Accessibility compliance
+- [ ] Screen reader optimization
+- [ ] Regional customizations
 </details>
 
 <details>
-<summary>🔒 Privacy Features</summary>
+<summary>🎆 Q4 2024 (October - December)</summary>
 
-- [ ] Implement data anonymization
-- [ ] Add privacy notice banner
-- [ ] Create data retention policy
-- [ ] Add data deletion options
-- [ ] Implement data export functionality
-- [ ] Add cookie consent banner
+#### Platform Enhancement
+
+- [ ] Advanced moderation tools
+- [ ] Community features
+- [ ] Integration capabilities
+- [ ] Performance optimization
+
+#### Documentation & Compliance
+
+- [ ] Complete documentation
+- [ ] Legal compliance review
+- [ ] Security audit
+- [ ] Public launch preparation
 </details>
 
-<details>
-<summary>👥 User Content Moderation</summary>
+### Development Phases
 
-- [ ] Add content guidelines
-- [ ] Implement reporting system
-- [ ] Add moderation disclaimers
-- [ ] Create terms of service
-- [ ] Add user responsibility notices
-</details>
+| Phase       | Timeline | Status      | Priority Items                |
+| ----------- | -------- | ----------- | ----------------------------- |
+| 🟡 Planning | Q1 2024  | In Progress | Architecture, Security Design |
+| 🟢 Alpha    | Q2 2024  | Upcoming    | Core Features, Basic UI       |
+| 🔵 Beta     | Q3 2024  | Planned     | Advanced Features, Testing    |
+| ⚪ Release  | Q4 2024  | Planned     | Optimization, Launch          |
 
-<details>
-<summary>📈 Result Transparency</summary>
+### Key Milestones
 
-- [ ] Add methodology section
-- [ ] Show participation demographics
-- [ ] Display data limitations
-- [ ] Add result context explanations
-- [ ] Implement data source citations
-</details>
+- **March 2024**: MVP Release
+- **June 2024**: Public Beta Launch
+- **September 2024**: Feature Complete
+- **December 2024**: Production Release
 
-<details>
-<summary>📝 Documentation & Policies</summary>
-
-- [ ] Create privacy policy
-- [ ] Add terms of service
-- [ ] Create data handling documentation
-- [ ] Add user guidelines
-- [ ] Create transparency report
-</details>
-
-<details>
-<summary>🛡️ Technical Safeguards</summary>
-
-- [ ] Implement rate limiting
-- [ ] Add anti-spam measures
-- [ ] Implement duplicate vote detection
-- [ ] Add data validation
-- [ ] Create audit logs
-</details>
-
-<details>
-<summary>🎨 User Interface Improvements</summary>
-
-- [ ] Add disclaimer tooltips
-- [ ] Implement warning modals
-- [ ] Add context banners
-- [ ] Improve error messages
-- [ ] Add help documentation
-</details>
-
-<details>
-<summary>🧾 Receipt System</summary>
-
-- [ ] Add non-official watermark
-- [ ] Include disclaimer text
-- [ ] Add data usage notice
-- [ ] Implement digital signatures
-- [ ] Add verification system
-</details>
-
-<details>
-<summary>🌐 Accessibility & Language</summary>
-
-- [ ] Add Filipino translations
-- [ ] Implement language toggle
-- [ ] Add accessibility features
-- [ ] Improve readability
-- [ ] Add screen reader support
-</details>
-
-### Progress Overview
-
-- 🟡 Planning Phase: 30% Complete
-- 🟢 Development Phase: 20% Complete
-- 🔵 Testing Phase: 10% Complete
-- ⚪ Deployment Phase: 5% Complete
-
-> **Note:** This roadmap is subject to change based on community feedback and project priorities.
+> **Note:** This roadmap is subject to change based on development progress and community feedback. Regular updates will be provided through our GitHub releases.
