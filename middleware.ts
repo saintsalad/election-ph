@@ -12,7 +12,6 @@ import { AxiosError } from "axios";
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
-  const sessionCookie = request.cookies.get("__session")?.value;
   const publicRoutes = [
     "/",
     "/signin",
@@ -41,11 +40,6 @@ export async function middleware(request: NextRequest) {
 
   //return NextResponse.next();
 
-  if (!sessionCookie) {
-    console.log("⚠️⚠️⚠️ Cookie not found ⚠️⚠️⚠️");
-    return NextResponse.redirect(new URL("/signin", request.url));
-  }
-
   let origin = request.nextUrl.origin;
   if (request.nextUrl.hostname === "localhost") {
     console.log("Running on localhost 🏡");
@@ -55,12 +49,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const response = await axios.get(`${origin}/api/signin`, {
-      headers: {
-        Cookie: `__session=${sessionCookie}`,
-      },
-      validateStatus: (status) => status < 500, // Consider all status codes less than 500 as resolved
-    });
+    const response = await axios.get(`${origin}/api/user`);
 
     if (response.status === 200) {
       return NextResponse.next();

@@ -14,9 +14,8 @@ function Logout() {
       .signOut()
       .then(async () => {
         await handleLogout();
-        router.push("/signin");
       })
-      .catch(() => router.push("/"));
+      .finally(() => router.push("/signin"));
   }, [router]);
 
   useEffect(() => {
