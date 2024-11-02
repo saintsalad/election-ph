@@ -1,31 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isUserAuthenticated } from "@/lib/firebase/firebase-admin";
+import {
+  isUserAuthenticated,
+  getCurrentUser,
+} from "@/lib/firebase/firebase-admin";
 
 export async function GET(req: NextRequest) {
   try {
-    const isAllowed = await isUserAuthenticated();
+    const isAuthenticated = await isUserAuthenticated();
 
-    const response = NextResponse.json(
-      {
-        authenticated: isAllowed,
-        message: isAllowed
-          ? "User is authenticated"
-          : "User is not authenticated",
-      },
-      { status: isAllowed ? 200 : 401 }
-    );
+    if (!isAuthenticated) {
+      return NextResponse.json(
+        { message: "User is not authenticated" },
+        { status: 401 }
+      );
+    }
 
-    // Short cache duration for auth status
-    response.headers.set(
-      "Cache-Control",
-      "max-age=30, s-maxage=30, stale-while-revalidate=60"
-    );
-
-    return response;
-  } catch (error) {
-    console.error("Error checking authentication:", error);
+    const user = await getCurrentUser();
     return NextResponse.json(
-      { message: "Failed to check authentication status" },
+      { user },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "private, max-age=30, s-maxage=30, stale-while-revalidate=60",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return NextResponse.json(
+      { message: "Authentication check failed" },
       { status: 500 }
     );
   }

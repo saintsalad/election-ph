@@ -49,28 +49,19 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const response = await axios.get(`${origin}/api/user`);
+    const response = await fetch(`${request.nextUrl.origin}/api/user`, {
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+    });
 
-    if (response.status === 200) {
-      return NextResponse.next();
-    } else {
-      console.log(`❌ Unauthorized access: ${response.status}`);
-      if (response.data?.code === "auth/session-cookie-expired") {
-        console.log("🍪🍪🍪❌ Session cookie expired ❌🍪🍪🍪");
-      }
+    if (!response.ok) {
       return NextResponse.redirect(new URL("/signin", request.url));
     }
+
+    return NextResponse.next();
   } catch (error) {
-    console.error("Error verifying session:", error);
-    if (error instanceof AxiosError) {
-      if (error.response) {
-        console.log(`Server responded with status: ${error.response.status}`);
-      } else if (error.request) {
-        console.log("No response received from server");
-      } else {
-        console.log("Error setting up the request:", error.message);
-      }
-    }
+    console.error("Authentication check failed:", error);
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 }
