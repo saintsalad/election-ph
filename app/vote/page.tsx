@@ -75,7 +75,7 @@ export default function Vote() {
               key={item.id}
               userId={user?.uid || ""}
               election={item}
-              hasUserInfo={!!userInfo?.dateUpdated}
+              hasUserInfo={Boolean(userInfo?.dateUpdated)}
               openUserInfoDialog={() => setShowUserInfoDialog(true)}
             />
           ))}
