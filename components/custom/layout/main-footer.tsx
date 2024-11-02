@@ -7,8 +7,8 @@ import logo from "@/public/images/logo.png";
 const LINKS = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
-  { href: "/services", label: "Services" },
-  { href: "/contact", label: "Contact" },
+  { href: "/candidates", label: "Candidates" },
+  { href: "/results", label: "Results" },
 ];
 
 const SOCIAL_LINKS = [
@@ -80,16 +80,15 @@ function MainFooter() {
                 title='Resources'
                 links={[
                   { href: "/faq", label: "FAQ" },
-                  { href: "/blog", label: "Blog" },
-                  { href: "/press", label: "Press Releases" },
+                  { href: "/roadmap", label: "Roadmap" },
                 ]}
               />
               <FooterSection
                 title='Legal'
                 links={[
-                  { href: "/privacy", label: "Privacy Policy" },
-                  { href: "/terms", label: "Terms of Service" },
-                  { href: "/accessibility", label: "Accessibility" },
+                  { href: "/#", label: "Privacy Policy" },
+                  { href: "/#", label: "Terms of Service" },
+                  { href: "/#", label: "Accessibility" },
                 ]}
               />
             </div>
@@ -105,5 +104,4 @@ function MainFooter() {
     </div>
   );
 }
-
 export default MainFooter;

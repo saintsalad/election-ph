@@ -152,6 +152,10 @@ function VotingPage({ params }: { params: { id: string } }) {
             Thank you for participating in this election. Your vote has been
             securely recorded and is contributing to the democratic process.
           </p>
+          <p className='text-red-600 dark:text-red-400 text-center mb-8 max-w-md mx-auto text-sm sm:text-base'>
+            Please note: This is a non-official election and the results are not
+            legally binding.
+          </p>
           <div className='flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center'>
             <Button
               asChild
