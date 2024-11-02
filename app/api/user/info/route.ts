@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     const dateUpdatedISO = new Date(dateUpdated).toISOString();
     await userRef.update({
       ...userInfo,
-      dateUpdated,
+      dateUpdatedISO,
     });
     console.log("User info updated successfully");
 
