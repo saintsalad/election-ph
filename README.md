@@ -1,14 +1,20 @@
 <div align="center">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+  
   <img src="public/images/logo.png" alt="Election PH Logo" width="80" height="80" style="border-radius: 50%;">
   <h1>Election PH</h1>
   <p>An independent, non-official online survey platform for gathering public opinion.</p>
 
   <p>
-    <a href="#-features">Features</a> •
-    <a href="#-roadmap">Roadmap</a> •
-    <a href="#-tech-stack">Tech Stack</a> •
-    <a href="#-getting-started">Getting Started</a> •
-    <a href="#-contributing">Contributing</a>
+    <a href="/#features">Features</a> •
+    <a href="/#tech-stack">Tech Stack</a> •
+    <a href="/#getting-started">Getting Started</a> •
+    <a href="/#roadmap">Roadmap</a> •
+    <a href="/#contributing">Contributing</a>
   </p>
 </div>
 
