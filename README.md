@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div align="center">
+  <img src="public/images/logo.png" alt="Election PH Logo" width="80" height="80" style="border-radius: 50%;">
+  <h1>Election PH</h1>
+  <p>An independent, non-official online survey platform for gathering public opinion.</p>
 
-## Getting Started
+  <p>
+    <a href="#features">Features</a> •
+    <a href="#roadmap">Roadmap</a> •
+    <a href="#tech-stack">Tech Stack</a> •
+    <a href="#getting-started">Getting Started</a> •
+    <a href="#contributing">Contributing</a>
+  </p>
+</div>
 
-First, run the development server:
+## 🌟 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Election PH is a platform designed to empower Filipino voters through accessible and transparent survey tools. Our mission is to provide insights into public opinion while maintaining the highest standards of data privacy and user responsibility.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Survey System**: Participate in community-driven surveys
+- **Real-time Analytics**: Access data-driven insights on voter trends
+- **Responsive Design**: Optimized for all devices
+- **Dark Mode**: Enhanced viewing experience
+- **Privacy Focus**: Minimal data collection with maximum security
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 🚀 Tech Stack
 
-## Learn More
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn UI
+- **Authentication**: NextAuth.js
+- **Database**: Prisma with PostgreSQL
+- **Deployment**: Vercel
+- **Icons**: Lucide Icons
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clone the repository
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## 🗺️ Roadmap
 
-## Deploy on Vercel
+<details>
+<summary>🎯 Current Focus</summary>
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Q1 2024 Priorities
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Implement core privacy features
+- Add survey result context
+- Improve non-official status indicators
+- Enhance user interface
+</details>
+
+<details>
+<summary>📊 Survey Result Context</summary>
+
+- [ ] Add sample size display
+- [ ] Show margin of error
+- [ ] Display data collection period
+- [ ] Add methodology explanation
+- [ ] Implement statistical confidence level
+</details>
+
+<details>
+<summary>🏢 Non-Official Status Indicators</summary>
+
+- [ ] Add "Unofficial Survey" watermark on results
+- [ ] Include COMELEC non-affiliation notice
+- [ ] Add disclaimer banner on homepage
+- [ ] Modify branding to avoid official appearance
+- [ ] Add disclaimers to shareable content
+</details>
+
+<details>
+<summary>🔒 Privacy Features</summary>
+
+- [ ] Implement data anonymization
+- [ ] Add privacy notice banner
+- [ ] Create data retention policy
+- [ ] Add data deletion options
+- [ ] Implement data export functionality
+- [ ] Add cookie consent banner
+</details>
+
+<details>
+<summary>👥 User Content Moderation</summary>
+
+- [ ] Add content guidelines
+- [ ] Implement reporting system
+- [ ] Add moderation disclaimers
+- [ ] Create terms of service
+- [ ] Add user responsibility notices
+</details>
+
+<details>
+<summary>📈 Result Transparency</summary>
+
+- [ ] Add methodology section
+- [ ] Show participation demographics
+- [ ] Display data limitations
+- [ ] Add result context explanations
+- [ ] Implement data source citations
+</details>
+
+<details>
+<summary>📝 Documentation & Policies</summary>
+
+- [ ] Create privacy policy
+- [ ] Add terms of service
+- [ ] Create data handling documentation
+- [ ] Add user guidelines
+- [ ] Create transparency report
+</details>
+
+<details>
+<summary>🛡️ Technical Safeguards</summary>
+
+- [ ] Implement rate limiting
+- [ ] Add anti-spam measures
+- [ ] Implement duplicate vote detection
+- [ ] Add data validation
+- [ ] Create audit logs
+</details>
+
+<details>
+<summary>🎨 User Interface Improvements</summary>
+
+- [ ] Add disclaimer tooltips
+- [ ] Implement warning modals
+- [ ] Add context banners
+- [ ] Improve error messages
+- [ ] Add help documentation
+</details>
+
+<details>
+<summary>🧾 Receipt System</summary>
+
+- [ ] Add non-official watermark
+- [ ] Include disclaimer text
+- [ ] Add data usage notice
+- [ ] Implement digital signatures
+- [ ] Add verification system
+</details>
+
+<details>
+<summary>🌐 Accessibility & Language</summary>
+
+- [ ] Add Filipino translations
+- [ ] Implement language toggle
+- [ ] Add accessibility features
+- [ ] Improve readability
+- [ ] Add screen reader support
+</details>
+
+### Progress Overview
+
+- 🟡 Planning Phase: 30% Complete
+- 🟢 Development Phase: 20% Complete
+- 🔵 Testing Phase: 10% Complete
+- ⚪ Deployment Phase: 5% Complete
+
+> **Note:** This roadmap is subject to change based on community feedback and project priorities.

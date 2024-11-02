@@ -21,7 +21,7 @@ function About() {
               <Code className='h-5 w-5 sm:h-6 sm:w-6 text-blue-500 dark:text-cyan-400' />
             }
             title='Our Team'
-            content='Our team is composed of dedicated individuals who want change for the community. We are committed to providing a reliable platform for gathering public opinion and fostering democratic engagement.'
+            content='Driven by a shared vision for positive change, our team brings together diverse talents, each committed to creating a platform that empowers public opinion and fosters democratic engagement. Working behind the scenes, we combine experience, innovation, and purpose to build a trusted space for meaningful civic participation. Though we stay out of the spotlight, our focus remains on amplifying the voices that matter most—yours.'
           />
 
           <Section
@@ -29,7 +29,7 @@ function About() {
               <Lightbulb className='h-5 w-5 sm:h-6 sm:w-6 text-yellow-500 dark:text-yellow-400' />
             }
             title='Our Vision'
-            content='We aim to provide a space for Filipinos to express their opinions on electoral matters, fostering public engagement and discussion. Our vision is to contribute to a more informed and participatory democratic process in the Philippines.'
+            content='We aim to create a space where Filipinos can freely share their views on electoral issues, encouraging public engagement and open conversation. Our goal is to support a more informed, inclusive, and participatory democratic process in the Philippines. By amplifying diverse voices, we hope to build a community that values thoughtful dialogue and active civic involvement.'
           />
 
           <Section
@@ -37,7 +37,7 @@ function About() {
               <Target className='h-5 w-5 sm:h-6 sm:w-6 text-green-500 dark:text-green-400' />
             }
             title='Our Mission'
-            content='To offer a user-friendly, accessible platform for conducting unofficial surveys on electoral topics, while maintaining user privacy, encouraging responsible participation, and providing clear disclaimers about the nature and limitations of our surveys.'
+            content='To provide an accessible and user-centered platform for conducting insightful, unofficial surveys on electoral topics, prioritizing user privacy, fostering informed participation, and promoting meaningful civic engagement. Our mission is to empower communities by amplifying diverse perspectives and encouraging constructive dialogue around elections and public issues.'
           />
         </div>
       </div>

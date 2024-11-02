@@ -25,14 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Separator } from "@/components/ui/separator";
-import {
-  UserIcon,
-  SettingsIcon,
-  LogOutIcon,
-  SunIcon,
-  MoonIcon,
-  LogIn,
-} from "lucide-react";
+import { UserIcon, SettingsIcon, LogOutIcon, LogIn } from "lucide-react";
 import { useTheme } from "next-themes";
 
 // Define the User type based on Firebase User properties
@@ -46,8 +39,7 @@ const MobileNav: React.FC<{
   user: User | null;
   desiredPath: string;
   isDarkMode: boolean;
-  onThemeToggle: () => void;
-}> = ({ user, desiredPath, isDarkMode, onThemeToggle }) => {
+}> = ({ user, desiredPath, isDarkMode }) => {
   const textColorClass = isDarkMode ? "text-gray-200" : "text-gray-800";
   const hoverTextColorClass = isDarkMode
     ? "hover:text-white"
@@ -137,24 +129,6 @@ const MobileNav: React.FC<{
         </div>
 
         <div className='absolute bottom-8 left-6 right-6 space-y-4'>
-          <Button
-            size='sm'
-            variant='ghost'
-            onClick={onThemeToggle}
-            className={`w-full justify-start ${hoverBgColorClass} ${textColorClass}`}>
-            {isDarkMode ? (
-              <>
-                <SunIcon className='mr-2 h-4 w-4 text-yellow-200' />
-                Light
-              </>
-            ) : (
-              <>
-                <MoonIcon className='mr-2 h-4 w-4 text-blue-500' />
-                Dark
-              </>
-            )}
-          </Button>
-
           {user && (
             <div
               className={`flex items-center space-x-3 ${
@@ -195,6 +169,10 @@ const DesktopNav: React.FC<{
     ? "hover:bg-gray-700/50"
     : "hover:bg-white/20";
 
+  const isElectionRoute = ["/vote", "/candidates", "/result"].includes(
+    desiredPath
+  );
+
   return (
     <nav className='hidden md:flex items-center justify-center'>
       <div
@@ -205,18 +183,27 @@ const DesktopNav: React.FC<{
           .filter((item) => !item.isHidden && item.label !== "Account")
           .map((item, i) => {
             if (item.children) {
+              const isActive = item.children.some(
+                (child) => child.route === desiredPath
+              );
               return (
                 <DropdownMenu key={i}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       size='sm'
                       variant='ghost'
-                      className={`rounded-full h-8 px-3 text-sm font-medium ${textColorClass} ${
-                        isHomePage
-                          ? hoverBgColorClass
-                          : isDarkMode
-                          ? "hover:bg-gray-700/50"
-                          : "hover:bg-white/90"
+                      className={`rounded-full h-8 px-3 text-sm font-medium ${
+                        isActive
+                          ? isDarkMode
+                            ? `bg-gray-700/60 text-white font-semibold`
+                            : `bg-white/40 text-gray-900 font-semibold`
+                          : `${textColorClass} ${
+                              isHomePage
+                                ? hoverBgColorClass
+                                : isDarkMode
+                                ? "hover:bg-gray-700/50"
+                                : "hover:bg-white/90"
+                            }`
                       } ${hoverTextColorClass} transition-colors`}>
                       {item.label}
                       <ChevronDownIcon className='ml-1 h-4 w-4' />
@@ -303,8 +290,6 @@ function MainHeader() {
     ? "hover:bg-gray-700/70"
     : "hover:bg-white/70";
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
-
   return (
     <header
       className={`fixed top-0 z-50 w-full shadow-lg border-b ${
@@ -335,16 +320,6 @@ function MainHeader() {
           <div className='flex items-center space-x-4'>
             {/* Desktop theme toggle button and user dropdown */}
             <div className='hidden md:flex items-center space-x-4'>
-              <Button
-                size='sm'
-                variant='ghost'
-                className={`rounded-full h-8 w-8 p-0 ${hoverBgColorClass}`}
-                onClick={toggleTheme}>
-                <SunIcon className='h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-yellow-500' />
-                <MoonIcon className='absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-blue-500' />
-                <span className='sr-only'>Toggle theme</span>
-              </Button>
-
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -368,7 +343,9 @@ function MainHeader() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align='end'
-                    className='w-56 rounded-xl bg-white/90 backdrop-blur-lg'>
+                    className={`w-56 rounded-xl backdrop-blur-lg transition-colors duration-300 ${
+                      isDarkMode ? "bg-gray-800/90" : "bg-white/90"
+                    }`}>
                     <DropdownMenuItem asChild>
                       <Link href='/profile' className='flex items-center'>
                         <UserIcon className='mr-2 h-4 w-4' />
@@ -422,7 +399,6 @@ function MainHeader() {
                 user={userProps}
                 desiredPath={desiredPath}
                 isDarkMode={isDarkMode}
-                onThemeToggle={toggleTheme}
               />
             </div>
           </div>

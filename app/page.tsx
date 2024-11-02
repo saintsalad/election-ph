@@ -111,14 +111,16 @@ export default function Home() {
           ✨ ABOUT US
         </div>
         <h1 className='text-center max-w-3xl text-lg sm:text-xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 z-10 mb-4 sm:mb-6'>
-          We are committed to offering a secure and transparent platform for
-          Filipinos to voice their opinions and engage in meaningful community
-          discussions.
+          Our team is ten toes down, fully committed to raising political
+          awareness among Filipinos.
         </h1>
         <p className='text-center max-w-2xl text-sm sm:text-base text-slate-600 dark:text-slate-300 z-10 mb-6 sm:mb-8'>
-          Our mission is to empower every Filipino citizen with a platform to
-          express their views, participate in surveys, and contribute to the
-          democratic process.
+          Our mission to provide an accessible and user-centered platform for
+          conducting insightful, unofficial surveys on electoral topics,
+          prioritizing user privacy, fostering informed participation, and
+          promoting meaningful civic engagement. Our mission is to empower
+          communities by amplifying diverse perspectives and encouraging
+          constructive dialogue around elections and public issues.
         </p>
         <Link href='/about'>
           <ShimmerButton
