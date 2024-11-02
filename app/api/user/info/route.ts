@@ -56,10 +56,10 @@ export async function GET(req: NextRequest) {
     const userData = userDoc.data() as UserInfo;
 
     const response = NextResponse.json(userData, { status: 200 });
-    response.headers.set(
-      "Cache-Control",
-      "max-age=86400, s-maxage=86400, stale-while-revalidate=172800"
-    );
+    // response.headers.set(
+    //   "Cache-Control",
+    //   "max-age=86400, s-maxage=86400, stale-while-revalidate=172800"
+    // );
 
     return response;
   } catch (error) {
@@ -98,7 +98,10 @@ export async function POST(req: NextRequest) {
 
     console.log(`Updating info for user: ${userId}`);
     const userRef = db.collection("users").doc(userId);
-    const dateUpdated = new Date();
+    const dateUpdated = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Manila",
+    });
+    const dateUpdatedISO = new Date(dateUpdated).toISOString();
     await userRef.update({
       ...userInfo,
       dateUpdated,

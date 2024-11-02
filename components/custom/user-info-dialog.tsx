@@ -173,7 +173,7 @@ export function UserInfoDialog({
             <UserCircle2 className='w-12 h-12 sm:w-16 sm:h-16 text-blue-600' />
           </div>
           <DialogTitle className='text-xl sm:text-2xl font-bold text-center text-slate-800'>
-            Know You Better Before Voting {isOpen ? "isOpen" : "isClosed"}
+            Know You Better Before Voting
           </DialogTitle>
           <DialogDescription className='text-sm sm:text-base text-center text-slate-600 max-w-[400px] mx-auto'>
             Your anonymous insights will enhance our understanding of voter
