@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Icons } from "@/components/custom/icons";
 import { cn } from "@/lib/utils";
 import { NavItem } from "@/lib/definitions";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useSidebar } from "@/hooks/useSidebar";
 import {
   Tooltip,
@@ -28,6 +28,10 @@ export function DashboardNav({
 }: DashboardNavProps) {
   const path = usePathname();
   const { isMinimized } = useSidebar();
+
+  useEffect(() => {
+    console.log("isMinimized", isMinimized);
+  }, [isMinimized]);
 
   if (!items?.length) {
     return null;

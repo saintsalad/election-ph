@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardNav } from "@/components/custom/dashboard-nav";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
@@ -11,8 +11,21 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ className }: SidebarProps) {
-  const { isMinimized, toggle } = useSidebar();
+  const { isMinimized, toggle, setIsMinimized } = useSidebar();
   const [status, setStatus] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMinimized(true);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [setIsMinimized]);
 
   const handleToggle = () => {
     setStatus(true);
