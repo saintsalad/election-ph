@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Minus, AlertCircle, Loader } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { TooltipProps } from "recharts";
 import { useTheme } from "next-themes";
@@ -13,11 +13,39 @@ import { analyzeGenderVotes } from "@/lib/functions";
 interface GenderCardProps extends BaseCardProps {
   genderData: GenderVoteResult | undefined;
   isLoading: boolean;
+  isError: boolean;
+}
+
+function NoDataState() {
+  return (
+    <div className='flex flex-col items-center justify-center h-[300px] text-gray-500 dark:text-gray-400'>
+      <Minus className='w-12 h-12 mb-4' />
+      <p>No gender data available</p>
+    </div>
+  );
+}
+
+function ErrorState() {
+  return (
+    <div className='flex flex-col items-center justify-center h-[300px] text-gray-700 dark:text-gray-300'>
+      <div className='bg-red-50 dark:bg-red-900/20 p-4 rounded-full mb-4'>
+        <AlertCircle className='w-8 h-8 text-red-500 dark:text-red-400' />
+      </div>
+      <h3 className='text-lg font-medium mb-2'>
+        Unable to load gender distribution
+      </h3>
+      <p className='text-sm text-gray-500 dark:text-gray-400 text-center max-w-[250px]'>
+        We&apos;re having trouble loading the gender data. Please try again
+        later.
+      </p>
+    </div>
+  );
 }
 
 const GenderCard: React.FC<GenderCardProps> = ({
   genderData,
   isLoading,
+  isError = false,
   ...props
 }) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>();
@@ -106,19 +134,36 @@ const GenderCard: React.FC<GenderCardProps> = ({
   };
 
   const renderSkeleton = () => (
-    <div className='space-y-4'>
-      <Skeleton className='h-[200px] w-[200px] rounded-full mx-auto' />
-      <div className='flex justify-center space-x-4'>
-        <Skeleton className='h-4 w-16' />
-        <Skeleton className='h-4 w-16' />
+    <div className='space-y-6'>
+      <div className='flex justify-center'>
+        <Skeleton className='h-[230px] w-[230px] rounded-full' />
+      </div>
+      <div className='flex justify-center space-x-6'>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className='flex items-center space-x-2'>
+            <Skeleton className='h-3 w-3 rounded-sm' />
+            <Skeleton className='h-4 w-16' />
+          </div>
+        ))}
+      </div>
+      <div className='flex justify-end space-x-2'>
+        <Skeleton className='h-4 w-24' />
         <Skeleton className='h-4 w-16' />
       </div>
     </div>
   );
 
   const renderContent = () => {
-    if (isLoading || !genderData) {
+    if (isError) {
+      return <ErrorState />;
+    }
+
+    if (isLoading) {
       return renderSkeleton();
+    }
+
+    if (!genderData || genderData.totalVotes === 0) {
+      return <NoDataState />;
     }
 
     return (
@@ -155,14 +200,18 @@ const GenderCard: React.FC<GenderCardProps> = ({
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className='flex justify-center mt-4'>
-          {genderData.voteResult.map((entry, index: number) => (
-            <div key={`legend-${index}`} className='flex items-center mx-2'>
+        <div className='flex justify-center mt-4 flex-wrap gap-4'>
+          {genderData.voteResult.map((entry, index) => (
+            <div
+              key={`legend-${index}`}
+              className='flex items-center space-x-2 min-w-[80px]'>
               <div
-                className='w-3 h-3 mr-1 rounded-sm'
+                className='w-3 h-3 rounded-sm'
                 style={{ backgroundColor: entry.color }}
               />
-              <span className='text-sm font-medium'>{entry.gender}</span>
+              <span className='text-sm font-medium whitespace-nowrap'>
+                {entry.gender}
+              </span>
             </div>
           ))}
         </div>

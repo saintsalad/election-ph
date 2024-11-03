@@ -54,6 +54,7 @@ const ResultsContent: React.FC = () => {
     data: mainCardData,
     isLoading: isMainCardLoading,
     refetchNext: refetchNextMainCard,
+    isError: isMainCardError,
   } = useReactQueryNext<VoteResult>("main-card", "/api/dashboard", {
     manual: true,
   });
@@ -62,6 +63,7 @@ const ResultsContent: React.FC = () => {
     data: genderData,
     isLoading: isGenderCardLoading,
     refetchNext: refetchNextGenderCard,
+    isError: isGenderError,
   } = useReactQueryNext<GenderVoteResult>(
     "gender-card",
     "/api/dashboard/gender",
@@ -72,6 +74,7 @@ const ResultsContent: React.FC = () => {
     data: educationData,
     isLoading: isEducationCardLoading,
     refetchNext: refetchNextEducationCard,
+    isError: isEducationError,
   } = useReactQueryNext<EducationVoteResult>(
     "education-card",
     "/api/dashboard/education",
@@ -120,6 +123,7 @@ const ResultsContent: React.FC = () => {
       case "Main":
         return (
           <MainCard
+            isError={isMainCardError}
             voteResult={mainCardData}
             isLoading={isMainCardLoading}
             {...baseProps}
@@ -131,6 +135,7 @@ const ResultsContent: React.FC = () => {
       case "Gender":
         return (
           <GenderCard
+            isError={isGenderError}
             genderData={genderData}
             isLoading={isGenderCardLoading}
             {...baseProps}
@@ -139,6 +144,7 @@ const ResultsContent: React.FC = () => {
       case "Education":
         return (
           <EducationCard
+            isError={isEducationError}
             educationData={educationData}
             isLoading={isEducationCardLoading}
             {...baseProps}

@@ -1,5 +1,12 @@
 import React, { useEffect, useMemo } from "react";
-import { TrendingUp, Loader2, FileX2, Loader } from "lucide-react";
+import {
+  TrendingUp,
+  Loader2,
+  FileX2,
+  Loader,
+  Minus,
+  AlertCircle,
+} from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -63,11 +70,37 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 interface EducationCardProps extends BaseCardProps {
   educationData: EducationVoteResult | undefined;
   isLoading: boolean;
+  isError: boolean;
+}
+
+function NoDataState() {
+  return (
+    <div className='flex flex-col items-center justify-center h-[300px] text-gray-500 dark:text-gray-400'>
+      <Minus className='w-12 h-12 mb-4' />
+      <p>No education data available</p>
+    </div>
+  );
+}
+
+function ErrorState() {
+  return (
+    <div className='flex flex-col items-center justify-center h-[300px] text-gray-700 dark:text-gray-300'>
+      <div className='bg-red-50 dark:bg-red-900/20 p-4 rounded-full mb-4'>
+        <AlertCircle className='w-8 h-8 text-red-500 dark:text-red-400' />
+      </div>
+      <h3 className='text-lg font-medium mb-2'>Error loading education data</h3>
+      <p className='text-sm text-gray-500 dark:text-gray-400 text-center max-w-[250px]'>
+        We&apos;re having trouble loading the education data. Please try again
+        later.
+      </p>
+    </div>
+  );
 }
 
 export const EducationCard: React.FC<EducationCardProps> = ({
   educationData,
   isLoading = false,
+  isError = false,
   ...props
 }) => {
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -100,41 +133,36 @@ export const EducationCard: React.FC<EducationCardProps> = ({
   );
 
   const renderSkeleton = () => (
-    <div className='space-y-4'>
-      <Skeleton className='h-8 w-1/3' />
-      <div className='space-y-2'>
+    <div className='space-y-4 p-4'>
+      <div className='flex justify-between items-center'>
+        <Skeleton className='h-8 w-1/3' />
+        <Skeleton className='h-8 w-1/4' />
+      </div>
+      <div className='space-y-3'>
         {[...Array(4)].map((_, index) => (
-          <div key={index} className='flex items-center space-x-2'>
-            <Skeleton className='h-6 w-1/4' />
-            <Skeleton className='h-6 flex-grow' />
+          <div key={index} className='flex items-center justify-between'>
+            <Skeleton className='h-6 w-1/3' />
+            <Skeleton className='h-6 w-1/2' />
           </div>
         ))}
       </div>
+      <Skeleton className='h-[200px] w-full mt-6' />
     </div>
   );
 
   const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className='flex flex-col items-center justify-center h-full min-h-[250px]'>
-          <Loader className='w-8 h-8 text-gray-400 dark:text-gray-600 animate-spin mb-2' />
-          <p className='text-sm text-gray-500 dark:text-gray-400'>
-            Loading education data...
-          </p>
-        </div>
-      );
+    if (isError) {
+      return <ErrorState />;
     }
 
-    if (!educationData) {
-      return (
-        <div className='flex flex-col items-center justify-center h-full min-h-[250px]'>
-          <FileX2 className='w-8 h-8 mb-2 text-gray-400 dark:text-gray-600' />
-          <p className='text-sm text-gray-500 dark:text-gray-400'>
-            No education data available
-          </p>
-        </div>
-      );
+    if (isLoading) {
+      return renderSkeleton();
     }
+
+    if (!educationData || educationData.totalVoters === 0) {
+      return <NoDataState />;
+    }
+
     return (
       <div className='w-full h-full flex-grow min-h-[250px]'>
         <ResponsiveContainer width='100%' height='100%' minHeight={250}>

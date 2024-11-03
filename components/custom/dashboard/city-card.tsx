@@ -23,7 +23,7 @@ export const CityCard: React.FC<BaseCardProps> = (props) => {
       <div className='flex flex-col items-center justify-center h-full min-h-[200px]'>
         <TrendingUp className='h-6 w-6 text-muted-foreground mb-2' />
         <span className='text-muted-foreground'>
-          This section is under construction
+          This section is under development
         </span>
       </div>
     </BaseCard>

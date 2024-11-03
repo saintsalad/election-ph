@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo } from "react";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -48,6 +54,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 interface MainCardProps extends BaseCardProps {
   voteResult: VoteResult | undefined;
   isLoading: boolean;
+  isError: boolean;
 }
 
 function formatYAxis(value: number): string {
@@ -56,9 +63,36 @@ function formatYAxis(value: number): string {
     : value.toLocaleString();
 }
 
+function NoDataState() {
+  return (
+    <div className='flex flex-col items-center justify-center h-[300px] text-gray-500 dark:text-gray-400'>
+      <Minus className='w-12 h-12 mb-2' />
+      <p>No data available</p>
+    </div>
+  );
+}
+
+function ErrorState() {
+  return (
+    <div className='flex flex-col items-center justify-center h-[300px] text-gray-700 dark:text-gray-300'>
+      <div className='bg-red-50 dark:bg-red-900/20 p-4 rounded-full mb-4'>
+        <AlertCircle className='w-8 h-8 text-red-500 dark:text-red-400' />
+      </div>
+      <h3 className='text-lg font-medium mb-2'>
+        Oops! The votes are playing hide and seek
+      </h3>
+      <p className='text-sm text-gray-500 dark:text-gray-400 text-center max-w-[250px]'>
+        We&apos;re having a bit of trouble counting the votes right now. Please
+        check back in a few moments.
+      </p>
+    </div>
+  );
+}
+
 const MainCard: React.FC<MainCardProps> = ({
   isLoading = false,
   voteResult,
+  isError = false,
   ...props
 }) => {
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -117,8 +151,16 @@ const MainCard: React.FC<MainCardProps> = ({
   );
 
   const renderContent = () => {
-    if (isLoading || topCandidates.length === 0) {
+    if (isError) {
+      return <ErrorState />;
+    }
+
+    if (isLoading) {
       return renderSkeleton();
+    }
+
+    if (!voteResult || voteResult.totalVotes === 0) {
+      return <NoDataState />;
     }
 
     return (
