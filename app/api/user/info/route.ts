@@ -4,13 +4,7 @@ import {
   getCurrentUser,
   isUserAuthenticated,
 } from "@/lib/firebase/firebase-admin";
-
-interface UserInfo {
-  age: string;
-  gender: string;
-  education: string;
-  city: string;
-}
+import { UserResponse } from "@/lib/definitions";
 
 export async function GET(req: NextRequest) {
   try {
@@ -53,7 +47,7 @@ export async function GET(req: NextRequest) {
       return response;
     }
 
-    const userData = userDoc.data() as UserInfo;
+    const userData = userDoc.data() as UserResponse;
 
     const response = NextResponse.json(userData, { status: 200 });
     // response.headers.set(
@@ -73,7 +67,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   console.log("POST request received for user info update");
-  const userInfo: Partial<UserInfo> = await req.json();
+  const userInfo: Partial<UserResponse> = await req.json();
   console.log("Received user info:", userInfo);
 
   try {
@@ -102,8 +96,11 @@ export async function POST(req: NextRequest) {
       timeZone: "Asia/Manila",
     });
     const dateUpdatedISO = new Date(dateUpdated).toISOString();
+    // user level is 1 by default
+    // super admin is level 12
     await userRef.update({
       ...userInfo,
+      level: 1,
       dateUpdated: dateUpdatedISO,
     });
     console.log("User info updated successfully");

@@ -17,14 +17,46 @@ export async function middleware(request: NextRequest) {
     "/signin",
     "/signup",
     "/signup/success",
+    "/about",
     "/api/signin",
     "/api/signup",
     "/api/user/info",
   ];
 
+  let origin = request.nextUrl.origin;
+  if (request.nextUrl.hostname === "localhost") {
+    console.log("Running on localhost 🏡");
+    origin = process.env.NEXT_PUBLIC_SITE_URL || "";
+  } else {
+    console.log("Running on deployed environment 🚀");
+  }
+
   // If the request URL matches one of the public routes, bypass authentication
   if (publicRoutes.includes(url.pathname)) {
     return NextResponse.next();
+  } else if (url.pathname === "/master") {
+    console.log("🔒 Validating master route access");
+
+    try {
+      const response = await fetch(`${origin}/api/user/info`, {
+        headers: { cookie: request.headers.get("cookie") || "" },
+      }).then((res) =>
+        res.ok
+          ? res.json()
+          : Promise.reject(new Error(`Authentication failed: ${res.status}`))
+      );
+
+      if (response.level !== 12) {
+        console.log("❌ Access denied: Insufficient privileges");
+        return NextResponse.redirect(new URL("/not-found", request.url));
+      }
+
+      console.log("✅ Super admin access granted");
+      return NextResponse.next();
+    } catch (error) {
+      console.error("🚫 Master route access failed:", error);
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
   }
 
   // if (request.nextUrl.hostname === "production") {
@@ -40,24 +72,16 @@ export async function middleware(request: NextRequest) {
 
   //return NextResponse.next();
 
-  let origin = request.nextUrl.origin;
-  if (request.nextUrl.hostname === "localhost") {
-    console.log("Running on localhost 🏡");
-    origin = process.env.NEXT_PUBLIC_SITE_URL || "";
-  } else {
-    console.log("Running on deployed environment 🚀");
-  }
-
   try {
-    const response = await fetch(`${request.nextUrl.origin}/api/user`, {
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    });
+    // const response = await fetch(`${origin}/api/user`, {
+    //   headers: {
+    //     cookie: request.headers.get("__session") || "",
+    //   },
+    // });
 
-    if (!response.ok) {
-      return NextResponse.redirect(new URL("/signin", request.url));
-    }
+    // if (!response.ok) {
+    //   return NextResponse.redirect(new URL("/signin", request.url));
+    // }
 
     return NextResponse.next();
   } catch (error) {

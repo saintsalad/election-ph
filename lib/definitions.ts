@@ -10,6 +10,7 @@ export type UserResponse = {
   education?: string;
   city?: string;
   dateUpdated?: string;
+  level: number;
 };
 
 // export type Candidate = {

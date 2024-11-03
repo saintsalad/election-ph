@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { useTheme } from "next-themes";
 import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 import MainHeader from "@/components/custom/layout/main-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,9 +23,8 @@ const publicRoutes = [
   "/signin",
   "/signup",
   "/signup/success",
-  "/api/signin",
-  "/api/signup",
-  "/api/user/info",
+  "/about",
+  "/roadmap",
 ];
 
 function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -34,6 +34,7 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   const { currentNavItem, desiredPath } = useMemo(() => {
     const pathParts = pathname?.split("/");
@@ -60,6 +61,8 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
       } else if (user && !user.emailVerified && desiredPath !== "/") {
         router.push("/");
       }
+
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -82,7 +85,13 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
           className={`h-full w-full self-center ${
             currentNavItem && !currentNavItem.isFullWidth ? "max-w-5xl" : ""
           }`}>
-          {children}
+          {!user && !publicRoutes.includes(desiredPath) ? (
+            <div className='h-full w-full flex items-center justify-center'>
+              <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
+            </div>
+          ) : (
+            children
+          )}
         </ScrollArea>
 
         {user && !isEmailVerified && <EmailVerificationSheet />}
