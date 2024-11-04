@@ -17,6 +17,7 @@ import {
   Flag,
   Trash2,
   AlertTriangle,
+  MessagesSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { truncateText, formatDate } from "@/lib/functions";
@@ -580,6 +581,27 @@ function CommentSectionMobile({
     </motion.div>
   );
 
+  const EmptyState = () => (
+    <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+      <div className='bg-gray-50 dark:bg-gray-800 rounded-full p-6 mb-4'>
+        <MessagesSquare className='w-12 h-12 text-gray-400 dark:text-gray-500' />
+      </div>
+      <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
+        No comments yet
+      </h3>
+      <p className='text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm'>
+        Be the first to share your thoughts! Start the conversation by adding a
+        comment below.
+      </p>
+      <Button
+        onClick={handleAddCommentClick}
+        className='flex items-center space-x-2'>
+        <Plus className='w-4 h-4' />
+        <span>Add Comment</span>
+      </Button>
+    </div>
+  );
+
   if (isLoading)
     return <div className='p-4 text-center'>Loading comments...</div>;
   if (error)
@@ -590,7 +612,7 @@ function CommentSectionMobile({
     );
 
   return (
-    <div className='flex flex-col h-full md:h-[80vh] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 md:overflow-hidden'>
+    <div className='flex flex-col h-full md:h-[70vh] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 md:overflow-hidden'>
       {/* Mobile header */}
       <div className='px-4 py-2 border-b flex justify-between items-center bg-white dark:bg-gray-800 dark:border-gray-700 md:hidden'>
         <h2 className='text-base font-semibold dark:text-white'>Comments</h2>
@@ -626,22 +648,26 @@ function CommentSectionMobile({
       <ScrollArea
         ref={scrollAreaRef}
         className='flex-1 px-4 md:py-4 md:px-6 md:overflow-y-auto'>
-        <AnimatePresence>
-          {comments.map((comment, index) => (
-            <motion.div
-              key={comment.id}
-              ref={newCommentId === comment.id ? newCommentRef : null}
-              initial={
-                newCommentId === comment.id ? { opacity: 0, y: 20 } : false
-              }
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className={cn(index === 0 ? "mt-4" : "", "md:mb-6")}>
-              {renderComment(comment)}
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {comments.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <AnimatePresence>
+            {comments.map((comment, index) => (
+              <motion.div
+                key={comment.id}
+                ref={newCommentId === comment.id ? newCommentRef : null}
+                initial={
+                  newCommentId === comment.id ? { opacity: 0, y: 20 } : false
+                }
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className={cn(index === 0 ? "mt-4" : "", "md:mb-6")}>
+                {renderComment(comment)}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
       </ScrollArea>
 
       <div className='py-3 px-4 border-t bg-white dark:bg-gray-800 dark:border-gray-700 md:px-6'>

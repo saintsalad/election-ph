@@ -205,7 +205,7 @@ function MultipleVoteListView({
       </div>
 
       {/* Desktop view */}
-      <div className='hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
+      <div className='hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4'>
         {election.candidates.map((item: CandidateNext) => {
           const isSelected = selectedCandidates.includes(item.id);
           return (
@@ -230,16 +230,20 @@ function MultipleVoteListView({
                 />
                 <div
                   className={cn(
-                    "absolute inset-0 bg-gradient-to-t to-transparent flex flex-col justify-end p-3",
+                    "absolute inset-0 bg-gradient-to-t to-transparent flex flex-col justify-end p-4",
                     isSelected
-                      ? "from-blue-900/80 dark:from-blue-800/90"
-                      : "from-blue-900/20 dark:from-blue-900/40"
+                      ? "from-blue-900/90 dark:from-blue-800/95"
+                      : "from-blue-900/20 dark:from-blue-900/50"
                   )}>
-                  <div className='text-white text-sm font-semibold'>
-                    {item.ballotNumber}. {item.displayName}
-                  </div>
-                  <div className='text-blue-200 dark:text-blue-300 text-xs uppercase'>
-                    {item.party}
+                  <div className='space-y-1'>
+                    <div className='text-white font-bold text-lg leading-tight tracking-tight'>
+                      <span>{item.ballotNumber}.</span> {item.displayName}
+                    </div>
+                    <div>
+                      <span className='inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-white/20 text-white backdrop-blur-[2px] border border-white/30'>
+                        {item.party}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div

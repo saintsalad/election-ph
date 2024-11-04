@@ -3,7 +3,13 @@
 import Image from "next/image";
 import hero from "@/public/images/hero.jpg";
 import { useState, useEffect } from "react";
-import { Star, EllipsisVertical, MoreHorizontal } from "lucide-react";
+import {
+  Star,
+  EllipsisVertical,
+  MoreHorizontal,
+  Share2,
+  FileEdit,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,7 +18,6 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -86,9 +91,9 @@ const CandidateViewDeskTop = ({
               src={hero}
               alt='Election PH Hero banner'
               fill
-              className='object-cover h-full w-full lg:rounded-t-xl'
+              className='object-cover h-full w-full'
             />
-            <div className='absolute inset-0 bg-gradient-to-b from-transparent to-background/80' />
+            <div className='absolute inset-0 bg-gradient-to-b from-transparent to-background/40' />
           </AspectRatio>
 
           <div className='px-6 -top-20 relative'>
@@ -107,16 +112,40 @@ const CandidateViewDeskTop = ({
               </div>
               <div className='flex flex-1 flex-col pt-6 px-6 relative'>
                 <div className='absolute right-2 top-2'>
-                  <Menubar className='border-none shadow-none p-0'>
+                  <Menubar className='border-none shadow-none p-0 bg-transparent'>
                     <MenubarMenu>
                       <MenubarTrigger className='cursor-pointer p-1'>
                         <EllipsisVertical className='h-5 w-5 text-slate-600' />
                       </MenubarTrigger>
                       <MenubarContent>
-                        <MenubarItem>Share</MenubarItem>
-                        <MenubarItem>Suggest Edit</MenubarItem>
-                        <MenubarSeparator />
-                        <MenubarItem>Report</MenubarItem>
+                        <MenubarItem
+                          onClick={() => {
+                            if (navigator.share) {
+                              navigator
+                                .share({
+                                  title: candidate.displayName,
+                                  text: candidate.shortDescription,
+                                  url: window.location.href,
+                                })
+                                .catch((error) =>
+                                  console.log("Error sharing:", error)
+                                );
+                            }
+                          }}
+                          className='cursor-pointer flex justify-between items-center'>
+                          Share
+                          <Share2 className='h-4 w-4' />
+                        </MenubarItem>
+                        <MenubarItem
+                          onClick={() => {
+                            alert(
+                              "Please send your suggestions to saintsalad000@gmail.com"
+                            );
+                          }}
+                          className='cursor-pointer flex justify-between items-center'>
+                          Suggest Edit
+                          <FileEdit className='h-4 w-4' />
+                        </MenubarItem>
                       </MenubarContent>
                     </MenubarMenu>
                   </Menubar>
@@ -138,7 +167,11 @@ const CandidateViewDeskTop = ({
                   </Badge>
 
                   <div
-                    title={`average of ${candidateRate.averageRating} rating from ${candidateRate.numberOfRatings} user/s`}
+                    title={`average of ${
+                      candidateRate?.averageRating ?? 0
+                    } rating from ${
+                      candidateRate?.numberOfRatings ?? 0
+                    } user/s`}
                     role='button'
                     className='font-semibold text-xs text-foreground hover:opacity-70 flex items-center bg-muted rounded-full px-2 py-0.5'
                     onClick={() => setActiveTab("rating")}>
@@ -147,8 +180,13 @@ const CandidateViewDeskTop = ({
                       color='#facc15'
                       fill='#facc15'
                     />
-                    {candidateRate.averageRating} (
-                    {candidateRate.numberOfRatings})
+                    {!candidateRate?.averageRating ||
+                    candidateRate.averageRating === 0
+                      ? "No ratings yet"
+                      : !candidateRate?.numberOfRatings ||
+                        candidateRate.numberOfRatings < 10
+                      ? candidateRate.averageRating
+                      : `${candidateRate.averageRating} (${candidateRate.numberOfRatings})`}
                   </div>
                 </div>
 
@@ -313,7 +351,7 @@ const CandidateViewSkeleton = () => {
       </AspectRatio>
 
       <div className='px-6 -top-20 relative'>
-        <div className='flex flex-1 mb-5 bg-white/80 backdrop-blur-md rounded-xl overflow-hidden shadow-lg'>
+        <div className='flex flex-1 mb-5 bg-white/10 backdrop-blur-md rounded-xl overflow-hidden shadow-lg'>
           <Skeleton className='h-[200px] w-[200px] rounded-l-xl' />
           <div className='flex flex-1 flex-col pt-6 px-6 relative'>
             <Skeleton className='h-8 w-3/4 mb-2' />

@@ -31,10 +31,10 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { theme } = useTheme();
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const loading = useAuthStore((state) => state.loading);
   const pathname = usePathname();
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
 
   const { currentNavItem, desiredPath } = useMemo(() => {
     const pathParts = pathname?.split("/");
@@ -61,8 +61,6 @@ function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
       } else if (user && !user.emailVerified && desiredPath !== "/") {
         router.push("/");
       }
-
-      setIsLoading(false);
     });
 
     return () => unsubscribe();

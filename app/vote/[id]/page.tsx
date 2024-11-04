@@ -7,7 +7,7 @@ import MultipleVoteListView from "@/components/custom/multiple-vote-listview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useQueryClient } from "react-query";
 import axios from "axios";
-import { CircleCheck, Fingerprint, X } from "lucide-react";
+import { CircleCheck, Fingerprint, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { triggerConfettiFireworks } from "@/lib/functions/triggerConfettiFireworks";
@@ -57,7 +57,7 @@ function VotingPage({ params }: { params: { id: string } }) {
   //   [&>*:last-child]:after:content-[''] [&>*:last-child]:after:absolute [&>*:last-child]:after:bottom-[-24px] [&>*:last-child]:after:left-[-24px] [&>*:last-child]:after:w-12 [&>*:last-child]:after:h-12 [&>*:last-child]:after:bg-black
   // `;
 
-  const contentStyle = "max-w-3xl mx-auto";
+  const contentStyle = "max-w-6xl mx-auto";
 
   // Loading state
   if (isLoading) {
@@ -207,33 +207,97 @@ function VotingPage({ params }: { params: { id: string } }) {
         </div>
 
         {showInstructions && (
-          <div className='bg-gradient-to-br from-blue-50/90 to-indigo-50/90 dark:from-blue-900/60 dark:to-indigo-900/60 backdrop-blur-sm border border-blue-200/50 dark:border-blue-700/30 rounded-lg p-4 mb-6 relative shadow-md'>
+          <div className='bg-card dark:bg-card/50 backdrop-blur-sm border shadow-sm rounded-lg p-4 mb-6 relative'>
             <Button
               variant='ghost'
               size='icon'
-              className='absolute top-2 right-2 text-blue-600 dark:text-blue-300 hover:bg-blue-100/50 dark:hover:bg-blue-800/50 rounded-full transition-colors'
+              className='absolute -top-2 -right-2 h-7 w-7 bg-background dark:bg-background text-muted-foreground hover:text-foreground shadow-sm rounded-full border'
               onClick={() => setShowInstructions(false)}>
-              <X className='h-4 w-4' />
+              <X className='h-3.5 w-3.5' />
               <span className='sr-only'>Close</span>
             </Button>
-            <h3 className='font-semibold text-blue-800 dark:text-blue-100 mb-2 text-sm'>
-              Voting Instructions
-            </h3>
-            <ol className='list-decimal list-inside text-xs text-blue-700 dark:text-blue-200 space-y-1'>
-              <li>
-                <strong>Select</strong> up to{" "}
-                <strong>{election.numberOfVotes}</strong> candidate(s)
-              </li>
-              <li>
-                <strong>Submit</strong> your choices
-              </li>
-              <li>
-                <strong>Double check</strong> the selected candidates
-              </li>
-              <li>
-                <strong>Swipe to confirm</strong> your vote
-              </li>
-            </ol>
+
+            <div className='flex flex-col space-y-4'>
+              {/* Disclaimer */}
+              <div className='flex items-start gap-2 pb-3 border-b'>
+                <div className='flex-shrink-0 w-1 h-1 mt-2 rounded-full bg-destructive'></div>
+                <p className='text-[11px] leading-relaxed text-destructive'>
+                  Election PH is an independent platform. Votes cast here will
+                  not affect any official election results or processes.
+                </p>
+              </div>
+
+              {/* Instructions */}
+              {(() => {
+                const steps = [
+                  {
+                    step: "1",
+                    text: `Select up to ${election.numberOfVotes} candidate(s)`,
+                  },
+                  {
+                    step: "2",
+                    text: "Review choices",
+                  },
+                  {
+                    step: "3",
+                    text: "Submit selections",
+                  },
+                  {
+                    step: "4",
+                    text: "Slide to confirm",
+                  },
+                ];
+
+                return (
+                  <>
+                    {/* Mobile List View */}
+                    <div className='sm:hidden space-y-2.5'>
+                      {steps.map((item) => (
+                        <div
+                          key={item.step}
+                          className='flex items-center gap-3 px-2'>
+                          <div className='flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-500 text-white'>
+                            <span className='text-xs font-medium'>
+                              {item.step}
+                            </span>
+                          </div>
+                          <p className='text-sm text-slate-600 dark:text-slate-300'>
+                            {item.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Card View */}
+                    <div className='hidden sm:grid sm:grid-cols-4 gap-6 relative'>
+                      {steps.map((item, index) => (
+                        <div key={item.step} className='relative'>
+                          <div className='group relative h-[80px] p-4 rounded-lg border bg-white/50 dark:bg-slate-900/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 backdrop-blur-sm border-slate-200/70 dark:border-slate-700/70 hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300'>
+                            <div className='absolute -top-2.5 left-3'>
+                              <div className='flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-500 text-white shadow-sm shadow-blue-500/20 dark:shadow-blue-500/10'>
+                                <span className='text-xs font-medium'>
+                                  {item.step}
+                                </span>
+                              </div>
+                            </div>
+                            <div className='pt-2'>
+                              <p className='text-sm text-slate-600 dark:text-slate-300 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200'>
+                                {item.text}
+                              </p>
+                            </div>
+                          </div>
+                          {index < steps.length - 1 && (
+                            <div className='absolute top-1/2 -right-5 transform -translate-y-1/2'>
+                              <ChevronRight className='w-4 h-4 text-slate-400 dark:text-slate-600' />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         )}
 

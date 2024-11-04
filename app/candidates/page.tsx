@@ -19,6 +19,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const ELECTION_TYPE_COLORS = {
+  PRESIDENTIAL: {
+    background: "bg-blue-500/90 dark:bg-blue-600/90",
+    border: "border-blue-400/30 dark:border-blue-500/30",
+  },
+  "VICE PRESIDENTIAL": {
+    background: "bg-emerald-500/90 dark:bg-emerald-600/90",
+    border: "border-emerald-400/30 dark:border-emerald-500/30",
+  },
+  SENATORIAL: {
+    background: "bg-purple-500/90 dark:bg-purple-600/90",
+    border: "border-purple-400/30 dark:border-purple-500/30",
+  },
+  "PARTY LIST": {
+    background: "bg-amber-500/90 dark:bg-amber-600/90",
+    border: "border-amber-400/30 dark:border-amber-500/30",
+  },
+  // Default color if type doesn't match
+  DEFAULT: {
+    background: "bg-gray-500/90 dark:bg-gray-600/90",
+    border: "border-gray-400/30 dark:border-gray-500/30",
+  },
+} as const;
 
 function useCandidates() {
   return useQuery<CandidateNext[]>("candidates", async () => {
@@ -109,40 +134,58 @@ type CandidateCardProps = {
 };
 
 function CandidateCard({ candidate }: CandidateCardProps) {
+  const electionType =
+    candidate.election?.electionType?.toUpperCase() || "DEFAULT";
+  const colorScheme =
+    ELECTION_TYPE_COLORS[electionType as keyof typeof ELECTION_TYPE_COLORS] ||
+    ELECTION_TYPE_COLORS.DEFAULT;
+
   return (
     <Link href={`/candidates/${candidate.id}`} passHref>
-      <Card className='relative overflow-hidden aspect-[3/4] sm:aspect-square group cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg'>
-        <Image
-          src={candidate.displayPhoto || defaultImage}
-          alt={candidate.displayName || "Candidate"}
-          fill
-          sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
-          className='object-cover transition-transform duration-300 group-hover:scale-105'
-          priority
-        />
-        <div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-90 transition-opacity duration-300' />
+      <Card
+        className={cn(
+          "group relative overflow-hidden rounded-md cursor-pointer transition-all duration-300",
+          "hover:border-blue-300 dark:hover:border-blue-600",
+          "border border-blue-100 dark:border-gray-700"
+        )}>
+        <div className='aspect-square relative'>
+          <Image
+            src={candidate.displayPhoto || defaultImage}
+            alt={candidate.displayName || "Candidate"}
+            fill
+            sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
+            className='object-cover transition-all duration-300 group-hover:brightness-98'
+          />
 
-        {/* Ballot Number */}
-        <div className='absolute top-1 left-1 sm:top-2 sm:left-2 bg-white/90 text-blue-600 font-bold rounded-full w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center shadow-md text-xs'>
-          {candidate.ballotNumber}
-        </div>
-
-        <div className='absolute inset-x-0 bottom-0 p-2 sm:p-3 flex flex-col justify-end'>
-          <div className='space-y-0.5'>
-            <h2 className='text-sm sm:text-base font-semibold text-white leading-tight line-clamp-2'>
-              {candidate.displayName}
-            </h2>
-            <div className='flex items-center justify-between'>
-              <p className='text-[10px] sm:text-xs text-gray-300'>
-                {candidate.party}
-              </p>
-              {candidate.election && candidate.election.electionType && (
-                <span className='text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider'>
-                  {candidate.election.electionType}
+          {/* Gradient Overlay - Enhanced for better text contrast */}
+          <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4'>
+            <div className='space-y-1'>
+              <div className='text-white font-bold text-lg leading-tight tracking-tight'>
+                <span>{candidate.ballotNumber}.</span> {candidate.displayName}
+              </div>
+              <div>
+                <span className='inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-white/20 text-white backdrop-blur-[2px] border border-white/30'>
+                  {candidate.party}
                 </span>
-              )}
+              </div>
             </div>
           </div>
+
+          {/* Election Type Badge - With dynamic colors */}
+          {candidate.election?.electionType && (
+            <div className='absolute top-2 right-2'>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+                  "text-white backdrop-blur-[2px] uppercase shadow-sm",
+                  colorScheme.background,
+                  colorScheme.border,
+                  "border"
+                )}>
+                {candidate.election.electionType}
+              </span>
+            </div>
+          )}
         </div>
       </Card>
     </Link>

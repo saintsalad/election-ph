@@ -41,16 +41,18 @@ export default function Home() {
                 words='Your Voice Matters'
               />
               <div className='text-white mt-3 px-10 md:px-0 flex flex-col items-center'>
-                <div className='font-extralight md:text-lg max-w-[550px]'>
+                <div className='font-extralight md:text-lg max-w-[550px] mb-4'>
                   Take part in fair surveys, voice your thoughts, and help shape
                   tomorrow with <b>Election PH</b>.
                 </div>
-                <ShimmerButton
-                  className='h-10 mt-4 px-10 text-white dark:text-white'
-                  background='rgba(0, 0, 1)'
-                  darkBackground='rgba(20, 20, 20)'>
-                  Join Us
-                </ShimmerButton>
+                <Link href='/signup'>
+                  <ShimmerButton
+                    className='h-10 px-10 text-white dark:text-white'
+                    background='rgba(0, 0, 1)'
+                    darkBackground='rgba(20, 20, 20)'>
+                    Join Us
+                  </ShimmerButton>
+                </Link>
               </div>
             </div>
           </div>

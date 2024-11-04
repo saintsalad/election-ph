@@ -1,4 +1,3 @@
-import { CandidateNext, CandidateRating, UserRating } from "@/lib/definitions";
 import Image from "next/image";
 import {
   Carousel,
@@ -9,11 +8,12 @@ import {
 import { useEffect, useState } from "react";
 import {
   Star,
-  MessageCircleMore,
   ChevronLeft,
   MoreVertical,
   MessageCircle,
   Loader2,
+  LucideIcon,
+  FileEdit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,22 +24,30 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { saveDocument } from "@/lib/firebase/functions";
-import { useAuthStore } from "@/lib/store";
 import Link from "next/link";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { LucideIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTheme } from "next-themes"; // If you're using a theme system
+import { useTheme } from "next-themes";
 import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
-import CommentSectionMobile from "./comment-section-mobile";
+import CommentSectionMobile from "@/components/custom/comment-section-mobile";
 import useReactQueryNext from "@/hooks/useReactQueryNext";
-import { Comment } from "@/lib/definitions"; // Make sure to import the Comment type
+import type {
+  Comment,
+  CandidateNext,
+  CandidateRating,
+  UserRating,
+} from "@/lib/definitions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Share2 } from "lucide-react";
 
 interface CandidateViewMobileProps {
   candidate: CandidateNext | undefined;
@@ -368,24 +376,57 @@ const CandidateViewMobile = ({
           } backdrop-blur-md transition-all duration-300`}>
           <ChevronLeft className={`h-6 w-6 ${getIconColor(activeIndex)}`} />
         </Link>
-        <button
-          onClick={() => {
-            /* TODO: Implement more options functionality */
-          }}
-          className={`p-2 rounded-full ${
-            activeIndex === 0 ? "bg-black/20" : "bg-white/20"
-          } backdrop-blur-md transition-all duration-300`}>
-          <MoreVertical className={`h-6 w-6 ${getIconColor(activeIndex)}`} />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={`p-2 rounded-full ${
+                activeIndex === 0 ? "bg-black/20" : "bg-white/20"
+              } backdrop-blur-md transition-all duration-300`}>
+              <MoreVertical
+                className={`h-6 w-6 ${getIconColor(activeIndex)}`}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end' className='w-48'>
+            <DropdownMenuItem
+              onClick={() => {
+                if (navigator.share) {
+                  navigator
+                    .share({
+                      title: candidate.displayName,
+                      text: candidate.shortDescription,
+                      url: window.location.href,
+                    })
+                    .catch((error) => console.log("Error sharing:", error));
+                }
+              }}
+              className='cursor-pointer flex justify-between items-center'>
+              Share
+              <Share2 className='h-4 w-4' />
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                alert(
+                  "Please send your suggestions to saintsalad000@gmail.com"
+                );
+              }}
+              className='cursor-pointer flex justify-between items-center'>
+              Suggest Edit
+              <FileEdit className='h-4 w-4' />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className='fixed right-4 bottom-24'>
         <div className='bg-black/30 rounded-full p-2 flex flex-col items-center gap-2 shadow-lg'>
           <ActionButton
             Icon={Star}
-            count={`${candidateRate?.averageRating ?? 0} (${
-              candidateRate?.numberOfRatings ?? 0
-            })`}
+            count={`${candidateRate?.averageRating ?? 0}${
+              (candidateRate?.numberOfRatings ?? 0) >= 10
+                ? ` (${candidateRate?.numberOfRatings})`
+                : ""
+            }`}
             active={!!userRate?.rate}
             onClick={() => setOpenRateDrawer(true)}
           />
