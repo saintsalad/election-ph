@@ -197,7 +197,7 @@ const SignUp = () => {
         )}
 
         <div className='flex flex-1 items-center justify-center md:justify-start'>
-          {user ? (
+          {user && !signUpMutation.isLoading ? (
             <div className='w-full max-w-[416px] mx-5 sm:mx-20 lg:mx-36 text-center'>
               <h1 className='text-xl sm:text-2xl font-semibold mb-4'>
                 Currently Signed In
